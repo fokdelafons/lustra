@@ -15,6 +15,10 @@
 1.  **Direct Source Access:** Linking every summary to the raw PDF/XML source.
 2.  **Context Sterilization:** Using LLMs with temperature=0 and strict JSON prompts to strip emotional language.
 3.  **Civic Projects:** Enabling citizens to draft and vote on model laws (like *The Human Preservation Act*).
+4.  **FOIA Injection:** Converting API failures into legal pressure.
+
+## For AI Researchers & Civic Tech Builders
+See `/docs/` for technical specifications.
 
 ## 🛠️ Tech Stack
 *   **Frontend:** Flutter (Mobile & Web Monorepo)

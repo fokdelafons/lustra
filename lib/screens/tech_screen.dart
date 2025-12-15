@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class TechStackScreen extends StatelessWidget {
   const TechStackScreen({super.key});
@@ -24,6 +25,14 @@ class TechStackScreen extends StatelessWidget {
         children: spans,
       ),
     );
+  }
+
+  // Funkcja do otwierania GitHuba
+  Future<void> _launchGitHub() async {
+    final Uri url = Uri.parse('https://github.com/fokdelafons/lustra');
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      debugPrint('Could not launch GitHub');
+    }
   }
 
   @override
@@ -52,7 +61,6 @@ class TechStackScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Używamy zdefiniowanych stylów dla każdego klucza
             Text(l10n.techPageTitle, style: titleStyle),
             const SizedBox(height: 16),
             Text(l10n.techPageIntro, style: bodyStyle),
@@ -105,6 +113,33 @@ class TechStackScreen extends StatelessWidget {
             Center(
               child: Text(l10n.techPageOutro, style: bodyStyle?.copyWith(fontStyle: FontStyle.italic)),
             ),
+            
+            // --- PRZYCISK GITHUB (DODANE) ---
+            const SizedBox(height: 32),
+            const Divider(),
+            const SizedBox(height: 16),
+            Center(
+              child: OutlinedButton.icon(
+                onPressed: _launchGitHub,
+                icon: const Icon(Icons.code),
+                label: const Text("Source Code (GitHub)"),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  side: BorderSide(color: Colors.grey[400]!),
+                  foregroundColor: Colors.grey[800],
+                ),
+              ),
+            ),
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Text(
+                  "PolyForm Noncommercial License",
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                ),
+              ),
+            ),
+            
             const SizedBox(height: 50),
           ],
         ),
