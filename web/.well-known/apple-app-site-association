@@ -1,0 +1,8 @@
+{
+  "applinks": {
+    "details": [{
+      "appID": "47CH6TG8KL.dev.lustra",
+      "paths": ["/*/legislations/*", "/*/members/*"]
+    }]
+  }
+}

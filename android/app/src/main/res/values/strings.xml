@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Lustra</string>
+    <string name="facebook_app_id">1388465905793451</string>
+    <string name="facebook_client_token">d2dc79a418dc8cd679ce273410e874af</string>
+    <string name="fb_login_protocol_scheme">fb1388465905793451</string>
+</resources>

@@ -1,0 +1,16 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "dev.lustra",
+      "sha256_cert_fingerprints": [
+        "A8:EC:4E:5F:7C:2D:E7:97:37:E8:5D:E3:AF:4A:76:45:2D:A6:C5:8D:7E:44:20:00:51:68:63:F8:F7:19:C6:E4",
+        "35:A7:28:4F:78:F8:FD:87:D5:F5:F2:D9:52:B2:66:A8:ED:D5:11:ED:46:A2:CB:7B:74:D5:AB:88:43:25:05:ED"
+      ]
+    }
+  }
+]

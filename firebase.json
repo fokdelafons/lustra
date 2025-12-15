@@ -1,0 +1,42 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "lustra-d8fdf",
+          "appId": "1:626018819854:android:247cd6ede5e5e0e66bc15f",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "lustra-d8fdf",
+          "configurations": {
+            "android": "1:626018819854:android:247cd6ede5e5e0e66bc15f",
+            "ios": "1:626018819854:ios:5947cc0a598196c86bc15f"
+          }
+        }
+      }
+    }
+  },
+  "hosting": [
+    {
+      "target": "lustra",
+      "public": "public",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ]
+    },
+    {
+      "target": "reality",
+      "public": "real-public",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ]
+    }
+  ]
+}

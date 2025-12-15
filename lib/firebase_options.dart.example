@@ -1,0 +1,63 @@
+import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, kIsWeb, TargetPlatform;
+
+class DefaultFirebaseOptions {
+  static FirebaseOptions get currentPlatform {
+    if (kIsWeb) {
+      return web;
+    }
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        return android;
+      case TargetPlatform.iOS:
+        return ios;
+      case TargetPlatform.macOS:
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for macos - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
+      case TargetPlatform.windows:
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for windows - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
+      case TargetPlatform.linux:
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for linux - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
+      default:
+        throw UnsupportedError(
+          'DefaultFirebaseOptions are not supported for this platform.',
+        );
+    }
+  }
+
+static const FirebaseOptions web = FirebaseOptions(
+    apiKey: "[YOUR-API-KEY]",
+    authDomain: "[YOUR-PROJECT-ID].firebaseapp.com",
+    projectId: "[YOUR-PROJECT-ID]",
+    storageBucket: "[YOUR-PROJECT-ID].firebasestorage.app",
+    messagingSenderId: "626018819854",
+    [YOUR-APP-ID]: "1:626018819854:web:5804fa302ca220b96bc15f",
+    measurementId: "G-3SWK5GX4TP",
+  );
+
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: '[YOUR-API-KEY]',
+    [YOUR-APP-ID]: '1:626018819854:android:247cd6ede5e5e0e66bc15f',
+    messagingSenderId: '626018819854',
+    projectId: '[YOUR-PROJECT-ID]',
+    storageBucket: '[YOUR-PROJECT-ID].firebasestorage.app',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: '[YOUR-API-KEY]',
+    [YOUR-APP-ID]: '1:626018819854:ios:5947cc0a598196c86bc15f',
+    messagingSenderId: '626018819854',
+    projectId: '[YOUR-PROJECT-ID]',
+    storageBucket: '[YOUR-PROJECT-ID].firebasestorage.app',
+    iosBundleId: '[YOUR-IOS-BUNDLE-ID]',
+  );
+}

@@ -1,0 +1,18 @@
+{
+  "projects": {
+    "default": "lustra-d8fdf"
+  },
+  "targets": {
+    "lustra-d8fdf": {
+      "hosting": {
+        "lustra": [
+          "lustra-d8fdf"
+        ],
+        "reality": [
+          "reality-67e37"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

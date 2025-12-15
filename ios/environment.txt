@@ -1,0 +1,13 @@
+Flutter 3.29.2 • channel [user-branch] • unknown source
+Framework • revision c236373904 (6 months ago) • 2025-03-13 16:17:06 -0400
+Engine • revision 18b71d647a
+Tools • Dart 3.7.2 • DevTools 2.42.3
+Xcode 16.4
+Build version 16F6
+pod --version
+1.16.2
+Homebrew 4.6.10
+ruby 2.6.10p210 (2022-04-12 revision 67958) [universal.arm64e-darwin24]
+ProductName:		macOS
+ProductVersion:		15.3.1
+BuildVersion:		24D70
