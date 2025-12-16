@@ -44,6 +44,7 @@ ios/GoogleService-Info.plist
 ios/Runner/GoogleService-Info.plist
 **/GoogleService-Info.plist
 lib/firebase_options.dart
+android/app/src/main/res/values/strings.xml
 
 # Pliki specyficzne dla iOS (Xcode)
 # Ignorujemy cały katalog Pods, bo jest on generowany komendą 'pod install'

@@ -17,9 +17,6 @@
 3.  **Civic Projects:** Enabling citizens to draft and vote on model laws (like *The Human Preservation Act*).
 4.  **FOIA Injection:** Converting API failures into legal pressure.
 
-## For AI Researchers & Civic Tech Builders
-See `/docs/` for technical specifications.
-
 ## 🛠️ Tech Stack
 *   **Frontend:** Flutter (Mobile & Web Monorepo)
 *   **Backend:** Firebase (Auth, Firestore, Cloud Functions) + Google Cloud Run
@@ -70,6 +67,9 @@ This project is **Source Available** under the **PolyForm Noncommercial License 
 *   ❌ You may NOT use this code for commercial purposes without explicit permission.
 
 We chose this license to protect the project from corporate capture while keeping it open for the community.
+
+## For AI Researchers & Civic Tech Builders
+See `/docs/` for technical specifications.
 
 ---
 *Maintained by the Lustra Initiative.*
