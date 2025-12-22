@@ -1065,24 +1065,23 @@ body: kIsWeb
       for (int i = 0; i < votes.length; i++) {
         final vote = votes[i];
         listChildren.add(
-ListTile(
+        ListTile(
             contentPadding: EdgeInsets.zero,
-title: Row(
+            title: Row(
               children: [
                 if (vote.votingUrl != null && vote.votingUrl!.isNotEmpty) ...[
                   Tooltip(
                     message: AppLocalizations.of(context)!.votingSourceTooltip,
-                    child: InkWell(
-                      customBorder: const CircleBorder(),
-                      onTap: () async {
-                        final Uri url = Uri.parse(vote.votingUrl!);
-                        if (await canLaunchUrl(url)) {
-                          await launchUrl(url, mode: LaunchMode.externalApplication);
-                        }
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Icon(Icons.launch, size: 20, color: Theme.of(context).primaryColor),
+                    child: Link(
+                      uri: Uri.parse(vote.votingUrl!),
+                      target: LinkTarget.blank,
+                      builder: (context, followLink) => InkWell(
+                        customBorder: const CircleBorder(),
+                        onTap: followLink,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Icon(Icons.launch, size: 20, color: Theme.of(context).primaryColor),
+                        ),
                       ),
                     ),
                   ),
@@ -1093,12 +1092,10 @@ title: Row(
                     margin: const EdgeInsets.only(right: 12.0),
                   ),
                 ],
-
                 Expanded(
                   child: Builder(
                     builder: (context) {
                       final parliamentId = context.read<ParliamentManager>().activeServiceId;
-                      
                       if (vote.link.isNotEmpty) {
                          final internalPath = '/$parliamentId/legislations/${vote.link}';
                          final fullWebUrl = Uri.parse(Uri.base.origin + internalPath);
@@ -1125,22 +1122,19 @@ title: Row(
                            }
                          );
                       } 
-                      
                       else if (vote.votingUrl != null && vote.votingUrl!.isNotEmpty) {
-                         return InkWell(
-                           onTap: () async {
-                             final Uri url = Uri.parse(vote.votingUrl!);
-                             if (await canLaunchUrl(url)) {
-                               await launchUrl(url, mode: LaunchMode.externalApplication);
-                             }
-                           },
-                           child: Text(
-                              vote.title,
-                              style: voteTextStyle.copyWith(color: Theme.of(context).primaryColor),
+                         return Link(
+                           uri: Uri.parse(vote.votingUrl!),
+                           target: LinkTarget.blank,
+                           builder: (context, followLink) => InkWell(
+                             onTap: followLink,
+                             child: Text(
+                                vote.title,
+                                style: voteTextStyle.copyWith(color: Theme.of(context).primaryColor),
+                             ),
                            ),
                          );
                       }
-                      
                       else {
                         return Text(vote.title, style: voteTextStyle);
                       }
@@ -1148,6 +1142,19 @@ title: Row(
                   ),
                 ),
               ],
+            ),
+            trailing: Builder(
+              builder: (context) {
+                final activeService = context.read<ParliamentServiceInterface>();
+                final String translatedVote = activeService.translateVote(context, vote.vote);
+                return Text(
+                  translatedVote,
+                  style: voteTextStyle.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: activeService.getVoteColor(context, translatedVote),
+                  ),
+                );
+              }
             ),
           )
         );
