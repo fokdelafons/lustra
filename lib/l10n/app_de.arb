@@ -22,7 +22,9 @@
   "sectionPopularVotes": "Beliebte Abstimmungen",
   "sectionUpcoming": "Demnächst",
   "sectionLegislationInProcess": "Gesetzgebung im Gange",
-  "sectionMpProfiles": "Abgeordnetenprofile",
+  "votingSourceTooltip": "Abstimmungsquelle anzeigen",
+  "legislationSponsorLabel": "Sponsor",
+  "sectionMpProfiles": "Profile",
   "buttonBrowseVotes": "Abstimmungs-Browser",
   "buttonScheduledMeetings": "Geplante Sitzungen",
   "buttonBillsInProgress": "Laufende Gesetze",
@@ -211,10 +213,10 @@
   "personalDataSectionTitle": "Persönliche Daten",
   "contactSectionTitle": "Kontakt",
   "dataSourceLabel": "Datenquelle: Sejm RP API",
-  "mandateStatusActive": "Abgeordnetenmandat: aktiv",
-  "mandateStatusFulfilled": "Abgeordnetenmandat: erfüllt",
-  "mandateStatusCancelled": "Abgeordnetenmandat: annulliert",
-  "mandateStatusInactive": "Abgeordnetenmandat: inaktiv",
+  "mandateStatusActive": "Mandat: aktiv",
+  "mandateStatusFulfilled": "Mandat: erfüllt",
+  "mandateStatusCancelled": "Mandat: annulliert",
+  "mandateStatusInactive": "Mandat: inaktiv",
   "followingAddedSnackbar": "Zu den gefolgten hinzugefügt",
   "followingRemovedSnackbar": "Aus den gefolgten entfernt",
   "clubLabel": "Fraktion: {clubName}",
@@ -552,5 +554,6 @@
   "civicEmailDialogBody": "Corps",
   "civicCopiedToClipboard": "Copié dans le presse-papiers",
   "civicTemplateCopied": "Modèle copié !",
-  "supportMegaTitle": "Bürgereigentum"
+  "supportMegaTitle": "Bürgereigentum",
+  "votingResultsUSMotionToReferTitle": "ERGEBNIS: VERWEISUNG"
 }

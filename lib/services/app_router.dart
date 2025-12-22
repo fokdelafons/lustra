@@ -17,11 +17,9 @@ import 'package:lustra/screens/support_project_screen.dart';
 import 'package:lustra/screens/future_features_screen.dart';
 import 'package:lustra/screens/mp_screen.dart';
 import 'package:lustra/screens/mp_details_screen.dart';
-import 'package:lustra/screens/ended_legislation_list.dart';
-import 'package:lustra/screens/process_legislation_list.dart';
-import 'package:lustra/screens/future_legislation_list.dart';
 import 'package:lustra/screens/legislation_details_screen.dart';
 import 'package:lustra/screens/civic_project_screen.dart';
+import 'package:lustra/screens/legislation_wrapper_screen.dart';
 
 final GoRouter router = GoRouter(
   initialLocation: '/',
@@ -118,6 +116,7 @@ final GoRouter router = GoRouter(
                  secondName: '',
                  active: true,
                  districtNum: 0,
+                 memberType: '',
                  mandateCoverage: 'UNKNOWN',
                  profession: '',
                  birthDate: '',
@@ -148,81 +147,51 @@ final GoRouter router = GoRouter(
       ]
     ),
 
-    // 2. LEGISLACJA (/pl/legislations/...)
+  // 2. LEGISLACJA
     GoRoute(
       path: '/:parliamentId/legislations',
-      // USUNIĘTO redirect
+      builder: (context, state) {
+        final pid = state.pathParameters['parliamentId']!;
+        // Pobieramy typ z query params (?type=voted), domyślnie voted
+        final type = state.uri.queryParameters['list'] ?? 'voted';
+
+        return ParliamentSourceGuard(
+          targetParliamentId: pid,
+          child: LegislationWrapperScreen(type: type),
+        );
+      },
       routes: [
-        GoRoute(
-          path: 'voted', 
-          builder: (context, state) => ParliamentSourceGuard(
-            targetParliamentId: state.pathParameters['parliamentId']!,
-            child: const LegislationScreen(),
-          ),
-        ),
-        GoRoute(
-          path: 'in-process', 
-          builder: (context, state) => ParliamentSourceGuard(
-            targetParliamentId: state.pathParameters['parliamentId']!,
-            child: const ProcessLegislationScreen(),
-          ),
-        ),
-        GoRoute(
-          path: 'upcoming', 
-          builder: (context, state) => ParliamentSourceGuard(
-            targetParliamentId: state.pathParameters['parliamentId']!,
-            child: const FutureLegislationScreen(),
-          ),
-        ),
-        // Szczegóły ustawy
+        // Szczegóły jako DZIECKO. URL: /legislations/123
         GoRoute(
           path: ':legislationId',
           builder: (context, state) {
              final pid = state.pathParameters['parliamentId']!;
              final legislationId = state.pathParameters['legislationId']!;
              Widget child;
-
-             // A. Pełny obiekt w extra
+             
              if (state.extra is Legislation) {
-               child = LegislationDetailsScreen(bill: state.extra as Legislation);
-             }
-             // B. Skrót z HomeScreen (konwersja)
-             else if (state.extra is HomeScreenLegislationItem) {
+                child = LegislationDetailsScreen(bill: state.extra as Legislation);
+             } else if (state.extra is HomeScreenLegislationItem) {
+                // Konwersja skróconego obiektu (zachowujemy Twoją logikę)
                 final homeItem = state.extra as HomeScreenLegislationItem;
                 final legislation = Legislation(
-                  id: homeItem.id, 
-                  title: homeItem.title, 
-                  description: homeItem.summary ?? 'Brak opisu', 
-                  status: homeItem.status, 
-                  date: homeItem.votingDate, 
-                  processStartDate: homeItem.processStartDate, 
-                  keyPoints: homeItem.keyPoints, 
-                  likes: homeItem.likes ?? 0, 
-                  dislikes: homeItem.dislikes ?? 0, 
-                  popularity: homeItem.popularity, 
-                  summaryGeneratedBy: homeItem.summaryGeneratedBy, 
-                  upcomingProceedingDates: homeItem.upcomingProceedingDates, 
-                  documentType: homeItem.documentType, 
-                  votesFor: homeItem.votesFor, 
-                  votesAgainst: homeItem.votesAgainst, 
-                  votesAbstain: homeItem.votesAbstain, 
-                  term: 0, 
-                  number: '', 
-                  documentDate: null, 
-                  category: '', 
-                  points: 0
+                  id: homeItem.id, title: homeItem.title, description: homeItem.summary ?? 'Brak opisu', 
+                  status: homeItem.status, date: homeItem.votingDate, processStartDate: homeItem.processStartDate, 
+                  keyPoints: homeItem.keyPoints, likes: homeItem.likes ?? 0, dislikes: homeItem.dislikes ?? 0, 
+                  popularity: homeItem.popularity, summaryGeneratedBy: homeItem.summaryGeneratedBy, 
+                  upcomingProceedingDates: homeItem.upcomingProceedingDates, documentType: homeItem.documentType, 
+                  votesFor: homeItem.votesFor, votesAgainst: homeItem.votesAgainst, votesAbstain: homeItem.votesAbstain, 
+                  term: 0, number: '', documentDate: null, category: '', points: 0
                 );
                 child = LegislationDetailsScreen(bill: legislation);
+             } else {
+                child = LegislationDetailsScreen(legislationId: legislationId);
              }
-            // C. Wejście z linku
-            else {
-              child = LegislationDetailsScreen(legislationId: legislationId);
-            }
 
-            return ParliamentSourceGuard(
-              targetParliamentId: pid,
-              child: child,
-            );
+             return ParliamentSourceGuard(
+               targetParliamentId: pid,
+               child: child,
+             );
           },
         ),
       ],

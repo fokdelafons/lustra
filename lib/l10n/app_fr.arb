@@ -22,7 +22,9 @@
   "sectionPopularVotes": "Votes populaires",
   "sectionUpcoming": "Prochainement",
   "sectionLegislationInProcess": "Législation en cours",
-  "sectionMpProfiles": "Profils des députés",
+  "sectionMpProfiles": "Profils",
+  "votingSourceTooltip": "Voir la source du vote",
+  "legislationSponsorLabel": "Sponsor",
   "buttonBrowseVotes": "Navigateur de votes",
   "buttonScheduledMeetings": "Sessions prévues",
   "buttonBillsInProgress": "Lois en cours",
@@ -211,10 +213,10 @@
   "personalDataSectionTitle": "Données personnelles",
   "contactSectionTitle": "Contact",
   "dataSourceLabel": "Source des données : API du Sejm RP",
-  "mandateStatusActive": "Mandat de député : actif",
-  "mandateStatusFulfilled": "Mandat de député : accompli",
-  "mandateStatusCancelled": "Mandat de député : annulé",
-  "mandateStatusInactive": "Mandat de député : inactif",
+  "mandateStatusActive": "Mandat : actif",
+  "mandateStatusFulfilled": "Mandat : accompli",
+  "mandateStatusCancelled": "Mandat : annulé",
+  "mandateStatusInactive": "Mandat : inactif",
   "followingAddedSnackbar": "Ajouté aux suivis",
   "followingRemovedSnackbar": "Retiré des suivis",
   "clubLabel": "Groupe : {clubName}",
@@ -552,5 +554,6 @@
   "civicEmailDialogBody": "Corps",
   "civicCopiedToClipboard": "Copié dans le presse-papiers",
   "civicTemplateCopied": "Modèle copié !",
-  "supportMegaTitle": "Propriété Citoyenne"
+  "supportMegaTitle": "Propriété Citoyenne",
+  "votingResultsUSMotionToReferTitle": "RÉSULTATS : RENVOI"
 }

@@ -20,7 +20,9 @@
     ProcessLegislationScreenState createState() => ProcessLegislationScreenState();
   }
 
-  class ProcessLegislationScreenState extends State<ProcessLegislationScreen> {
+  class ProcessLegislationScreenState extends State<ProcessLegislationScreen> with AutomaticKeepAliveClientMixin {
+		@override
+		bool get wantKeepAlive => true;
     List<Legislation> _bills = [];
     bool _isLoading = false;
     bool _isLoadingMore = false;
@@ -64,6 +66,16 @@
       super.initState();
       developer.log('ProcessLegislationScreen initState', name: 'ProcessLegislationScreen');
     }
+
+Future<void> refreshData() async {
+    if (_scrollController.hasClients) {
+      _scrollController.jumpTo(0);
+    }
+    
+    final activeService = Provider.of<ParliamentServiceInterface>(context, listen: false);
+    await activeService.clearCache();
+    _resetAndLoadData(forceRefresh: true);
+  }
 
    @override
     void didChangeDependencies() {
@@ -152,7 +164,7 @@
         });
       }
     }
-
+  final ScrollController _scrollController = ScrollController();
   void _resetAndLoadData({bool forceRefresh = false, bool newSourceChanged = false, bool exitingNotification = false}) {
       developer.log('Resetowanie stanu. forceRefresh: $forceRefresh, newSourceChanged: $newSourceChanged, exitingNotification: $exitingNotification', name: 'ProcessLegislationScreen');
       if (!mounted) return;
@@ -297,8 +309,9 @@ Future<void> _loadMoreBills() async {
     }
 
     @override
-    Widget build(BuildContext context) {
-      final l10n = AppLocalizations.of(context)!;
+		Widget build(BuildContext context) {
+			super.build(context);
+			final l10n = AppLocalizations.of(context)!;
       
       // --- POCZĄTEK ZMIANY W BUILD ---
       // Jeśli trwa synchronizacja parlamentu, pokaż ekran ładowania.
@@ -355,24 +368,7 @@ Future<void> _loadMoreBills() async {
         child: Consumer<ParliamentServiceInterface>(
           builder: (context, activeService, child) {
             final processedBills = _getProcessedBills();
-            return Scaffold(
-              appBar: AppBar(
-                title: Text(l10n.processLegislationScreenTitle(activeService.name)),
-                backgroundColor: Theme.of(context).primaryColor,
-                foregroundColor: Colors.white,
-                actions: [
-                  IconButton(
-                    icon: const Icon(Icons.refresh),
-                    tooltip: l10n.refreshDataTooltip,
-                    onPressed: _isLoading || _isFromNotification
-                      ? null
-                      : () {
-                          _resetAndLoadData(forceRefresh: true, exitingNotification: true);
-                        },
-                  ),
-                ],
-              ),
-              body: Column(
+return Column(
                 children: [
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
@@ -503,8 +499,7 @@ Future<void> _loadMoreBills() async {
                     child: _buildListComponent(processedBills),
                   ),
                 ],
-              ),
-            );
+              );
           },
         ),
       );
@@ -533,8 +528,10 @@ Future<void> _loadMoreBills() async {
             return true;
           },
           child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            itemCount: processedBills.length + (_isLoadingMore ? 1 : 0),
+						key: const PageStorageKey<String>('process_legislation_list_scroll'),
+            controller: _scrollController,
+						padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+						itemCount: processedBills.length + (_isLoadingMore ? 1 : 0),
             itemBuilder: (context, index) {
               if (index == processedBills.length) {
                 return _isLoadingMore ? const Center(child: Padding(padding: EdgeInsets.symmetric(vertical: 16.0), child: CircularProgressIndicator())) : const SizedBox.shrink();
@@ -672,7 +669,7 @@ Future<void> _loadMoreBills() async {
       return GestureDetector(
         onTap: () {
           final parliamentId = context.read<ParliamentManager>().activeServiceId;
-          context.smartNavigate('/$parliamentId/legislations/${bill.id}', extra: bill);
+          context.smartNavigate('/$parliamentId/legislations/${bill.id}?list=process', extra: bill);
         },
         child: Card(
           margin: const EdgeInsets.only(bottom: 12.0),

@@ -22,7 +22,9 @@
   "sectionPopularVotes": "Votazioni popolari",
   "sectionUpcoming": "Prossimamente",
   "sectionLegislationInProcess": "Legislazione in corso",
-  "sectionMpProfiles": "Profili dei deputati",
+  "votingSourceTooltip": "Vedi la fonte della votazione",
+  "legislationSponsorLabel": "Sponsor",
+  "sectionMpProfiles": "Profili",
   "buttonBrowseVotes": "Browser votazioni",
   "buttonScheduledMeetings": "Sessioni programmate",
   "buttonBillsInProgress": "Leggi in corso",
@@ -211,10 +213,10 @@
   "personalDataSectionTitle": "Dati personali",
   "contactSectionTitle": "Contatti",
   "dataSourceLabel": "Fonte dei dati: API del Sejm RP",
-  "mandateStatusActive": "Mandato parlamentare: attivo",
-  "mandateStatusFulfilled": "Mandato parlamentare: espletato",
-  "mandateStatusCancelled": "Mandato parlamentare: annullato",
-  "mandateStatusInactive": "Mandato parlamentare: inattivo",
+  "mandateStatusActive": "Mandato: attivo",
+  "mandateStatusFulfilled": "Mandato: espletato",
+  "mandateStatusCancelled": "Mandato: annullato",
+  "mandateStatusInactive": "Mandato: inattivo",
   "followingAddedSnackbar": "Aggiunto ai seguiti",
   "followingRemovedSnackbar": "Rimosso dai seguiti",
   "clubLabel": "Gruppo: {clubName}",
@@ -552,5 +554,6 @@
   "civicEmailDialogBody": "Corpo",
   "civicCopiedToClipboard": "Copiato negli appunti",
   "civicTemplateCopied": "Modello copiato!",
-  "supportMegaTitle": "Proprietà Civica"
+  "supportMegaTitle": "Proprietà Civica",
+  "votingResultsUSMotionToReferTitle": "RISULTATI: RINVIO"
 }

@@ -132,8 +132,10 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
       );
     }
-		return MaterialApp.router(
-      routerConfig: router,
+		return PageStorage(
+			bucket: PageStorageBucket(),
+			child: MaterialApp.router(
+				routerConfig: router,
 			locale: Provider.of<LanguageProvider>(context).appLocale,
 			supportedLocales: LanguageProvider.supportedLocales,
 			title: 'Lustra',
@@ -162,6 +164,7 @@ class MyApp extends StatelessWidget {
 						borderRadius: BorderRadius.circular(8),
 					),
 				),
+			),
 			),
 		);
 	}

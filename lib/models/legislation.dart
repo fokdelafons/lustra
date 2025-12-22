@@ -117,6 +117,7 @@ class Legislation {
   final DateTime? lastUpdated;
   final String? titleOfficial;
   final bool noDocument;
+  final Map<String, dynamic>? sponsor;
 
   Legislation({
     required this.id,
@@ -151,6 +152,7 @@ class Legislation {
     this.lastUpdated,
     this.titleOfficial,
     this.noDocument = false,
+    this.sponsor,
   });
 
   factory Legislation.fromJson(Map<String, dynamic> json) {
@@ -206,6 +208,7 @@ class Legislation {
       lastUpdated: _parseDateTime(json['lastUpdated']),
       titleOfficial: _parseDynamicString(json['titleOfficial'], fieldName: 'titleOfficial', itemId: itemIdForLog),
       noDocument: json['noDocument'] as bool? ?? false,
+      sponsor: json['sponsor'] != null ? Map<String, dynamic>.from(json['sponsor']) : null,
     );
   }
 
@@ -243,6 +246,7 @@ class Legislation {
       'lastUpdated': lastUpdated?.toIso8601String(),
       'titleOfficial': titleOfficial,
       'noDocument': noDocument,
+      'sponsor': sponsor,
     };
   }
 
@@ -276,6 +280,7 @@ class Legislation {
     DateTime? lastUpdated,
     String? titleOfficial,
     bool? noDocument,
+    Map<String, dynamic>? sponsor,
   }) {
     return Legislation(
       id: id ?? this.id,
@@ -307,6 +312,7 @@ class Legislation {
       lastUpdated: lastUpdated ?? this.lastUpdated,
       titleOfficial: titleOfficial ?? this.titleOfficial,
       noDocument: noDocument ?? this.noDocument,
+      sponsor: sponsor ?? this.sponsor,
     );
   }
 
@@ -341,9 +347,10 @@ class Legislation {
           meetingNumber == other.meetingNumber &&
           votingNumber == other.votingNumber &&
           missingDataInfo == other.missingDataInfo &&
-          lastUpdated == other.lastUpdated &&
+        lastUpdated == other.lastUpdated &&
           titleOfficial == other.titleOfficial &&
-          noDocument == other.noDocument;
+          noDocument == other.noDocument &&
+          sponsor.toString() == other.sponsor.toString();
 
   @override
   int get hashCode => Object.hashAll([

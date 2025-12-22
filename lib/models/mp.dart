@@ -119,6 +119,7 @@ class MP {
   final String educationLevel;
   final int numberOfVotes;
   final String voivodeship;
+  final String memberType;
   final String? imageUrl; 
   final Map<String, dynamic>? parliamentaryHistory;
   final List<String> clubHistory;
@@ -156,6 +157,7 @@ class MP {
     required this.educationLevel,
     required this.numberOfVotes,
     required this.voivodeship,
+    required this.memberType,
     this.imageUrl,
     this.parliamentaryHistory,
     this.clubHistory = const [],
@@ -204,6 +206,7 @@ class MP {
       educationLevel: json['educationLevel'] as String? ?? '',
       numberOfVotes: (json['numberOfVotes'] as num?)?.toInt() ?? 0,
       voivodeship: json['voivodeship'] as String? ?? '',
+      memberType: json['memberType'] as String? ?? '',
       imageUrl: json['imageUrl'] as String?,
       parliamentaryHistory: json['parliamentaryHistory'] != null ? Map<String, dynamic>.from(json['parliamentaryHistory']) : null,
     clubHistory: json['clubHistory'] is List ? List<String>.from(json['clubHistory']) : [],
@@ -310,6 +313,7 @@ MP copyWith({
     int? sponsoredBillsCount,
     int? cosponsoredBillsCount,
     int? interpellationsCount,
+    String? memberType,
   }) {
     return MP(
       id: id,
@@ -327,6 +331,7 @@ MP copyWith({
       educationLevel: educationLevel,
       numberOfVotes: numberOfVotes,
       voivodeship: voivodeship,
+      memberType: memberType ?? this.memberType,
       imageUrl: imageUrl,
       parliamentaryHistory: parliamentaryHistory,
       clubHistory: clubHistory,

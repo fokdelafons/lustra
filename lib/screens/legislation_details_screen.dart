@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import '../models/legislation.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'dart:developer' as developer;
 import 'package:provider/provider.dart';
@@ -18,6 +17,7 @@ import '../services/api_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:lustra/providers/translators.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/link.dart';
 
 
 class ParliamentaryVotePainter extends CustomPainter {
@@ -411,28 +411,6 @@ void _initializeStateData() {
     }
   }
 
-  Future<void> _launchUrlHelper(String? urlString) async {
-    if (urlString == null || urlString.isEmpty) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.noUrlAvailableSnackbar)),
-        );
-      }
-      return;
-    }
-    final Uri url = Uri.parse(urlString);
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url, mode: LaunchMode.externalApplication);
-    } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.cannotOpenLinkSnackbar(urlString))),
-        );
-      }
-      developer.log('Could not launch $urlString');
-    }
-  }
-
   Widget _buildVoteCountRow(String label, int count, Color color) {
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -684,29 +662,46 @@ void _shareLegislation() {
     
 // APP BAR (używany w loading/error i głównym widoku)
     final bool isWideScreen = kIsWeb && MediaQuery.of(context).size.width > 800;
-    final bool canPop = context.canPop();
     
-    final appBar = AppBar(
+final appBar = AppBar(
       title: Text(l10n.detailsScreenTitle),
       centerTitle: true,
       backgroundColor: Theme.of(context).primaryColor,
       foregroundColor: Colors.white,
       
-      // --- LEWA STRONA (Cofnij / Dom) ---
       // Na szerokim ekranie dajemy więcej miejsca na napis
       leadingWidth: isWideScreen ? 140 : null, 
-      leading: isWideScreen
-          ? InkWell(
-              onTap: () => canPop ? context.pop() : context.go('/'),
+      
+leading: Builder(
+        builder: (context) {
+          final uri = GoRouterState.of(context).uri;
+          final hasTypeParam = uri.queryParameters.containsKey('list');
+          
+          // JEŚLI JEST TYP -> WRACAMY DO LISTY (POP)
+          // JEŚLI NIE MA -> IDZIEMY DO HOME (GO)
+          final bool showBack = hasTypeParam && context.canPop();
+
+          void onNavigation() {
+            if (showBack) {
+              context.pop(); 
+            } else {
+              context.go('/'); 
+            }
+          }
+
+          // WIDOK DLA WEB (SZEROKI)
+          if (isWideScreen) {
+            return InkWell(
+              onTap: onNavigation,
               child: Padding(
                 padding: const EdgeInsets.only(left: 16.0),
                 child: Row(
                   children: [
-                    Icon(canPop ? Icons.arrow_back : Icons.home, color: Colors.white),
+                    Icon(showBack ? Icons.arrow_back : Icons.home, color: Colors.white),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        canPop ? l10n.actionBack : l10n.bottomNavHome, 
+                        showBack ? l10n.actionBack : l10n.bottomNavHome, 
                         style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -714,19 +709,21 @@ void _shareLegislation() {
                   ],
                 ),
               ),
-            )
-          : (canPop 
-              ? null // Standardowa strzałka na mobile
-              : IconButton(
-                  icon: const Icon(Icons.home),
-                  tooltip: l10n.bottomNavHome,
-                  onPressed: () => context.go('/'),
-                )),
+            );
+          }
+
+          // WIDOK DLA MOBILE (IKONA)
+          return IconButton(
+            icon: Icon(showBack ? Icons.arrow_back : Icons.home),
+            tooltip: showBack ? l10n.actionBack : l10n.bottomNavHome,
+            onPressed: onNavigation,
+          );
+        },
+      ),
 
       // --- PRAWA STRONA (Udostępnij) ---
       actions: _bill == null ? [] : [
             if (isWideScreen)
-              // Używamy TextButton ze zwykłym Row, aby wymusić kolejność: Tekst -> Ikona
               TextButton(
                 onPressed: _isFetchingDetails ? null : _shareLegislation,
                 child: Row(
@@ -796,16 +793,12 @@ void _shareLegislation() {
     final int? currentMeetingNumber = _bill!.meetingNumber;
     final int? currentVotingNumber = _bill!.votingNumber;
 
-    // --- TREŚĆ (Widget) ---
-    // Budujemy kolumnę z treścią raz, żeby użyć jej w obu wariantach
-    
- // Logika tytułu: Użyj AI title, a jak pusty/null -> titleOfficial -> Fallback
+
     String displayTitle = _bill!.title;
     if (displayTitle.isEmpty || displayTitle == 'No AI title' || displayTitle == 'Brak tytułu' || displayTitle == 'No Title') {
       displayTitle = _bill!.titleOfficial ?? l10n.errorNoDataLegislationInProcess;
     }
     
-    // Logika opisu: Ukryj jeśli "Brak opisu" lub pusty
     final bool showDescription = _bill!.description.isNotEmpty && 
                                  _bill!.description != 'Brak opisu' && 
                                  _bill!.description != 'No description';
@@ -821,8 +814,6 @@ void _shareLegislation() {
         if (showDescription)
           Text(_bill!.description, style: TextStyle(fontSize: 15, color: Colors.grey[800], height: 1.4)),
         
-        // UWAGA: Jeśli action jest null (serwis nie obsłużył noDocument), widget się nie pokaże.
-        // Należy zaktualizować getMissingDataAction w serwisie.
         if ((showFullPageWarning || isDocumentMissing) && action != null) 
            Center(child: MissingDataWidget(action: action)),
         
@@ -842,11 +833,37 @@ void _shareLegislation() {
           final String? processUrl = activeService.getProcessUrl(_bill!);
           final List<Widget> buttonWidgets = [];
           if (officialUrl != null) {
-            buttonWidgets.add(Expanded(child: OutlinedButton.icon(icon: const Icon(Icons.article_outlined), label: Text(l10n.officialContentButton, textAlign: TextAlign.center), onPressed: () => _launchUrlHelper(officialUrl), style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)))));
+            buttonWidgets.add(
+              Expanded(
+                child: Link(
+                  uri: Uri.parse(officialUrl),
+                  target: LinkTarget.blank,
+                  builder: (context, followLink) => OutlinedButton.icon(
+                    icon: const Icon(Icons.article_outlined),
+                    label: Text(l10n.officialContentButton, textAlign: TextAlign.center),
+                    onPressed: followLink, // Przekazujemy sterowanie do Linka
+                    style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12))
+                  ),
+                ),
+              )
+            );
           }
           if (processUrl != null) {
             if (buttonWidgets.isNotEmpty) buttonWidgets.add(const SizedBox(width: 12));
-            buttonWidgets.add(Expanded(child: OutlinedButton.icon(icon: const Icon(Icons.account_balance_outlined), label: Text(l10n.processPageButton, textAlign: TextAlign.center), onPressed: () => _launchUrlHelper(processUrl), style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12)))));
+            buttonWidgets.add(
+              Expanded(
+                child: Link(
+                  uri: Uri.parse(processUrl),
+                  target: LinkTarget.blank,
+                  builder: (context, followLink) => OutlinedButton.icon(
+                    icon: const Icon(Icons.account_balance_outlined),
+                    label: Text(l10n.processPageButton, textAlign: TextAlign.center),
+                    onPressed: followLink,
+                    style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12))
+                  ),
+                ),
+              )
+            );
           }
           if (buttonWidgets.isEmpty) return const SizedBox.shrink();
           return Padding(padding: const EdgeInsets.symmetric(vertical: 8.0), child: Row(children: buttonWidgets));
@@ -854,7 +871,6 @@ void _shareLegislation() {
         
         const SizedBox(height: 24),
         
-        // Sekcja Głosowania
         if (showVotingWarning)
           Center(child: MissingDataWidget(action: action!))
         else if (_bill!.date != null) ...[
@@ -864,7 +880,6 @@ void _shareLegislation() {
           })),
           Padding(padding: const EdgeInsets.only(top: 4.0, bottom: 8.0), child: Center(child: Text(_formatDateTime(context, _bill!.date), style: TextStyle(fontSize: 13, color: Colors.grey[700], fontStyle: FontStyle.italic)))),
           RepaintBoundary(child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-            // Tutaj constraints przyjdą od rodzica (750px na webie), więc kropki będą OK
             final double chartFullWidth = max(150.0, constraints.maxWidth);
             final double calculatedHeightBasedOnWidth = chartFullWidth / 2;
             final double chartHeight = calculatedHeightBasedOnWidth.clamp(120.0, 220.0); 
@@ -877,11 +892,42 @@ void _shareLegislation() {
             _buildVoteCountRow(l10n.labelAbstained, votesAbstainSejm, Colors.grey),
           ]),
           const SizedBox(height: 12),
-          InkWell(onTap: () {
+          Builder(builder: (context) {
             final activeService = Provider.of<ParliamentServiceInterface>(context, listen: false);
-            final url = activeService.getVotingPdfUrl(_bill!);
-            _launchUrlHelper(url);
-          }, child: Padding(padding: const EdgeInsets.symmetric(vertical: 8.0), child: Row(mainAxisSize: MainAxisSize.min, children: [Text(l10n.fullVotingResultsPDF, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Theme.of(context).primaryColor, decoration: TextDecoration.underline, decorationColor: Theme.of(context).primaryColor)), const SizedBox(width: 4), Icon(Icons.open_in_new, size: 18, color: Theme.of(context).primaryColor)]))),
+            final urlString = activeService.getVotingPdfUrl(_bill!);
+            
+            if (urlString == null || urlString.isEmpty) return const SizedBox.shrink();
+
+            return Link(
+              uri: Uri.parse(urlString),
+              target: LinkTarget.blank,
+              builder: (context, followLink) {
+                return InkWell(
+                  onTap: followLink,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          l10n.fullVotingResultsPDF, 
+                          style: TextStyle(
+                            fontSize: 15, 
+                            fontWeight: FontWeight.w500, 
+                            color: Theme.of(context).primaryColor, 
+                            decoration: TextDecoration.underline, 
+                            decorationColor: Theme.of(context).primaryColor
+                          )
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(Icons.open_in_new, size: 18, color: Theme.of(context).primaryColor)
+                      ]
+                    )
+                  )
+                );
+              }
+            );
+          }),
         ] else if (upcomingProceedingDates != null && upcomingProceedingDates.isNotEmpty) ...[
           Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             const SizedBox(height: 12),
@@ -906,8 +952,55 @@ void _shareLegislation() {
         Text(l10n.additionalInfoSectionTitle, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          if (_bill!.id.isNotEmpty)
+        if (_bill!.id.isNotEmpty)
             Text(l10n.printNumberLabel(_bill!.id), style: const TextStyle(fontSize: 15, height: 1.5)),
+
+          if (_bill!.sponsor != null && _bill!.sponsor!['name'] != null)
+            Builder(builder: (context) {
+              final parliamentId = context.read<ParliamentManager>().activeServiceId;
+              final sponsorId = _bill!.sponsor!['id'];
+              final sponsorName = _bill!.sponsor!['name'];
+              final labelText = "${l10n.legislationSponsorLabel}: $sponsorName";
+    
+              const textStyle = TextStyle(fontSize: 15, height: 1.5); 
+              if (sponsorId == null || sponsorId.isEmpty) {
+                return Text(labelText, style: textStyle);
+              }
+
+              final compositeId = '${_bill!.term}_$sponsorId';
+              final internalPath = '/$parliamentId/members/$compositeId';
+              final fullWebUrl = Uri.parse(Uri.base.origin + internalPath);
+
+              return Link(
+                uri: fullWebUrl,
+                target: LinkTarget.blank,
+                builder: (context, followLink) {
+                  return InkWell(
+                    onTap: () {
+                      if (kIsWeb) {
+                        followLink?.call();
+                      } else {
+                        context.push(internalPath);
+                      }
+                    },
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            labelText,
+                            style: textStyle.copyWith(color: Colors.black87),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Icon(Icons.launch, size: 14, color: Colors.grey[600]), 
+                      ],
+                    ),
+                  );
+                },
+              );
+            }),
           if (_bill!.processStartDate != null)
             Text(l10n.processStartDateLabel(currentProcessStartDate), style: const TextStyle(fontSize: 15, height: 1.5)),
           if (_bill!.date != null) 
@@ -926,7 +1019,7 @@ void _shareLegislation() {
           
           // Na razie użyjemy helpera _launchUrlHelper z gotowym linkiem, jeśli activeService go dostarcza, lub zbudujemy go ręcznie.
           // Tu prosta wersja: dodajemy klikalny tekst.
-          final jsonUrl = "https://lustra.news/lustra-logs/${activeService.source.id}/legislations/${_bill!.id}.json";
+          final jsonUrl = "https://storage.googleapis.com/lustra-logs/${activeService.source.id}/legislations/${_bill!.id}.json";
 
           return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(l10n.legislationFooterAiDisclaimer, style: footerTextStyle),
@@ -934,11 +1027,22 @@ void _shareLegislation() {
             if (finalSummarizedBy != null) Padding(padding: const EdgeInsets.only(bottom: 4.0), child: Text('${l10n.legislationFooterModelUsed} $finalSummarizedBy', style: footerTextStyle)),
             Text('${l10n.legislationFooterSourceData} $governmentApiUrl', style: footerTextStyle),
             const SizedBox(height: 8),
-             InkWell(
-              onTap: () => _launchUrlHelper(jsonUrl),
-              child: Text(
-                l10n.actionViewSourceJson,
-                style: footerTextStyle
+             Link(
+               uri: Uri.parse(jsonUrl),
+               target: LinkTarget.blank,
+               builder: (context, followLink) => InkWell(
+                onTap: followLink,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      l10n.actionViewSourceJson,
+                      style: footerTextStyle
+                    ),
+                    const SizedBox(width: 6),
+                    Icon(Icons.launch, size: 14, color: Colors.grey[700]),
+                  ],
+                ),
               ),
             ),
           ]);

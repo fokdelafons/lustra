@@ -862,7 +862,7 @@ class HomeContentState extends State<HomeContent> {
                                   if (_searchController.text.trim().isEmpty) return;
                                   FocusScope.of(context).unfocus();
                                   final pid = context.read<ParliamentManager>().activeServiceId;
-                                  context.smartNavigate('/$pid/legislations/in-process', extra: {'searchQuery': _searchController.text.trim()});
+                                  context.smartNavigate('/$pid/legislations?list=process', extra: {'searchQuery': _searchController.text.trim()});
                                 },
                               ),
                             ),
@@ -1205,7 +1205,7 @@ Widget _buildContentList(BuildContext context) {
     if (homeData.popularVoted != null && homeData.popularVoted!.id.isNotEmpty) {
       sectionWidgets.add(buildClassicStyleCard(
         context, l10n.sectionPopularVotes, buildVotingContent(context, true, homeData.popularVoted),
-        Icons.how_to_vote, '/$pid/legislations/voted', l10n.actionSeeAll,
+        Icons.how_to_vote, '/$pid/legislations?list=voted', l10n.actionSeeAll,
         legislationItem: homeData.popularVoted,
       ));
     }
@@ -1213,7 +1213,7 @@ Widget _buildContentList(BuildContext context) {
     if (homeData.upcomingVote != null && homeData.upcomingVote!.id.isNotEmpty) {
       sectionWidgets.add(buildClassicStyleCard(
         context, l10n.sectionUpcoming, buildVotingContent(context, false, homeData.upcomingVote),
-        Icons.upcoming, '/$pid/legislations/upcoming', l10n.actionSeeAll,
+        Icons.upcoming, '/$pid/legislations?list=upcoming', l10n.actionSeeAll,
         legislationItem: homeData.upcomingVote,
       ));
     }
@@ -1221,7 +1221,7 @@ Widget _buildContentList(BuildContext context) {
     if (homeData.popularInProcess != null && homeData.popularInProcess!.id.isNotEmpty) {
       sectionWidgets.add(buildClassicStyleCard(
         context, l10n.sectionLegislationInProcess, buildLegislationContent(context, homeData.popularInProcess),
-        Icons.gavel, '/$pid/legislations/in-process', l10n.actionSeeAll,
+        Icons.gavel, '/$pid/legislations?list=process', l10n.actionSeeAll,
         legislationItem: homeData.popularInProcess,
       ));
     }

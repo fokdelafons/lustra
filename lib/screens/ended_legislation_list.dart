@@ -19,7 +19,9 @@ class LegislationScreen extends StatefulWidget {
   LegislationScreenState createState() => LegislationScreenState();
 }
 
-class LegislationScreenState extends State<LegislationScreen> {
+class LegislationScreenState extends State<LegislationScreen> with AutomaticKeepAliveClientMixin {
+	@override
+	bool get wantKeepAlive => true;
   Map<String, String> _documentTypeOptions = {};
   String _selectedDocumentTypeKey = 'all';
   List<Legislation> _bills = [];
@@ -59,6 +61,16 @@ class LegislationScreenState extends State<LegislationScreen> {
     super.initState();
     developer.log('LegislationScreen initState', name: 'LegislationScreen');
     _selectedStatusKey = 'all'; 
+  }
+
+Future<void> refreshData() async {
+    if (_scrollController.hasClients) {
+      _scrollController.jumpTo(0);
+    }
+  
+    final activeService = Provider.of<ParliamentServiceInterface>(context, listen: false);
+    await activeService.clearCache();
+    _resetAndLoadData(forceRefresh: true);
   }
   
   @override
@@ -112,7 +124,7 @@ Future<void> _loadFilterOptions() async {
     developer.log('Błąd podczas ładowania opcji filtrów: $e', name: 'LegislationScreen');
   }
 }
-
+  final ScrollController _scrollController = ScrollController();
   void _resetAndLoadData({bool forceRefresh = false, bool newSourceChanged = false}) {
     developer.log('Resetowanie stanu i ładowanie danych. forceRefresh: $forceRefresh, newSourceChanged: $newSourceChanged', name: 'LegislationScreen');
     if (!mounted) {
@@ -246,7 +258,8 @@ Future<void> _loadBills({bool forceRefresh = false}) async {
 
 @override
 Widget build(BuildContext context) {
-  final l10n = AppLocalizations.of(context)!;
+	super.build(context);
+	final l10n = AppLocalizations.of(context)!;
   final manager = Provider.of<ParliamentManager>(context);
   if (manager.isLoading || !manager.isInitialized) {
     return Scaffold(
@@ -289,22 +302,7 @@ Widget build(BuildContext context) {
     child: Consumer<ParliamentServiceInterface>(
       builder: (context, activeService, child) {
         final processedBills = _getProcessedBills();
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(l10n.legislationScreenTitle(activeService.name)),
-            backgroundColor: Theme.of(context).primaryColor,
-            foregroundColor: Colors.white,
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.refresh),
-                tooltip: l10n.refreshDataTooltip,
-                onPressed: _isLoading ? null : () async {
-                  _resetAndLoadData(forceRefresh: true);
-                },
-              ),
-            ],
-          ),
-          body: Column(
+        return Column(
             children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
@@ -436,8 +434,7 @@ underline: const SizedBox.shrink(),
                 child: _buildListComponent(processedBills),
               ),
             ],
-          ),
-        );
+          );
       },
     ),
   );
@@ -478,6 +475,8 @@ underline: const SizedBox.shrink(),
           return true; 
         },
         child: ListView.builder(
+          key: const PageStorageKey<String>('ended_legislation_list_scroll'),
+          controller: _scrollController,
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0), 
           itemCount: processedBills.length + (_isLoadingMore ? 1 : 0),
           itemBuilder: (context, index) {
@@ -631,7 +630,7 @@ underline: const SizedBox.shrink(),
     return GestureDetector(
       onTap: () {
         final parliamentId = context.read<ParliamentManager>().activeServiceId;
-        context.smartNavigate('/$parliamentId/legislations/${bill.id}', extra: bill);
+        context.smartNavigate('/$parliamentId/legislations/${bill.id}?list=voted', extra: bill);
       },
       child: Card(
         margin: const EdgeInsets.only(bottom: 12.0),

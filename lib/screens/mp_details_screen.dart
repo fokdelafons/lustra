@@ -14,6 +14,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/citizen_poll_widget.dart';
 import '../services/api_service.dart';
 import 'package:flutter/foundation.dart';
+import 'package:url_launcher/link.dart';
 
 class MPDetailsScreen extends StatefulWidget {
   final MP? mp;
@@ -549,7 +550,6 @@ Widget build(BuildContext context) {
   final TextStyle? subSectionTitleStyle = textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600);
   final displayMP = _mp!;
 final bool isWideScreen = kIsWeb && MediaQuery.of(context).size.width > 800;
-    final bool canPop = context.canPop();
 
     return Scaffold(
       appBar: AppBar(
@@ -557,20 +557,36 @@ final bool isWideScreen = kIsWeb && MediaQuery.of(context).size.width > 800;
         backgroundColor: theme.primaryColor,
         foregroundColor: Colors.white,
         
-        // --- LEWA STRONA (Cofnij / Dom) ---
-        leadingWidth: isWideScreen ? 140 : null, 
-        leading: isWideScreen
-            ? InkWell(
-                onTap: () => canPop ? context.pop() : context.go('/'),
+        leadingWidth: isWideScreen ? 140 : null,
+leading: Builder(
+          builder: (context) {
+            final bool showBack;
+            if (kIsWeb) {
+               showBack = widget.mp != null;
+            } else {
+               showBack = context.canPop();
+            }
+
+            void onNavigation() {
+              if (showBack) {
+                context.pop();
+              } else {
+                context.go('/');
+              }
+            }
+
+            if (isWideScreen) {
+              return InkWell(
+                onTap: onNavigation,
                 child: Padding(
                   padding: const EdgeInsets.only(left: 16.0),
                   child: Row(
                     children: [
-                      Icon(canPop ? Icons.arrow_back : Icons.home, color: Colors.white),
+                      Icon(showBack ? Icons.arrow_back : Icons.home, color: Colors.white),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          canPop ? l10n.actionBack : l10n.bottomNavHome, 
+                          showBack ? l10n.actionBack : l10n.bottomNavHome,
                           style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -578,14 +594,16 @@ final bool isWideScreen = kIsWeb && MediaQuery.of(context).size.width > 800;
                     ],
                   ),
                 ),
-              )
-            : (canPop 
-                ? null 
-                : IconButton(
-                    icon: const Icon(Icons.home),
-                    tooltip: l10n.bottomNavHome,
-                    onPressed: () => context.go('/'),
-                  )),
+              );
+            }
+
+            return IconButton(
+              icon: Icon(showBack ? Icons.arrow_back : Icons.home),
+              tooltip: showBack ? l10n.actionBack : l10n.bottomNavHome,
+              onPressed: onNavigation,
+            );
+          },
+        ),
 
         // --- PRAWA STRONA (Udostępnij) ---
         actions: [
@@ -1047,47 +1065,89 @@ body: kIsWeb
       for (int i = 0; i < votes.length; i++) {
         final vote = votes[i];
         listChildren.add(
-          ListTile(
+ListTile(
             contentPadding: EdgeInsets.zero,
-            title: InkWell(
-              onTap: () async {
-                final parliamentId = context.read<ParliamentManager>().activeServiceId;
-                // Jeśli legislationId (link) nie jest puste, to nawigujemy wewnątrz apki
-                if (vote.link.isNotEmpty) {
-                   final path = '/$parliamentId/legislations/${vote.link}';
-                   if (kIsWeb) {
-                     context.go(path);
-                   } else {
-                     context.push(path);
-                   }
-                }
-                // Jeśli brak legislationId, ale jest votingUrl (proceduralne), otwieramy przeglądarkę
-                else if (vote.votingUrl != null && vote.votingUrl!.isNotEmpty) {
-                   final Uri url = Uri.parse(vote.votingUrl!);
-                   if (await canLaunchUrl(url)) {
-                     await launchUrl(url, mode: LaunchMode.externalApplication);
-                   }
-                }
-              },
-              child: Text(
-                vote.title,
-                style: voteTextStyle.copyWith(
-                  color: Theme.of(context).primaryColor,
-                ),
-              ),
-            ),
-            trailing: Builder(
-              builder: (context) {
-                final activeService = context.read<ParliamentServiceInterface>();
-                final String translatedVote = activeService.translateVote(context, vote.vote);
-                return Text(
-                  translatedVote,
-                  style: voteTextStyle.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: activeService.getVoteColor(context, translatedVote),
+title: Row(
+              children: [
+                if (vote.votingUrl != null && vote.votingUrl!.isNotEmpty) ...[
+                  Tooltip(
+                    message: AppLocalizations.of(context)!.votingSourceTooltip,
+                    child: InkWell(
+                      customBorder: const CircleBorder(),
+                      onTap: () async {
+                        final Uri url = Uri.parse(vote.votingUrl!);
+                        if (await canLaunchUrl(url)) {
+                          await launchUrl(url, mode: LaunchMode.externalApplication);
+                        }
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Icon(Icons.launch, size: 20, color: Theme.of(context).primaryColor),
+                      ),
+                    ),
                   ),
-                );
-              }
+                  Container(
+                    height: 24,
+                    width: 1,
+                    color: Colors.grey[300],
+                    margin: const EdgeInsets.only(right: 12.0),
+                  ),
+                ],
+
+                Expanded(
+                  child: Builder(
+                    builder: (context) {
+                      final parliamentId = context.read<ParliamentManager>().activeServiceId;
+                      
+                      if (vote.link.isNotEmpty) {
+                         final internalPath = '/$parliamentId/legislations/${vote.link}';
+                         final fullWebUrl = Uri.parse(Uri.base.origin + internalPath);
+                         
+                         return Link(
+                           uri: fullWebUrl,
+                           target: LinkTarget.blank, 
+                           builder: (context, followLink) {
+                             return InkWell(
+                               onTap: () {
+                                 if (kIsWeb) {
+                                   followLink?.call();
+                                 } else {
+                                   context.push(internalPath);
+                                 }
+                               },
+                               child: Text(
+                                  vote.title,
+                                  style: voteTextStyle.copyWith(
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                               ),
+                             );
+                           }
+                         );
+                      } 
+                      
+                      else if (vote.votingUrl != null && vote.votingUrl!.isNotEmpty) {
+                         return InkWell(
+                           onTap: () async {
+                             final Uri url = Uri.parse(vote.votingUrl!);
+                             if (await canLaunchUrl(url)) {
+                               await launchUrl(url, mode: LaunchMode.externalApplication);
+                             }
+                           },
+                           child: Text(
+                              vote.title,
+                              style: voteTextStyle.copyWith(color: Theme.of(context).primaryColor),
+                           ),
+                         );
+                      }
+                      
+                      else {
+                        return Text(vote.title, style: voteTextStyle);
+                      }
+                    }
+                  ),
+                ),
+              ],
             ),
           )
         );

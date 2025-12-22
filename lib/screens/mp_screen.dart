@@ -22,7 +22,9 @@ class MPScreen extends StatefulWidget {
   MPScreenState createState() => MPScreenState();
 }
 
-class MPScreenState extends State<MPScreen> {
+class MPScreenState extends State<MPScreen> with AutomaticKeepAliveClientMixin {
+	@override
+	bool get wantKeepAlive => true;
   List<MP> _mps = [];
   bool _isLoading = false;
   bool _isLoadingMore = false;
@@ -97,10 +99,13 @@ class MPScreenState extends State<MPScreen> {
       });
     }
   }
-
+  
   void _resetAndLoadData({bool forceRefresh = false, bool newSourceChanged = false}) {
     developer.log('Resetowanie stanu. forceRefresh: $forceRefresh, newSourceChanged: $newSourceChanged', name: 'MPScreen');
     if (!mounted) return;
+    if (_scrollController.hasClients) {
+      _scrollController.jumpTo(0);
+    }
     setState(() {
       _mps = [];
       _isLoading = true;
@@ -275,8 +280,10 @@ Widget _buildFilterChips() {
 
 @override
 Widget build(BuildContext context) {
+  super.build(context);
   final l10n = AppLocalizations.of(context)!;
   final manager = Provider.of<ParliamentManager>(context);
+  final bool isWideScreen = kIsWeb && MediaQuery.of(context).size.width > 800;
   if (manager.isLoading || !manager.isInitialized) {
     return Scaffold(
       appBar: AppBar(
@@ -313,19 +320,58 @@ Widget build(BuildContext context) {
     value: manager.activeService,
     child: Consumer<ParliamentServiceInterface>(
       builder: (context, activeService, child) {
-        return Scaffold(
+return Scaffold(
           appBar: AppBar(
             title: Text(l10n.mpScreenTitle(activeService.name)),
             backgroundColor: Theme.of(context).primaryColor,
             foregroundColor: Colors.white,
+            leadingWidth: isWideScreen ? 140 : null,
+            leading: Builder(
+              builder: (context) {
+                void onNavigation() {
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.go('/');
+                  }
+                }
+                if (isWideScreen) {
+                  return InkWell(
+                    onTap: onNavigation,
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 16.0),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.arrow_back, color: Colors.white),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              l10n.actionBack,
+                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
+                return IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  tooltip: l10n.actionBack,
+                  onPressed: onNavigation,
+                );
+              },
+            ),
             actions: [
               IconButton(
                 icon: const Icon(Icons.refresh),
                 tooltip: l10n.refreshDataTooltip,
                 onPressed: (_isLoading || _isLoadingMore) ? null : () async {
-                  await activeService.clearCache();
-                  _resetAndLoadData(forceRefresh: true);
-                },
+                await activeService.clearCache();
+                _resetAndLoadData(forceRefresh: true);
+              },
               ),
             ],
           ),
@@ -410,7 +456,7 @@ Widget build(BuildContext context) {
                               items: [
                                 DropdownMenuItem<String>(
                                   value: 'deputies',
-                                  child: Text(l10n.deputies),
+                                  child: Text(l10n.allFilter), // senators representatives deputies add here rn hardcoded all
                                 ),
                               ],
                               onChanged: null,
@@ -511,9 +557,10 @@ Widget build(BuildContext context) {
       ),
     );
   }
-  return ListView.builder(
-    controller: _scrollController,
-    padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),
+	return ListView.builder(
+		key: const PageStorageKey<String>('mp_list_scroll'),
+		controller: _scrollController,
+		padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),
     itemCount: filteredMPs.length + (_isLoadingMore ? 1 : 0),
     itemBuilder: (context, index) {
       if (index == filteredMPs.length) {

@@ -17,6 +17,8 @@ import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import '../services/parliament_manager.dart';
 import 'package:lustra/services/api_service.dart';
+import 'package:flutter/foundation.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class USParliamentService with ChangeNotifier implements ParliamentServiceInterface {
   final ApiService _apiService = ApiService();
@@ -140,8 +142,9 @@ class USParliamentService with ChangeNotifier implements ParliamentServiceInterf
     const List<String> acceptedDisplayVariants = [
       "passed house",
       "passed senate",
+      "adopted",
       "became law",
-      "to president"
+      "to president",
     ];
     const List<String> rejectedDisplayVariants = [
       "vetoed",
@@ -168,7 +171,7 @@ class USParliamentService with ChangeNotifier implements ParliamentServiceInterf
         backgroundColor: Colors.orange.withAlpha(20),
         textColor: Colors.orange[800]!,
       );
-    } else if (lowerStatus == 'placed on calendar') {
+    } else if (lowerStatus == 'placed on calendar' || lowerStatus == 'resolving differences') {
       return DisplayableStatus(
         label: translatedLabel,
         backgroundColor: Colors.blue.withAlpha(20),
@@ -186,9 +189,15 @@ class USParliamentService with ChangeNotifier implements ParliamentServiceInterf
   @override
   String getVotingTitle(BuildContext context, Legislation legislation) {
     final l10n = AppLocalizations.of(context)!;
-    final status = legislation.statusText;
-    if (status != null && status.toLowerCase().contains('table')) {
-      return l10n.votingResultsUSMotionToTableTitle;
+    final status = legislation.statusText?.toLowerCase();
+    
+    if (status != null) {
+      if (status.contains('table')) {
+        return l10n.votingResultsUSMotionToTableTitle;
+      }
+      if (status.contains('refer') || status.contains('commit')) {
+        return l10n.votingResultsUSMotionToReferTitle; 
+      }
     }
     return l10n.votingResultsTitle;
   }
@@ -348,10 +357,18 @@ class USParliamentService with ChangeNotifier implements ParliamentServiceInterf
   }
 
   @override
-  String getMandateStatusText(BuildContext context, MP mp) {
-    final l10n = AppLocalizations.of(context)!;
-    return mp.active ? l10n.mandateStatusActive : l10n.mandateStatusInactive;
-  }
+    String getMandateStatusText(BuildContext context, MP mp) {
+      final l10n = AppLocalizations.of(context)!;
+      switch (mp.mandateCoverage) {
+        case 'FULL':
+          return mp.active ? l10n.mandateStatusActive : l10n.mandateStatusFulfilled;
+        case 'PARTIAL':
+          return l10n.mandateStatusCancelled;
+        case 'UNKNOWN':
+        default:
+          return mp.active ? l10n.mandateStatusActive : l10n.mandateStatusInactive;
+      }
+    }
 
 @override
   List<MPDetailItem> getMPHeaderDetails(BuildContext context, MP mp) {
@@ -368,6 +385,10 @@ class USParliamentService with ChangeNotifier implements ParliamentServiceInterf
       formerlyText = l10n.formerlyLabel(previousClubs.join(', '));
     }
     details.add(MPDetailItem(label: currentClubText, value: formerlyText));
+      if (mp.memberType.isNotEmpty) {
+      final String translatedRole = translateUSRole(context, mp.memberType);
+      details.add(MPDetailItem(label: translatedRole));
+    }
     if (mp.district.isNotEmpty) {
       details.add(MPDetailItem(label: l10n.districtLabelUS(mp.district, mp.districtNum.toString())));
     }
@@ -405,12 +426,18 @@ class USParliamentService with ChangeNotifier implements ParliamentServiceInterf
     }
   }
 
-  @override
+@override
   VoidCallback? getInterpellationTapAction(BuildContext context, InterpellationPreview interp) {
     if (interp.id.isNotEmpty) {
-      return () {
+      return () async {
         final parliamentId = context.read<ParliamentManager>().activeServiceId;
-        context.push('/$parliamentId/legislations/${interp.id}');
+        final path = '/$parliamentId/legislations/${interp.id}';
+        if (kIsWeb) {
+          final fullUrl = Uri.parse(Uri.base.origin + path);
+          await launchUrl(fullUrl, webOnlyWindowName: '_blank');
+        } else {
+          context.push(path);
+        }
       };
     }
     return null;
