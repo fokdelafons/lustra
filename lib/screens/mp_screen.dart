@@ -8,6 +8,7 @@ import '../services/parliament_manager.dart';
 import '../services/parliament_service_interface.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lustra/providers/language_provider.dart';
 import 'package:flutter/foundation.dart';
 import '../services/app_router.dart';
 
@@ -648,8 +649,11 @@ return Scaffold(
       opacity: cardOpacity,
       child: GestureDetector(
         onTap: () {
-          final parliamentId = context.read<ParliamentManager>().activeServiceId;
-          context.smartNavigate('/$parliamentId/members/${mp.id}', extra: mp);
+          final manager = context.read<ParliamentManager>();
+          final slug = manager.activeSlug;
+          final lang = context.read<LanguageProvider>().appLanguageCode;
+          final term = manager.currentTerm;
+          context.smartNavigate('/$lang/$slug/$term/members/${mp.id}', extra: mp);
         },
         child: Card(
           margin: const EdgeInsets.only(bottom: 12.0),

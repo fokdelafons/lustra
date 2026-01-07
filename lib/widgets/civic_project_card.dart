@@ -8,6 +8,7 @@ import 'package:lustra/widgets/citizen_poll_widget.dart';
 import 'package:lustra/services/share_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:lustra/providers/language_provider.dart';
 import 'package:intl/intl.dart' as intl;
 
 class CivicProjectCard extends StatelessWidget {
@@ -89,8 +90,11 @@ class CivicProjectCard extends StatelessWidget {
                       Expanded(
                         child: InkWell(
                           onTap: () {
-                            final pid = context.read<ParliamentManager>().activeServiceId;
-                            context.smartNavigate('/$pid/legislations/${project.id}', extra: project);
+                            final manager = context.read<ParliamentManager>();
+                            final slug = manager.activeSlug;
+                            final lang = context.read<LanguageProvider>().appLanguageCode;
+                            final term = manager.currentTerm;
+                            context.smartNavigate('/$lang/$slug/$term/legislations/${project.id}', extra: project);
                           },
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 10),
@@ -115,7 +119,12 @@ class CivicProjectCard extends StatelessWidget {
                         child: InkWell(
                           onTap: () {
                              final shareService = ShareService();
-                             final pid = context.read<ParliamentManager>().activeServiceId!;
+                             final manager = context.read<ParliamentManager>();
+                             final langProvider = context.read<LanguageProvider>();
+                             final pid = manager.activeServiceId!;
+                             final slug = manager.activeSlug;
+                             final lang = langProvider.appLanguageCode;
+                             final term = manager.currentTerm ?? 0;
                              final status = activeService.translateStatus(context, project.status);
                              showModalBottomSheet(
                               context: context,
@@ -131,6 +140,7 @@ class CivicProjectCard extends StatelessWidget {
                                           shareService.shareLegislation(
                                             context: context, legislation: project, imageSize: const Size(1080, 1080),
                                             l10n: l10n, translatedStatus: status, parliamentId: pid,
+                                            slug: slug, lang: lang, term: term,
                                             flagAssetPath: activeService.flagAssetPath, parliamentName: activeService.name,
                                             votingTitle: l10n.votingResultsTitle,
                                           );
@@ -144,6 +154,7 @@ class CivicProjectCard extends StatelessWidget {
                                           shareService.shareLegislation(
                                             context: context, legislation: project, imageSize: const Size(1080, 1920),
                                             l10n: l10n, translatedStatus: status, parliamentId: pid,
+                                            slug: slug, lang: lang, term: term,
                                             flagAssetPath: activeService.flagAssetPath, parliamentName: activeService.name,
                                             votingTitle: l10n.votingResultsTitle,
                                           );
@@ -183,8 +194,11 @@ class CivicProjectCard extends StatelessWidget {
             color: lightPrimaryColor,
             child: InkWell(
               onTap: () {
-                final pid = context.read<ParliamentManager>().activeServiceId;
-                context.smartNavigate('/$pid/civic-project');
+                final manager = context.read<ParliamentManager>();
+                final slug = manager.activeSlug;
+                final lang = context.read<LanguageProvider>().appLanguageCode;
+                final term = manager.currentTerm;
+                context.smartNavigate('/$lang/$slug/$term/civic-project');
               },
               child: Container(
                 width: double.infinity,
@@ -264,7 +278,7 @@ class CivicProjectCard extends StatelessWidget {
           Theme(
             data: Theme.of(context).copyWith(primaryColor: primaryColor),
             child: CitizenPollWidget(
-              targetType: 'legislation', // 'legislation' dla spójności liczników
+              targetType: 'civic',
               targetId: data.id,
               itemData: data,
             ),

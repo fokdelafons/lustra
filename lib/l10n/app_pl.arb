@@ -206,6 +206,7 @@
   "tenureTooltip": "Ilość lat jest wartością przybliżoną, obliczoną na podstawie poniższych danych, bez brania pod uwagę przedwczesnego wygaśnięcia mandatu poselskiego.",
   "tenureTermItem": "{romanNumeral} kadencja Sejmu RP {duration}",
   "unknownTermDuration": "Nieznany okres",
+  "lustraClubLabel": "Klub Lustra",
   "noTermData": "Brak szczegółowych danych o kadencjach.",
   "plHistoricalDataDisclaimer": "Uwaga: Dane historyczne dla 1. i 2. kadencji Sejmu RP są niedostępne i nie są uwzględniane.",
   "personalDataSectionTitle": "Dane osobowe",

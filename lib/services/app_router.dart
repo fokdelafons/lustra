@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:lustra/models/mp.dart';
 import 'package:lustra/models/legislation.dart';
 import 'package:lustra/models/home_screen_data.dart';
+import 'package:lustra/models/parliament_source.dart';
 import 'package:lustra/services/parliament_manager.dart';
 import 'package:lustra/screens/home_screen.dart';
 import 'package:lustra/screens/login_screen.dart';
@@ -20,6 +21,7 @@ import 'package:lustra/screens/mp_details_screen.dart';
 import 'package:lustra/screens/legislation_details_screen.dart';
 import 'package:lustra/screens/civic_project_screen.dart';
 import 'package:lustra/screens/legislation_wrapper_screen.dart';
+import 'package:lustra/providers/language_provider.dart';
 
 final GoRouter router = GoRouter(
   initialLocation: '/',
@@ -74,19 +76,30 @@ final GoRouter router = GoRouter(
           final user = state.extra as User;
           return PostSocialLoginConsentScreen(user: user);
         }
-        // Fallback w razie błędu
         return const NewHomeScreen(child: HomeContent()); 
       },
     ),
 
-    // 1. POSŁOWIE (/pl/members i /pl/members/123)
+    // 1. POSŁOWIE (/:lang/:pid/:term/members)
     GoRoute(
-      path: '/:parliamentId/members',
-      // USUNIĘTO redirect - teraz zajmuje się tym ParliamentSourceGuard w builderze
+      path: '/:lang/:slug/:term/members',
+      redirect: (context, state) {
+        final slug = state.pathParameters['slug'];
+        if (ParliamentSource.getIdBySlug(slug) == null) {
+          return '/';
+        }
+        return null;
+      },
       builder: (context, state) {
-        final pid = state.pathParameters['parliamentId']!;
-        return ParliamentSourceGuard(
+        final lang = state.pathParameters['lang'];
+        final slug = state.pathParameters['slug'];
+        final term = state.pathParameters['term'];
+        final pid = ParliamentSource.getIdBySlug(slug)!;
+
+        return RouteContextGuard(
+          targetLang: lang,
           targetParliamentId: pid,
+          targetTerm: term,
           child: const MPScreen(),
         );
       },
@@ -94,15 +107,14 @@ final GoRouter router = GoRouter(
          GoRoute(
           path: ':mpId',
           builder: (context, state) {
-            final pid = state.pathParameters['parliamentId']!;
+            final slug = state.pathParameters['slug'];
             final mpId = state.pathParameters['mpId']!;
+            final pid = ParliamentSource.getIdBySlug(slug)!; 
             
             Widget child;
-            // A. Pełny obiekt MP przekazany w extra
             if (state.extra is MP) {
               child = MPDetailsScreen(mp: state.extra as MP);
             }
-            // B. Skrót z HomeScreen (konwersja)
             else if (state.extra is HomeScreenDeputy) {
                final homeDeputy = state.extra as HomeScreenDeputy;
                final mp = MP(
@@ -132,13 +144,11 @@ final GoRouter router = GoRouter(
                );
                child = MPDetailsScreen(mp: mp);
             }
-            // C. Wejście z linku (pobieranie po ID wewnątrz ekranu)
             else {
               child = MPDetailsScreen(mpId: mpId);
             }
 
-            // Owijamy w Guarda
-            return ParliamentSourceGuard(
+            return RouteContextGuard(
               targetParliamentId: pid,
               child: child,
             );
@@ -149,33 +159,44 @@ final GoRouter router = GoRouter(
 
   // 2. LEGISLACJA
     GoRoute(
-      path: '/:parliamentId/legislations',
-      builder: (context, state) {
-        final pid = state.pathParameters['parliamentId']!;
-        // Pobieramy typ z query params (?type=voted), domyślnie voted
-        final type = state.uri.queryParameters['list'] ?? 'voted';
+      path: '/:lang/:slug/:term/legislations',
+      redirect: (context, state) {
+        final slug = state.pathParameters['slug'];
+        if (ParliamentSource.getIdBySlug(slug) == null) {
+          return '/'; 
+        }
+        return null;
+      },
 
-        return ParliamentSourceGuard(
+      builder: (context, state) {
+        final lang = state.pathParameters['lang'];
+        final slug = state.pathParameters['slug'];
+        final term = state.pathParameters['term'];
+        final type = state.uri.queryParameters['list'] ?? 'voted';
+        final pid = ParliamentSource.getIdBySlug(slug)!;
+
+        return RouteContextGuard(
+          targetLang: lang,
           targetParliamentId: pid,
+          targetTerm: term,
           child: LegislationWrapperScreen(type: type),
         );
       },
       routes: [
-        // Szczegóły jako DZIECKO. URL: /legislations/123
         GoRoute(
           path: ':legislationId',
           builder: (context, state) {
-             final pid = state.pathParameters['parliamentId']!;
+             final slug = state.pathParameters['slug'];
+             final pid = ParliamentSource.getIdBySlug(slug)!;
              final legislationId = state.pathParameters['legislationId']!;
              Widget child;
              
              if (state.extra is Legislation) {
                 child = LegislationDetailsScreen(bill: state.extra as Legislation);
              } else if (state.extra is HomeScreenLegislationItem) {
-                // Konwersja skróconego obiektu (zachowujemy Twoją logikę)
                 final homeItem = state.extra as HomeScreenLegislationItem;
                 final legislation = Legislation(
-                  id: homeItem.id, title: homeItem.title, description: homeItem.summary ?? 'Brak opisu', 
+                  id: homeItem.id, title: homeItem.title, description: homeItem.summary ?? '', 
                   status: homeItem.status, date: homeItem.votingDate, processStartDate: homeItem.processStartDate, 
                   keyPoints: homeItem.keyPoints, likes: homeItem.likes ?? 0, dislikes: homeItem.dislikes ?? 0, 
                   popularity: homeItem.popularity, summaryGeneratedBy: homeItem.summaryGeneratedBy, 
@@ -188,7 +209,7 @@ final GoRouter router = GoRouter(
                 child = LegislationDetailsScreen(legislationId: legislationId);
              }
 
-             return ParliamentSourceGuard(
+             return RouteContextGuard(
                targetParliamentId: pid,
                child: child,
              );
@@ -196,12 +217,24 @@ final GoRouter router = GoRouter(
         ),
       ],
     ),
-        GoRoute(
-      path: '/:parliamentId/civic-project',
+GoRoute(
+      path: '/:lang/:slug/:term/civic-project',
+      redirect: (context, state) {
+        final slug = state.pathParameters['slug'];
+        if (ParliamentSource.getIdBySlug(slug) == null) {
+          return '/';
+        }
+        return null;
+      },
       builder: (context, state) {
-        final pid = state.pathParameters['parliamentId']!;
-        return ParliamentSourceGuard(
+        final lang = state.pathParameters['lang'];
+        final slug = state.pathParameters['slug'];
+        final term = state.pathParameters['term'];
+        final pid = ParliamentSource.getIdBySlug(slug)!;
+        return RouteContextGuard(
+          targetLang: lang,
           targetParliamentId: pid,
+          targetTerm: term,
           child: const CivicProjectScreen(),
         );
       },
@@ -219,44 +252,81 @@ extension NavigationExtensions on BuildContext {
   }
 }
 
-class ParliamentSourceGuard extends StatelessWidget {
+class RouteContextGuard extends StatelessWidget {
   final String targetParliamentId;
+  final String? targetLang;
+  final String? targetTerm;
   final Widget child;
 
-  const ParliamentSourceGuard({
+  const RouteContextGuard({
     super.key,
     required this.targetParliamentId,
+    this.targetLang,
+    this.targetTerm,
     required this.child,
   });
 
   @override
   Widget build(BuildContext context) {
-    final manager = context.watch<ParliamentManager>();
-    if (!manager.isReady) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    final pManager = context.watch<ParliamentManager>();
+    final lProvider = context.watch<LanguageProvider>();
+    if (!pManager.isReady) {
+      return Container(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        child: const Center(child: CircularProgressIndicator()),
+      );
     }
-    if (manager.isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    bool langMatch = true;
+    if (targetLang != null && lProvider.appLanguageCode != targetLang) {
+      langMatch = false;
     }
-    if (manager.activeServiceId == targetParliamentId) {
+    bool sourceMatch = pManager.activeServiceId == targetParliamentId;
+    bool termMatch = true;
+    int? parsedTerm;
+    if (targetTerm != null) {
+      parsedTerm = int.tryParse(targetTerm!);
+      if (sourceMatch && parsedTerm != null && pManager.currentTerm != parsedTerm) {
+        termMatch = false;
+      }
+    }
+
+    if (langMatch && sourceMatch && termMatch && !pManager.isLoading) {
       return child;
     }
-    Future.microtask(() {
-      if (manager.activeServiceId != targetParliamentId && !manager.isLoading) {
-         manager.changeSource(targetParliamentId);
+
+    _synchronize(context, pManager, lProvider, langMatch, sourceMatch, termMatch, parsedTerm);
+    
+    return Container(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: const Center(child: CircularProgressIndicator()),
+    );
+  }
+
+  void _synchronize(
+    BuildContext context,
+    ParliamentManager pManager,
+    LanguageProvider lProvider,
+    bool langMatch,
+    bool sourceMatch,
+    bool termMatch,
+    int? parsedTerm,
+  ) {
+    Future.microtask(() async {
+      if (!langMatch && targetLang != null) {
+        await lProvider.setLanguageByCode(targetLang!);
+        return;
+      }
+      if (!sourceMatch) {
+        if (!pManager.isLoading) {
+           await pManager.changeSource(targetParliamentId);
+        }
+        return;
+      }
+      if (!termMatch && parsedTerm != null) {
+        if (!pManager.isLoading) {
+          await pManager.changeTerm(parsedTerm);
+        }
       }
     });
-    return const Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text("Loading...", style: TextStyle(color: Colors.grey)),
-          ],
-        ),
-      ),
-    );
   }
 }

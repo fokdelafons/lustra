@@ -19,7 +19,7 @@ class ImportantVote {
       title: json['title'] as String? ?? 'Brak tytułu',
       link: json['legislationId'] as String? ?? json['link'] as String? ?? '',
       votingUrl: json['votingUrl'] as String?,
-      vote: json['deputyActualVote'] as String? ?? json['vote'] as String? ?? 'Brak danych',
+      vote: json['deputyActualVote'] as String? ?? json['vote'] as String? ?? '',
       votingStats: json['votingStats'] != null && json['votingStats'] is Map
           ? Map<String, dynamic>.from(json['votingStats'] as Map)
           : null,
@@ -81,7 +81,7 @@ class InterpellationPreview {
     // final sponsorshipType = json['sponsorshipType'] as String?;
     return InterpellationPreview(
       id: json['id'] as String? ?? '',
-      title: json['title'] as String? ?? 'Brak tytułu',
+      title: json['title'] as String? ?? '',
       sentDate: json['sentDate'] as String?,
       contentUrl: json['contentUrl'] as String?,
       replyFrom: json['replyfrom'] as String? ?? json['replyFrom'] as String?,

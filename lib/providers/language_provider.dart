@@ -65,6 +65,11 @@ class LanguageProvider with ChangeNotifier {
   bool isSupported(Locale locale) {
     return supportedLocales.any((sl) => sl.languageCode == locale.languageCode);
   }
+
+  Future<void> setLanguageByCode(String code) async {
+    await changeLanguage(Locale(code));
+  }
+
 Future<void> changeLanguage(Locale newLocale) async {
     if (!isSupported(newLocale)) {
       return;

@@ -16,6 +16,7 @@ import '../widgets/missing_data_widget.dart';
 import '../services/api_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:lustra/providers/translators.dart';
+import 'package:lustra/providers/language_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/link.dart';
 
@@ -450,7 +451,13 @@ Widget _buildCitizenPoll(BuildContext context) {
 void _shareLegislation() {
     // 1. Stwórz instancję serwisu.
     final shareService = ShareService();
-    final parliamentId = context.read<ParliamentManager>().activeServiceId;
+    final manager = context.read<ParliamentManager>();
+    final langProvider = context.read<LanguageProvider>();
+
+    final parliamentId = manager.activeServiceId;
+    final slug = manager.activeSlug;
+    final lang = langProvider.appLanguageCode;
+    final term = manager.currentTerm ?? 0;
 
     // 2. Zbierz dane ZANIM otworzysz bottom sheet.
     final l10n = AppLocalizations.of(context)!;
@@ -497,6 +504,9 @@ void _shareLegislation() {
                     l10n: l10n,
                     translatedStatus: status,
                     parliamentId: parliamentId!,
+                    slug: slug,
+                    lang: lang,
+                    term: term,
                     flagAssetPath: activeService.flagAssetPath,
                     parliamentName: activeService.name,
                     votingTitle: dynamicVotingTitle,
@@ -516,6 +526,9 @@ void _shareLegislation() {
                     l10n: l10n,
                     translatedStatus: status,
                     parliamentId: parliamentId!,
+                    slug: slug,
+                    lang: lang,
+                    term: term,
                     flagAssetPath: activeService.flagAssetPath,
                     parliamentName: activeService.name,
                     votingTitle: dynamicVotingTitle,
@@ -957,7 +970,6 @@ leading: Builder(
 
           if (_bill!.sponsor != null && _bill!.sponsor!['name'] != null)
             Builder(builder: (context) {
-              final parliamentId = context.read<ParliamentManager>().activeServiceId;
               final sponsorId = _bill!.sponsor!['id'];
               final sponsorName = _bill!.sponsor!['name'];
               final labelText = "${l10n.legislationSponsorLabel}: $sponsorName";
@@ -966,10 +978,17 @@ leading: Builder(
               if (sponsorId == null || sponsorId.isEmpty) {
                 return Text(labelText, style: textStyle);
               }
+              
+              final manager = context.read<ParliamentManager>();
+              final slug = manager.activeSlug;
+              final lang = context.read<LanguageProvider>().appLanguageCode;
+              final term = _bill!.term; 
 
               final compositeId = '${_bill!.term}_$sponsorId';
-              final internalPath = '/$parliamentId/members/$compositeId';
-              final fullWebUrl = Uri.parse(Uri.base.origin + internalPath);
+              final internalPath = '/$lang/$slug/$term/members/$compositeId';
+              final fullWebUrl = kIsWeb 
+                  ? Uri.parse(Uri.base.origin + internalPath)
+                  : Uri.parse('https://lustra.dev$internalPath');
 
               return Link(
                 uri: fullWebUrl,

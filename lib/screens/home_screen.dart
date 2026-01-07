@@ -272,6 +272,26 @@ class NewHomeScreen extends StatefulWidget {
 }
 
 class NewHomeScreenState extends State<NewHomeScreen> {
+  bool _marketingConsent = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkUserProfileAndHandleIfNeeded();
+      _loadMarketingConsent();
+    });
+  }
+
+  Future<void> _loadMarketingConsent() async {
+    final authService = context.read<AuthService>();
+    final data = await authService.getUserProfileDetails();
+    if (mounted && data != null) {
+      setState(() {
+        _marketingConsent = data['marketingConsent'] ?? false;
+      });
+    }
+  }
 
   void _onItemTapped(int index) {
     switch (index) {
@@ -287,14 +307,6 @@ class NewHomeScreenState extends State<NewHomeScreen> {
         context.smartNavigate('/future');
         break;
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkUserProfileAndHandleIfNeeded();
-    });
   }
 
   Future<void> _checkUserProfileAndHandleIfNeeded() async {
@@ -526,8 +538,43 @@ int _calculateSelectedIndex(BuildContext context) {
                           switch (value) {
                             case 'language': _showLanguageDialog(context); break;
                             case 'logout': authService.signOut(); break;
-                            case 'delete_account': 
-                               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Aby usunąć konto, użyj aplikacji mobilnej.")));
+                            case 'delete_account':
+                                bool proceed = false;
+                                final isEmailUser = user.providerData.any((p) => p.providerId == 'password');
+                                if (isEmailUser) {
+                                  final password = await _showPasswordDialog(context);
+                                  if (!context.mounted) return;
+                                  if (password != null && password.isNotEmpty) {
+                                    final reauthenticated = await authService.reauthenticateUser(password);
+                                    if (!context.mounted) return;
+                                    if (reauthenticated) {
+                                      proceed = true;
+                                    } else {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text(l10n.authErrorInvalidCredentials)),
+                                      );
+                                    }
+                                  }
+                                } else {
+                                  proceed = true;
+                                }
+                                
+                                if (!context.mounted) return;
+                                if (proceed) {
+                                  final deleteConfirmed = await _showFinalConfirmationDialog(context);
+                                  if (!context.mounted) return;
+                                  if (deleteConfirmed == true) {
+                                    try {
+                                      await authService.deleteAccount();
+                                      await authService.signOut();
+                                    } catch (e) {
+                                      if (!context.mounted) return;
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text(l10n.errorDeleteAccount)),
+                                      );
+                                    }
+                                  }
+                                }
                                break;
                           }
                         },
@@ -536,6 +583,36 @@ int _calculateSelectedIndex(BuildContext context) {
                             value: 'language',
                             child: Text(l10n.settingsChangeLanguage),
                           ),
+                          
+                          PopupMenuItem<String>(
+                            enabled: true,
+                            value: 'marketing_consent',
+                            child: StatefulBuilder(
+                              builder: (BuildContext context, StateSetter setState) {
+                                return SwitchListTile(
+                                  title: Text(AppLocalizations.of(context)!.lustraClubLabel, style: const TextStyle(fontSize: 14)),
+                                  value: _marketingConsent, 
+                                  activeColor: Theme.of(context).primaryColor,
+                                  onChanged: (bool value) async {
+                                    setState(() => _marketingConsent = value);
+                                    this.setState(() => _marketingConsent = value);
+                                    
+                                    final authService = context.read<AuthService>();
+                                    try {
+                                      await authService.updateUserNotificationPrefs({
+                                        'marketingConsent': value
+                                      });
+                                    } catch (e) {
+                                      developer.log('Błąd zapisu zgody: $e');
+                                    }
+                                  },
+                                  dense: true,
+                                  contentPadding: EdgeInsets.zero,
+                                );
+                              }
+                            ),
+                          ),
+
                           PopupMenuItem<String>(
                             value: 'delete_account',
                             child: Text(l10n.settingsDeleteAccount, style: TextStyle(color: Colors.red)),
@@ -616,12 +693,12 @@ class HomeContentState extends State<HomeContent> {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   bool _notificationsEnabled = false;
   String? _subscribedParliamentId;
+  bool _marketingConsent = false;
   final ShareService _shareService = ShareService();
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _searchWidgetKey = GlobalKey();
-  bool _isSearchExpanded = false;
   bool _isInitialScrollPerformed = false;
   HomeScreenData? _data;
   bool _isLoading = true;
@@ -648,24 +725,45 @@ class HomeContentState extends State<HomeContent> {
     _currentLanguageCode = Provider.of<LanguageProvider>(context, listen: false).appLanguageCode;
     _loadHomeScreenData();
     _loadNotificationPreference();
-    _searchFocusNode.addListener(_onSearchFocusChange);
   }
 
-  Future<void> _loadNotificationPreference() async {
+Future<void> _loadNotificationPreference() async {
+    final authService = context.read<AuthService>();
     final parliamentId = context.read<ParliamentManager>().activeServiceId;
     if (parliamentId == null) return;
 
-    final prefs = await SharedPreferences.getInstance();
-
+    // 1. Load from Server (Source of Truth)
+    final profileData = await authService.getUserProfileDetails();
+    
     if (!mounted) return;
 
-    final key = 'notifications_enabled_$parliamentId';
-    final subscribedId = prefs.getString('subscribed_parliament_id');
-    
-    setState(() {
-      _notificationsEnabled = prefs.getBool(key) ?? false;
-      _subscribedParliamentId = subscribedId;
-    });
+    if (profileData != null) {
+      setState(() {
+        _notificationsEnabled = profileData['notificationsEnabled'] ?? false;
+        _marketingConsent = profileData['marketingConsent'] ?? false;
+        // Opcjonalnie: sync z subscribed_parliament_id na podstawie danych z serwera
+        if (_notificationsEnabled) {
+             _subscribedParliamentId = profileData['notificationParliamentId'] ?? parliamentId;
+        } else {
+             _subscribedParliamentId = null;
+        }
+      });
+      
+      // Update local cache (SharedPreferences) - opcjonalne, dla spójności
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('notifications_enabled_$parliamentId', _notificationsEnabled);
+      
+    } else {
+       // Fallback to SharedPreferences if server fail or no profile
+       final prefs = await SharedPreferences.getInstance();
+       final key = 'notifications_enabled_$parliamentId';
+       final subscribedId = prefs.getString('subscribed_parliament_id');
+       setState(() {
+        _notificationsEnabled = prefs.getBool(key) ?? false;
+        _subscribedParliamentId = subscribedId;
+        _marketingConsent = false; // Domyślnie false w fallbacku
+      });
+    }
   }
 
   Future<void> _handleNotificationsToggle(bool isEnabled) async {
@@ -725,11 +823,6 @@ class HomeContentState extends State<HomeContent> {
     }
   }
 
-  void _onSearchFocusChange() {
-    setState(() {
-      _isSearchExpanded = _searchFocusNode.hasFocus;
-    });
-  }
 
   @override
   void didChangeDependencies() {
@@ -797,81 +890,48 @@ class HomeContentState extends State<HomeContent> {
   @override
   void dispose() {
     _searchController.dispose();
-    _searchFocusNode.removeListener(_onSearchFocusChange);
     _searchFocusNode.dispose();
     _scrollController.dispose();
     super.dispose();
   }
 
-  Widget _buildSearchWidget(BuildContext context) {
+Widget _buildSearchWidget(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+
+    void performSearch() {
+       if (_searchController.text.trim().isEmpty) return;
+       FocusScope.of(context).unfocus();
+       final manager = context.read<ParliamentManager>();
+       final slug = manager.activeSlug;
+       final lang = context.read<LanguageProvider>().appLanguageCode;
+       final term = manager.currentTerm;
+       context.smartNavigate('/$lang/$slug/$term/legislations?list=process', extra: {'searchQuery': _searchController.text.trim()});
+    }
+
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextField(
-              controller: _searchController,
-              focusNode: _searchFocusNode,
-              decoration: InputDecoration(
-                hintText: l10n.homeSearchHint,
-                suffixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                isDense: true,
-                fillColor: Colors.grey[200],
-              ),
+        child: TextField(
+          controller: _searchController,
+          focusNode: _searchFocusNode,
+          textInputAction: TextInputAction.search,
+          onSubmitted: (_) => performSearch(),
+          decoration: InputDecoration(
+            hintText: l10n.homeSearchHint,
+            suffixIcon: IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: performSearch,
             ),
-            AnimatedSize(
-              duration: const Duration(milliseconds: 250),
-              curve: Curves.easeInOut,
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 350),
-                opacity: (kIsWeb || _isSearchExpanded) ? 1.0 : 0.0,
-                child: !(kIsWeb || _isSearchExpanded)
-                    ? const SizedBox.shrink()
-                    : Padding(
-                        padding: const EdgeInsets.only(top: 12.0),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: ElevatedButton.icon(
-                                icon: const Icon(Icons.people_outline, size: 18),
-                                label: Text(l10n.homeSearchButtonDeputies),
-                                onPressed: () {
-                                  if (_searchController.text.trim().isEmpty) return;
-                                  FocusScope.of(context).unfocus();
-                                  final pid = context.read<ParliamentManager>().activeServiceId;
-                                  context.smartNavigate('/$pid/members', extra: {'searchQuery': _searchController.text.trim()});
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: ElevatedButton.icon(
-                                icon: const Icon(Icons.gavel_outlined, size: 18),
-                                label: Text(l10n.homeSearchButtonLegislations),
-                                onPressed: () {
-                                  if (_searchController.text.trim().isEmpty) return;
-                                  FocusScope.of(context).unfocus();
-                                  final pid = context.read<ParliamentManager>().activeServiceId;
-                                  context.smartNavigate('/$pid/legislations?list=process', extra: {'searchQuery': _searchController.text.trim()});
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-              ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide.none,
             ),
-          ],
+            filled: true,
+            isDense: true,
+            fillColor: Colors.grey[200],
+          ),
         ),
       ),
     );
@@ -1006,6 +1066,7 @@ class HomeContentState extends State<HomeContent> {
                       value: 'language',
                       child: Text(l10n.settingsChangeLanguage),
                     ),
+                    
                     PopupMenuItem<String>(
                       value: 'notifications_new_laws',
                       child: StatefulBuilder(
@@ -1013,6 +1074,7 @@ class HomeContentState extends State<HomeContent> {
                           final currentParliamentId = context.watch<ParliamentManager>().activeServiceId;
                           final isAnotherParliamentSubscribed = _subscribedParliamentId != null && _subscribedParliamentId != currentParliamentId;
                           final bool isSwitchEnabled = !isAnotherParliamentSubscribed;
+                          
                           return SwitchListTile(
                             title: Text(l10n.settingsNotificationsNewLaws),
                             subtitle: isAnotherParliamentSubscribed
@@ -1035,6 +1097,7 @@ class HomeContentState extends State<HomeContent> {
                         },
                       ),
                     ),
+
                     PopupMenuItem<String>(
                       enabled: false,
                       value: 'notifications_vote_results',
@@ -1046,6 +1109,34 @@ class HomeContentState extends State<HomeContent> {
                           const SizedBox(width: 16),
                           Icon(Icons.check_box_outline_blank, color: Theme.of(context).disabledColor),
                         ],
+                      ),
+                    ),
+                    PopupMenuItem<String>(
+                      enabled: true,
+                      value: 'marketing_consent',
+                      child: StatefulBuilder(
+                        builder: (BuildContext context, StateSetter setState) {
+                          return SwitchListTile(
+                            title: Text(AppLocalizations.of(context)!.lustraClubLabel, style: const TextStyle(fontSize: 14)), 
+                            value: _marketingConsent, 
+                            activeColor: Theme.of(context).primaryColor,
+                            onChanged: (bool value) async {
+                              setState(() => _marketingConsent = value); 
+                              this.setState(() => _marketingConsent = value); 
+                              
+                              final authService = context.read<AuthService>();
+                              try {
+                                await authService.updateUserNotificationPrefs({
+                                  'marketingConsent': value
+                                });
+                              } catch (e) {
+                                developer.log('Błąd zapisu zgody: $e');
+                              }
+                            },
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                          );
+                        }
                       ),
                     ),
                     PopupMenuItem<String>(
@@ -1194,7 +1285,10 @@ Widget _buildBodyContent(BuildContext context) {
 Widget _buildContentList(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final homeData = _data;
-    final pid = context.read<ParliamentManager>().activeServiceId;
+    final manager = context.read<ParliamentManager>();
+    final slug = manager.activeSlug;
+    final lang = context.read<LanguageProvider>().appLanguageCode;
+    final term = manager.currentTerm;
 
     if (homeData == null) {
       return const SizedBox.shrink();
@@ -1205,7 +1299,7 @@ Widget _buildContentList(BuildContext context) {
     if (homeData.popularVoted != null && homeData.popularVoted!.id.isNotEmpty) {
       sectionWidgets.add(buildClassicStyleCard(
         context, l10n.sectionPopularVotes, buildVotingContent(context, true, homeData.popularVoted),
-        Icons.how_to_vote, '/$pid/legislations?list=voted', l10n.actionSeeAll,
+        Icons.how_to_vote, '/$lang/$slug/$term/legislations?list=voted', l10n.actionSeeAll,
         legislationItem: homeData.popularVoted,
       ));
     }
@@ -1213,7 +1307,7 @@ Widget _buildContentList(BuildContext context) {
     if (homeData.upcomingVote != null && homeData.upcomingVote!.id.isNotEmpty) {
       sectionWidgets.add(buildClassicStyleCard(
         context, l10n.sectionUpcoming, buildVotingContent(context, false, homeData.upcomingVote),
-        Icons.upcoming, '/$pid/legislations?list=upcoming', l10n.actionSeeAll,
+        Icons.upcoming, '/$lang/$slug/$term/legislations?list=upcoming', l10n.actionSeeAll,
         legislationItem: homeData.upcomingVote,
       ));
     }
@@ -1221,7 +1315,7 @@ Widget _buildContentList(BuildContext context) {
     if (homeData.popularInProcess != null && homeData.popularInProcess!.id.isNotEmpty) {
       sectionWidgets.add(buildClassicStyleCard(
         context, l10n.sectionLegislationInProcess, buildLegislationContent(context, homeData.popularInProcess),
-        Icons.gavel, '/$pid/legislations?list=process', l10n.actionSeeAll,
+        Icons.gavel, '/$lang/$slug/$term/legislations?list=process', l10n.actionSeeAll,
         legislationItem: homeData.popularInProcess,
       ));
     }
@@ -1236,7 +1330,7 @@ Widget _buildContentList(BuildContext context) {
     if (homeData.topDeputies != null && homeData.topDeputies!.deputies.isNotEmpty) {
       sectionWidgets.add(buildRoundedShadowCard(
         context, l10n.sectionMpProfiles, buildDeputiesListContent(context, homeData.topDeputies!.deputies, _buildSingleDeputyItem),
-        Icons.people_outline, '/$pid/members', l10n.buttonAllMps,
+        Icons.people_outline, '/$lang/$slug/$term/members', l10n.buttonAllMps,
       ));
     }
     if (sectionWidgets.isEmpty) {
@@ -1359,8 +1453,11 @@ Widget buildClassicStyleCard(BuildContext context, String title, Widget content,
                         child: InkWell(
                           onTap: () {
                             if (legislationItem != null) {
-                              final parliamentId = context.read<ParliamentManager>().activeServiceId;
-                              context.smartNavigate('/$parliamentId/legislations/${legislationItem.id}', extra: legislationItem);
+                              final manager = context.read<ParliamentManager>();
+                              final slug = manager.activeSlug;
+                              final lang = context.read<LanguageProvider>().appLanguageCode;
+                              final term = manager.currentTerm;
+                              context.smartNavigate('/$lang/$slug/$term/legislations/${legislationItem.id}', extra: legislationItem);
                             }
                           },
                           child: Padding(
@@ -1387,7 +1484,13 @@ Widget buildClassicStyleCard(BuildContext context, String title, Widget content,
                           onTap: () {
                             if (legislationItem == null) return;
                             final shareService = _shareService;
-                            final parliamentId = context.read<ParliamentManager>().activeServiceId;
+                            final manager = context.read<ParliamentManager>();
+                            final langProvider = context.read<LanguageProvider>();
+
+                            final parliamentId = manager.activeServiceId;
+                            final slug = manager.activeSlug;
+                            final lang = langProvider.appLanguageCode;
+                            final term = manager.currentTerm ?? 0;
                             final activeService = context.read<ParliamentServiceInterface>();
                             final status = activeService.translateStatus(context, legislationItem.status);
                             showModalBottomSheet(
@@ -1403,7 +1506,7 @@ Widget buildClassicStyleCard(BuildContext context, String title, Widget content,
                                           Navigator.of(bottomSheetContext).pop();
                                           shareService.shareLegislation(
                                             context: context, legislation: legislationItem, imageSize: const Size(1080, 1080),
-                                            l10n: l10n, translatedStatus: status, parliamentId: parliamentId!,
+                                            l10n: l10n, translatedStatus: status, parliamentId: parliamentId!, slug: slug, lang: lang, term: term,
                                             flagAssetPath: activeService.flagAssetPath, parliamentName: activeService.name,
                                             votingTitle: l10n.votingResultsTitle,
                                           );
@@ -1416,7 +1519,7 @@ Widget buildClassicStyleCard(BuildContext context, String title, Widget content,
                                           Navigator.of(bottomSheetContext).pop();
                                           shareService.shareLegislation(
                                             context: context, legislation: legislationItem, imageSize: const Size(1080, 1920),
-                                            l10n: l10n, translatedStatus: status, parliamentId: parliamentId!,
+                                            l10n: l10n, translatedStatus: status, parliamentId: parliamentId!, slug: slug, lang: lang, term: term,
                                             flagAssetPath: activeService.flagAssetPath, parliamentName: activeService.name,
                                             votingTitle: l10n.votingResultsTitle,
                                           );
@@ -1762,9 +1865,12 @@ Widget buildClassicStyleCard(BuildContext context, String title, Widget content,
                     const SizedBox(height: 12),
                     ElevatedButton.icon(
                       onPressed: () {
-                        final parliamentId = context.read<ParliamentManager>().activeServiceId;
+                        final manager = context.read<ParliamentManager>();
+                        final slug = manager.activeSlug;
+                        final lang = context.read<LanguageProvider>().appLanguageCode;
+                        final term = manager.currentTerm;
                         final homeDeputy = deputyData; 
-                        context.smartNavigate('/$parliamentId/members/${homeDeputy.deputyId}', extra: homeDeputy);
+                        context.smartNavigate('/$lang/$slug/$term/members/${homeDeputy.deputyId}', extra: homeDeputy);
                       },
                       icon: const Icon(Icons.person_search, size: 16),
                       label: Text(l10n.buttonCheckProfile),

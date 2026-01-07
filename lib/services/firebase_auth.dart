@@ -206,4 +206,18 @@ Future<UserCredential> signInWithApple() async {
       return false;
     }
   }
+
+  Future<Map<String, dynamic>?> getUserProfileDetails() async {
+    if (_firebaseAuth.currentUser == null) return null;
+    try {
+      final result = await _apiService.callFunction('checkUserProfile');
+      if (result['exists'] == true && result['profile'] != null) {
+        return Map<String, dynamic>.from(result['profile']);
+      }
+      return null;
+    } catch (e) {
+      developer.log("Błąd pobierania detali profilu: $e", name: 'AuthService');
+      return null;
+    }
+  }
 }

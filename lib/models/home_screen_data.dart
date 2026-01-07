@@ -125,9 +125,9 @@ class HomeScreenLegislationItem {
     }
     return HomeScreenLegislationItem(
       id: json['id'] as String? ?? json['itemId'] as String? ?? '',
-      title: json['title'] as String? ?? 'Brak tytułu',
+      title: json['title'] as String? ?? '',
       summary: json['summary'] as String?,
-      status: json['status'] as String? ?? 'Nieznany',
+      status: json['status'] as String? ?? '',
       statusText: json['statusText'] as String?,
       keyPoints: _parseStringList(json['key_points']),
       popularity: json['popularity'] as int? ?? 0,
@@ -181,7 +181,7 @@ class HomeScreenDeputy {
   factory HomeScreenDeputy.fromJson(Map<String, dynamic> json) {
     return HomeScreenDeputy(
       deputyId: json['deputyId'] as String? ?? '',
-      fullName: json['fullName'] as String? ?? 'Brak imienia',
+      fullName: json['fullName'] as String? ?? '',
       imageUrl: json['imageUrl'] as String? ?? '',
       club: json['club'] as String? ?? 'N/A',
       district: json['district'] as String? ?? 'N/A',

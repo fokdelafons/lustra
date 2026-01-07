@@ -8,6 +8,7 @@ import 'uk_parliament_service.dart';
 import 'fr_parliament_service.dart';
 import 'de_parliament_service.dart';
 import 'package:flutter/widgets.dart';
+import '/models/parliament_source.dart';
 
 class ParliamentManager extends ChangeNotifier {
   static const String _lastSelectedSourceKey = 'last_selected_parliament_source_id';
@@ -40,6 +41,7 @@ class ParliamentManager extends ChangeNotifier {
   
   ParliamentServiceInterface get activeService => _activeService;
   String? get activeServiceId => _activeServiceId;
+  String get activeSlug => ParliamentSource.getSlugById(_activeServiceId);
   
   List<ParliamentServiceInterface> get availableServices => _serviceFactories.values.map((factory) => factory()).toList();
 
@@ -47,6 +49,26 @@ class ParliamentManager extends ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get isReady => _isReady;
   Object? get error => _error;
+
+  int? get currentTerm => _isReady ? _activeService.currentTerm : null;
+  List<int> get availableTerms => _isReady ? _activeService.availableTerms : [];
+
+  Future<void> changeTerm(int newTerm) async {
+    if (!_isReady) return;
+    if (_activeService.currentTerm == newTerm) return;
+
+    try {
+      _isLoading = true;
+      notifyListeners();
+      await _activeService.changeTerm(newTerm);
+    } catch (e) {
+      developer.log('Error: Błąd zmiany kadencji na $newTerm: $e', name: 'ParliamentManager');
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 
   ParliamentManager() {
     _initialize();
@@ -59,9 +81,7 @@ class ParliamentManager extends ChangeNotifier {
     if (lastSelectedId != null && _serviceFactories.containsKey(lastSelectedId)) {
       _activeServiceId = lastSelectedId;
     } else {
-      // Bezpieczne pobieranie locale (działa na Web i Mobile)
       final locale = WidgetsBinding.instance.platformDispatcher.locale;
-      // Tworzymy string np. "pl_PL"
       String deviceLocale = '${locale.languageCode}_${locale.countryCode}';
       
       String? mappedServiceId = _languageToServiceMap[deviceLocale];

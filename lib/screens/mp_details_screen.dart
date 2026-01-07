@@ -12,6 +12,7 @@ import 'package:go_router/go_router.dart';
 import '../services/parliament_manager.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/citizen_poll_widget.dart';
+import 'package:lustra/providers/language_provider.dart';
 import '../services/api_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:url_launcher/link.dart';
@@ -324,7 +325,12 @@ void _shareMPDetails() {
     final tenureText = tenureYears > 0 
       ? l10n.parliamentaryTenureSectionTitle(tenureYears) 
       : l10n.parliamentaryTenureNoData;
-    final parliamentId = context.read<ParliamentManager>().activeServiceId;
+    final manager = context.read<ParliamentManager>();
+    final langProvider = context.read<LanguageProvider>();
+    final parliamentId = manager.activeServiceId;
+    final slug = manager.activeSlug;
+    final lang = langProvider.appLanguageCode;
+    final term = manager.currentTerm ?? 0;
     showModalBottomSheet(
       context: context,
       builder: (bottomSheetContext) {
@@ -344,6 +350,9 @@ void _shareMPDetails() {
                     tenureText: tenureText,
                     recentVotings: _mpVotings,
                     parliamentId: parliamentId!,
+                    slug: slug,
+                    lang: lang,
+                    term: term,
                     flagAssetPath: activeService.flagAssetPath,
                     parliamentName: activeService.name,
                   );
@@ -362,6 +371,9 @@ void _shareMPDetails() {
                     tenureText: tenureText,
                     recentVotings: _mpVotings,
                     parliamentId: parliamentId!,
+                    slug: slug,
+                    lang: lang,
+                    term: term,
                     flagAssetPath: activeService.flagAssetPath,
                     parliamentName: activeService.name,
                   );
@@ -1095,10 +1107,16 @@ body: kIsWeb
                 Expanded(
                   child: Builder(
                     builder: (context) {
-                      final parliamentId = context.read<ParliamentManager>().activeServiceId;
+                      final manager = context.read<ParliamentManager>();
+                      final slug = manager.activeSlug;
+                      final lang = context.read<LanguageProvider>().appLanguageCode;
+                      final term = manager.currentTerm;
+
                       if (vote.link.isNotEmpty) {
-                         final internalPath = '/$parliamentId/legislations/${vote.link}';
-                         final fullWebUrl = Uri.parse(Uri.base.origin + internalPath);
+                         final internalPath = '/$lang/$slug/$term/legislations/${vote.link}';
+                         final fullWebUrl = kIsWeb 
+                             ? Uri.parse(Uri.base.origin + internalPath)
+                             : Uri.parse('https://lustra.dev$internalPath');
                          
                          return Link(
                            uri: fullWebUrl,

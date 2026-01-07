@@ -9,6 +9,7 @@
   import '../services/parliament_manager.dart';
   import 'package:flutter_gen/gen_l10n/app_localizations.dart';
   import '../providers/translators.dart';
+  import 'package:lustra/providers/language_provider.dart';
   import 'package:go_router/go_router.dart';
   import 'package:flutter/foundation.dart';
   import '../services/app_router.dart';
@@ -56,7 +57,7 @@
           l10n.categoryEnvironment, l10n.categoryCourtsAndLaw, l10n.categoryTransport, 
           l10n.categoryBenefits, l10n.categoryRealEstate, l10n.categoryMediaAndCulture,
           l10n.categoryLocalGovernment, l10n.categoryAgriculture, l10n.categoryPublicInvestments, 
-          l10n.categoryInformatization, l10n.categoryEconomy
+          l10n.categoryInformatization, l10n.categoryEconomy, l10n.categoryOther
         ];
     }
     }
@@ -668,8 +669,11 @@ return Column(
 
       return GestureDetector(
         onTap: () {
-          final parliamentId = context.read<ParliamentManager>().activeServiceId;
-          context.smartNavigate('/$parliamentId/legislations/${bill.id}?list=process', extra: bill);
+          final manager = context.read<ParliamentManager>();
+          final slug = manager.activeSlug;
+          final lang = context.read<LanguageProvider>().appLanguageCode;
+          final term = manager.currentTerm;
+          context.smartNavigate('/$lang/$slug/$term/legislations/${bill.id}?list=process', extra: bill);
         },
         child: Card(
           margin: const EdgeInsets.only(bottom: 12.0),
@@ -854,6 +858,23 @@ return Column(
                           style: TextStyle(color: Colors.grey[700], fontSize: 14, fontWeight: FontWeight.w500),
                         ),
                       ],
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Text(
+                          bill.id,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.grey[500],
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: 'monospace',
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ),
                     ),
                     Text(
                       l10n.seeDetailsLink,

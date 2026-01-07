@@ -57,6 +57,9 @@ class ShareService {
     required AppLocalizations l10n,
     required String translatedStatus,
     required String parliamentId,
+    required String slug,
+    required String lang,
+    required int term,
     required String flagAssetPath,
     required String parliamentName,
     required String votingTitle,
@@ -81,10 +84,10 @@ class ShareService {
         final xFile = XFile.fromData(
           imageBytes,
           mimeType: 'image/png',
-          name: 'ustawa.png',
+          name: 'bill.png',
         );
 
-        final deepLink = '$_baseDeepLinkUrl/$parliamentId/legislations/${legislation.id}';
+        final deepLink = '$_baseDeepLinkUrl/$lang/$slug/$term/legislations/${legislation.id}';
         
         // 1. Hashtagi
         final countryTag = _getParliamentHashtag(parliamentId);
@@ -131,6 +134,9 @@ class ShareService {
     required String tenureText,
     required List<ImportantVote> recentVotings,
     required String parliamentId,
+    required String slug,
+    required String lang,
+    required int term,
     required String flagAssetPath,
     required String parliamentName
   }) async {
@@ -152,10 +158,10 @@ class ShareService {
         final xFile = XFile.fromData(
           imageBytes,
           mimeType: 'image/png',
-          name: 'posel.png',
+          name: 'politician.png',
         );
 
-        final deepLink = '$_baseDeepLinkUrl/$parliamentId/members/${deputy.id}';
+        final deepLink = '$_baseDeepLinkUrl/$lang/$slug/$term/members/${deputy.id}';
         
         // 1. Hashtagi
         final countryTag = _getParliamentHashtag(parliamentId);

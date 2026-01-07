@@ -10,6 +10,7 @@ import '../services/parliament_service_interface.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../providers/translators.dart';
 import '../services/app_router.dart';
+import 'package:lustra/providers/language_provider.dart';
 import 'package:flutter/foundation.dart';
 
 class FutureLegislationScreen extends StatefulWidget {
@@ -53,7 +54,7 @@ class FutureLegislationScreenState extends State<FutureLegislationScreen> with A
        l10n.categoryEnvironment, l10n.categoryCourtsAndLaw, l10n.categoryTransport, 
        l10n.categoryBenefits, l10n.categoryRealEstate, l10n.categoryMediaAndCulture,
        l10n.categoryLocalGovernment, l10n.categoryAgriculture, l10n.categoryPublicInvestments, 
-       l10n.categoryInformatization, l10n.categoryEconomy
+       l10n.categoryInformatization, l10n.categoryEconomy, l10n.categoryOther
      ];
    }
   }
@@ -589,8 +590,11 @@ return Column(
 
     return GestureDetector(
       onTap: () {
-        final parliamentId = context.read<ParliamentManager>().activeServiceId;
-        context.smartNavigate('/$parliamentId/legislations/${bill.id}?list=upcoming', extra: bill);
+        final manager = context.read<ParliamentManager>();
+        final slug = manager.activeSlug;
+        final lang = context.read<LanguageProvider>().appLanguageCode;
+        final term = manager.currentTerm;
+        context.smartNavigate('/$lang/$slug/$term/legislations/${bill.id}?list=upcoming', extra: bill);
       },
       child: Card(
         margin: const EdgeInsets.only(bottom: 12.0),
@@ -756,6 +760,25 @@ return Column(
                       ),
                     ],
                   ),
+                  
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text(
+                        bill.id,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.grey[500],
+                          fontSize: 11,
+                          fontFamily: 'monospace',
+                          fontWeight: FontWeight.w500,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ),
+                  ),
+
                   Text(
                     l10n.seeDetailsLink,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
