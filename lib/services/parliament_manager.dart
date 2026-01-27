@@ -1,36 +1,40 @@
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:developer' as developer;
-import 'parliament_service_interface.dart';
-import 'pl_parliament_service.dart';
-import 'eu_parliament_service.dart';
-import 'us_parliament_service.dart';
-import 'uk_parliament_service.dart';
-import 'fr_parliament_service.dart';
-import 'de_parliament_service.dart';
+
 import 'package:flutter/widgets.dart';
-import '/models/parliament_source.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../models/parliament_source.dart';
+import 'countries/pl_parliament_service.dart';
+// import 'countries/eu_parliament_service.dart';
+import 'countries/us_parliament_service.dart';
+// import 'countries/uk_parliament_service.dart';
+// import 'countries/fr_parliament_service.dart';
+// import 'countries/de_parliament_service.dart';
+import 'parliament_service_interface.dart';
 
 class ParliamentManager extends ChangeNotifier {
   static const String _lastSelectedSourceKey = 'last_selected_parliament_source_id';
   SharedPreferences? _prefs;
   int _changeSourceOperationId = 0;
-
+  
+  // WAITING FOR v2.0
   final Map<String, ParliamentServiceInterface Function()> _serviceFactories = {
     'pl': () => PLParliamentService(),
-    'eu': () => EUParliamentService(),
+    // 'eu': () => EUParliamentService(),
     'us': () => USParliamentService(),
-    'uk': () => UKParliamentService(),
-    'de': () => DEParliamentService(),
-    'fr': () => FRParliamentService(),
+    // 'uk': () => UKParliamentService(),
+    // 'de': () => DEParliamentService(),
+    // 'fr': () => FRParliamentService(),
   };
 
-  final Map<String, String> _languageToServiceMap = {
-    'pl_PL': 'pl',
-    'en_GB': 'uk',
-    'en_US': 'us',
-    'de_DE': 'de',
-    'fr_FR': 'fr',
-  };
+  // WAITING FOR v2.0
+  // final Map<String, String> _languageToServiceMap = {
+  //   'pl_PL': 'pl',
+  //   'en_GB': 'uk',
+  //   'en_US': 'us',
+  //   'de_DE': 'de',
+  //   'fr_FR': 'fr',
+  // };
 
   String? _activeServiceId;
   late ParliamentServiceInterface _activeService;
@@ -42,8 +46,9 @@ class ParliamentManager extends ChangeNotifier {
   ParliamentServiceInterface get activeService => _activeService;
   String? get activeServiceId => _activeServiceId;
   String get activeSlug => ParliamentSource.getSlugById(_activeServiceId);
-  
-  List<ParliamentServiceInterface> get availableServices => _serviceFactories.values.map((factory) => factory()).toList();
+  // WAITING FOR v2.0
+  // List<ParliamentServiceInterface> get availableServices => _serviceFactories.values.map((factory) => factory()).toList();
+  List<ParliamentServiceInterface> get availableServices => ['us', 'pl'].map((id) => _serviceFactories[id]!()).toList();
 
   bool get isInitialized => _activeServiceId != null;
   bool get isLoading => _isLoading;
@@ -78,17 +83,32 @@ class ParliamentManager extends ChangeNotifier {
     _prefs = await SharedPreferences.getInstance();
     String? lastSelectedId = _prefs?.getString(_lastSelectedSourceKey);
 
-    if (lastSelectedId != null && _serviceFactories.containsKey(lastSelectedId)) {
+    // WAITING FOR v2.0
+    // if (lastSelectedId != null && _serviceFactories.containsKey(lastSelectedId)) {
+    //   _activeServiceId = lastSelectedId;
+    // } else {
+    //   final locale = WidgetsBinding.instance.platformDispatcher.locale;
+    //   String deviceLocale = '${locale.languageCode}_${locale.countryCode}';
+      
+    //   String? mappedServiceId = _languageToServiceMap[deviceLocale];
+    //   if (mappedServiceId != null && _serviceFactories.containsKey(mappedServiceId)) {
+    //     _activeServiceId = mappedServiceId;
+    //   } else {
+    //     _activeServiceId = _serviceFactories.keys.first;
+    //   }
+    // }
+
+    const allowedSources = ['pl', 'us'];
+    
+    if (lastSelectedId != null && allowedSources.contains(lastSelectedId)) {
       _activeServiceId = lastSelectedId;
     } else {
       final locale = WidgetsBinding.instance.platformDispatcher.locale;
-      String deviceLocale = '${locale.languageCode}_${locale.countryCode}';
-      
-      String? mappedServiceId = _languageToServiceMap[deviceLocale];
-      if (mappedServiceId != null && _serviceFactories.containsKey(mappedServiceId)) {
-        _activeServiceId = mappedServiceId;
+      // If language code is explicitly Polish, serve PL. Otherwise default to US (World).
+      if (locale.languageCode == 'pl') {
+        _activeServiceId = 'pl';
       } else {
-        _activeServiceId = _serviceFactories.keys.first;
+        _activeServiceId = 'us';
       }
     }
     

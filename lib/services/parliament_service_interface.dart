@@ -5,8 +5,8 @@ import '../models/mp.dart';
 import '../models/parliament_source.dart';
 
 class MPDetailItem {
-  final String label; // Będzie zawierać główną, w pełni sformatowaną treść
-  final String? value; // Opcjonalna, dodatkowa treść (np. "dawniej: ...")
+  final String label;
+  final String? value;
   final String? tooltip;
 
   MPDetailItem({required this.label, this.value, this.tooltip});
@@ -21,7 +21,7 @@ class MPDetailSection {
 
 class MPActivityTab {
   final String title;
-  final String type; // e.g., 'votings', 'interpellations', 'sponsorships'
+  final String type;
 
   MPActivityTab({required this.title, required this.type});
 }
@@ -84,7 +84,8 @@ abstract class ParliamentServiceInterface with ChangeNotifier {
 
   Future<HomeScreenData> getHomeScreenData(BuildContext context, {bool forceRefresh = false});
   Future<Map<String, dynamic>> getLegislations(BuildContext context, {int limit = 20, String? lastVisibleId, bool forceRefresh = false, String? searchQuery, String? status, List<String>? documentType, bool? active, String? category, String? sortBy, String? processStartDateAfter});
-  Future<Legislation?> getLegislationDetails(BuildContext context, String legislationId, {bool forceRefresh = false});
+  Future<Map<String, dynamic>> getCivicProjects(BuildContext context, {int limit = 20, String? lastVisibleId, bool forceRefresh = false, String? category, String? sortBy});
+  Future<Legislation?> getLegislationDetails(BuildContext context, String legislationId, {bool forceRefresh = false, String? documentType});
   Future<Map<String, dynamic>> getMPs(BuildContext context, {required int limit, String? lastVisibleId, bool forceRefresh = false, String? searchQuery, String? club, String? sortBy});
   Future<MP?> getMPDetails(BuildContext context, String mpId, {bool forceRefresh = false, String? dataType, Map<String, dynamic>? params});
   Future<MP?> getMPData(BuildContext context, String mpId, {bool forceRefresh = false, String? dataType, Map<String, dynamic>? params});

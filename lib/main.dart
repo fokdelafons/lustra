@@ -1,24 +1,28 @@
+import 'dart:developer' as developer;
+import 'firebase_options.dart';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
-import 'firebase_options.dart';
-import 'services/parliament_manager.dart';
-import 'services/firebase_auth.dart';
-import 'providers/language_provider.dart';
-import 'services/app_router.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
-import 'screens/force_update_screen.dart';
-import 'services/remote_config_service.dart';
-import 'services/parliament_service_interface.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
+
+import 'providers/user_provider.dart';
+import 'providers/language_provider.dart';
+import 'services/parliament_manager.dart';
+import 'services/firebase_auth.dart';
+import 'services/app_router.dart';
+import 'services/remote_config_service.dart';
+import 'services/parliament_service_interface.dart';
+import 'screens/force_update_screen.dart';
 import 'widgets/mobile_app_banner_wrapper.dart';
+import 'models/parliament_source.dart'; 
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -35,11 +39,11 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   await FirebaseAppCheck.instance.activate(
-    androidProvider: AndroidProvider.playIntegrity,
-    appleProvider: AppleProvider.appAttest,
-    // androidProvider: AndroidProvider.debug, // Opcje debug
-    // appleProvider: AppleProvider.debug,     
-    webProvider: ReCaptchaV3Provider('6Ld0ERYsAAAAAIJwDVGZPZaApFpmBUj0iunVizlr'),
+    providerAndroid: AndroidPlayIntegrityProvider(),
+    providerApple: AppleAppAttestProvider(),
+    // providerAndroid: AndroidDebugProvider(), // debug
+    // providerApple: AppleDebugProvider(),     // debug
+    providerWeb: ReCaptchaV3Provider('6Ld0ERYsAAAAAIJwDVGZPZaApFpmBUj0iunVizlr'),
   );
 
   if (!kIsWeb) {
@@ -72,6 +76,13 @@ void main() async {
 					create: (context) => context.read<AuthService>().authStateChanges,
 					initialData: null,
 				),
+                ChangeNotifierProxyProvider<User?, UserProvider>(
+                  create: (_) => UserProvider(),
+                  update: (context, firebaseUser, userProvider) {
+                    userProvider!.updateAuthStatus(firebaseUser);
+                    return userProvider;
+                  },
+                ),
 				ChangeNotifierProvider(create: (context) => ParliamentManager()),
 				ChangeNotifierProvider(create: (context) => LanguageProvider()),
         Provider<RemoteConfigService>.value(value: remoteConfigService),
@@ -94,16 +105,33 @@ void main() async {
 void _handleNotificationNavigation(Map<String, dynamic> data) {
   final String? filterTimestamp = data['filterTimestamp'];
   final String? parliamentId = data['parliamentId'];
+  final String? termStr = data['term'];
 
   if (filterTimestamp != null && parliamentId != null) {
+    final context = router.routerDelegate.navigatorKey.currentContext;
+    if (context == null) return;
+    final pManager = Provider.of<ParliamentManager>(context, listen: false);
+    final lang = Provider.of<LanguageProvider>(context, listen: false).appLanguageCode;
+    int? term;
+    if (termStr != null) {
+      term = int.tryParse(termStr);
+    } else if (pManager.activeServiceId == parliamentId) {
+      term = pManager.currentTerm;
+    }
+    if (term == null) {
+      developer.log("Błąd nawigacji: Brak parametru 'term' dla $parliamentId", name: "Notifications");
+      return;
+    }
+    final slug = ParliamentSource.getSlugById(parliamentId);
+    final location = '/$lang/$slug/$term/legislations?list=in-process';
     router.push(
-      '/$parliamentId/legislations/in-process',
+      location,
       extra: {
         'filterFromTimestamp': filterTimestamp,
         'parliamentId': parliamentId,
       },
     );
-    developer.log("Nawigacja do /legislations/in-process z extra: {parliamentId: $parliamentId}", name: "Notifications");
+    developer.log("Nawigacja do: $location", name: "Notifications");
   }
 }
 

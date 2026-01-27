@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:developer' as developer;
-import '../models/mp.dart';
+import '../../models/mp.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../models/parliament_source.dart';
-import '../services/parliament_manager.dart';
-import '../services/parliament_service_interface.dart';
+import '../../models/parliament_source.dart';
+import '../../services/parliament_manager.dart';
+import '../../services/parliament_service_interface.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lustra/providers/language_provider.dart';
 import 'package:flutter/foundation.dart';
-import '../services/app_router.dart';
+import '../../services/app_router.dart';
+
+// --- LEGACY CODE --- 
+// potential for some rework
 
 class MPScreen extends StatefulWidget {
   final String? deputyId;
@@ -65,10 +68,22 @@ class MPScreenState extends State<MPScreen> with AutomaticKeepAliveClientMixin {
     }
   }
 
-@override
+  Future<void> forceRefresh() async {
+    final activeService = Provider.of<ParliamentServiceInterface>(context, listen: false);
+    await activeService.clearCache();
+    _resetAndLoadData(forceRefresh: true);
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final activeService = context.watch<ParliamentServiceInterface>();
+    final routerState = GoRouterState.of(context);
+    final bool isDetailsView = routerState.pathParameters.containsKey('mpId');
+    final bool hasListMarker = routerState.uri.queryParameters.containsKey('mp');
+    if (isDetailsView && !hasListMarker) {
+      return;
+    }
 
     final extra = GoRouterState.of(context).extra;
     String? initialSearchQuery;
@@ -76,11 +91,16 @@ class MPScreenState extends State<MPScreen> with AutomaticKeepAliveClientMixin {
       initialSearchQuery = extra['searchQuery'] as String;
     }
 
-    if (_isFirstBuild || _lastSource?.id != activeService.source.id || _lastTerm != activeService.currentTerm) {
+    final bool sourceChanged = _lastSource?.id != activeService.source.id;
+    final bool termChanged = _lastTerm != activeService.currentTerm;
+    final bool hasData = _mps.isNotEmpty;
+
+    if (sourceChanged || termChanged || (_isFirstBuild && !hasData)) {
       developer.log(
-        'didChangeDependencies: Wykryto zmianę kontekstu. Nowe źródło: ${activeService.source.id}, kadencja: ${activeService.currentTerm}',
+        'RELOAD POSŁÓW: SourceChanged: $sourceChanged, TermChanged: $termChanged, NeedData: ${_isFirstBuild && !hasData}',
         name: 'MPScreen'
       );
+      
       _isFirstBuild = false;
       _lastSource = activeService.source;
       _lastTerm = activeService.currentTerm;
@@ -95,7 +115,7 @@ class MPScreenState extends State<MPScreen> with AutomaticKeepAliveClientMixin {
       
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          _resetAndLoadData(newSourceChanged: true, forceRefresh: false);
+          _resetAndLoadData(newSourceChanged: sourceChanged || termChanged, forceRefresh: false);
         }
       });
     }
@@ -253,11 +273,9 @@ Widget _buildFilterChips() {
       );
     }).toList();
 
-    // Responsywność: Na szerokich ekranach Wrap, na wąskich (mobilnych/tablet portret) Scroll Poziomy
     final bool isWideScreen = kIsWeb && MediaQuery.of(context).size.width > 900;
 
     if (isWideScreen) {
-      // NA SZEROKIM WEBIE: Wrap (wszystkie widoczne)
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         child: SizedBox(
@@ -270,7 +288,6 @@ Widget _buildFilterChips() {
         ),
       );
     } else {
-      // NA WĄSKIM WEBIE i MOBILE: Scroll poziomy
       return SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -280,29 +297,17 @@ Widget _buildFilterChips() {
   }
 
 @override
-Widget build(BuildContext context) {
+  Widget build(BuildContext context) {
   super.build(context);
   final l10n = AppLocalizations.of(context)!;
   final manager = Provider.of<ParliamentManager>(context);
-  final bool isWideScreen = kIsWeb && MediaQuery.of(context).size.width > 800;
+
   if (manager.isLoading || !manager.isInitialized) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.mpScreenTitle("")), 
-        backgroundColor: Theme.of(context).primaryColor,
-        foregroundColor: Colors.white,
-      ),
-      body: const Center(child: CircularProgressIndicator()),
-    );
+    return const Center(child: CircularProgressIndicator());
   }
+
   if (manager.error != null) {
-     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.mpScreenTitle("")),
-        backgroundColor: Theme.of(context).primaryColor,
-        foregroundColor: Colors.white,
-      ),
-      body: Center(
+     return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -314,69 +319,14 @@ Widget build(BuildContext context) {
             ),
           ],
         ),
-      ),
-    );
+      );
   }
+
   return ChangeNotifierProvider.value(
     value: manager.activeService,
     child: Consumer<ParliamentServiceInterface>(
       builder: (context, activeService, child) {
-return Scaffold(
-          appBar: AppBar(
-            title: Text(l10n.mpScreenTitle(activeService.name)),
-            backgroundColor: Theme.of(context).primaryColor,
-            foregroundColor: Colors.white,
-            leadingWidth: isWideScreen ? 140 : null,
-            leading: Builder(
-              builder: (context) {
-                void onNavigation() {
-                  if (context.canPop()) {
-                    context.pop();
-                  } else {
-                    context.go('/');
-                  }
-                }
-                if (isWideScreen) {
-                  return InkWell(
-                    onTap: onNavigation,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 16.0),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.arrow_back, color: Colors.white),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              l10n.actionBack,
-                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }
-
-                return IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  tooltip: l10n.actionBack,
-                  onPressed: onNavigation,
-                );
-              },
-            ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.refresh),
-                tooltip: l10n.refreshDataTooltip,
-                onPressed: (_isLoading || _isLoadingMore) ? null : () async {
-                await activeService.clearCache();
-                _resetAndLoadData(forceRefresh: true);
-              },
-              ),
-            ],
-          ),
-          body: Column(
+        return Column(
             children: [
               Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -457,7 +407,7 @@ return Scaffold(
                               items: [
                                 DropdownMenuItem<String>(
                                   value: 'deputies',
-                                  child: Text(l10n.allFilter), // senators representatives deputies add here rn hardcoded all
+                                  child: Text(l10n.allFilter), 
                                 ),
                               ],
                               onChanged: null,
@@ -503,8 +453,7 @@ return Scaffold(
                 child: _buildMPList(_mps),
               ),
             ],
-          ),
-        );
+          );
       },
     ),
   );
@@ -647,18 +596,23 @@ return Scaffold(
     final double cardOpacity = (mp.mandateCoverage == 'PARTIAL') ? 0.4 : 1.0;
     return Opacity(
       opacity: cardOpacity,
-      child: GestureDetector(
-        onTap: () {
-          final manager = context.read<ParliamentManager>();
-          final slug = manager.activeSlug;
-          final lang = context.read<LanguageProvider>().appLanguageCode;
-          final term = manager.currentTerm;
-          context.smartNavigate('/$lang/$slug/$term/members/${mp.id}', extra: mp);
-        },
-        child: Card(
-          margin: const EdgeInsets.only(bottom: 12.0),
-          elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: Card(
+        margin: const EdgeInsets.only(bottom: 12.0),
+        elevation: 2,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: const BorderSide(color: Colors.transparent),
+        ),
+        child: InkWell(
+          onTap: () {
+            final manager = context.read<ParliamentManager>();
+            final slug = manager.activeSlug;
+            final lang = context.read<LanguageProvider>().appLanguageCode;
+            final term = manager.currentTerm;
+            context.smartNavigate('/$lang/$slug/$term/members/${mp.id}?mp', extra: mp);
+          },
+          hoverColor: Theme.of(context).primaryColor.withValues(alpha: 0.04),
           child: Padding(
             padding: const EdgeInsets.all(12.0),
             child: Column(

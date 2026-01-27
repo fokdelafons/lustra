@@ -1,18 +1,18 @@
-import 'package:flutter/material.dart';
-import 'package:lustra/models/home_screen_data.dart';
-import 'package:lustra/models/mp.dart'; 
-import 'package:lustra/widgets/shareable_image_widget.dart';
-import 'package:lustra/services/image_renderer.dart';
-import 'package:share_plus/share_plus.dart';
 import 'dart:developer' as developer;
+
+import 'package:share_plus/share_plus.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:flutter/material.dart';
+
+import '../models/home_screen_data.dart';
+import '../models/mp.dart'; 
+import '../widgets/shareable_image_widget.dart';
+import '../services/image_renderer.dart';
 
 class ShareService {
   static const String _baseDeepLinkUrl = 'https://lustra.news';
-
-  // --- METODY POMOCNICZE (HASHTAGI) ---
   
   String _getParliamentHashtag(String parliamentId) {
     switch (parliamentId) {
@@ -40,15 +40,12 @@ class ShareService {
       final url = rc.getString('kickstarter_campaign_url');
       if (url.isEmpty) return null;
 
-      // Pamiętaj o dodaniu "supportUsLabel" do plików ARB!
       return '${l10n.crowdfundingLabel} $url'; 
     } catch (e) {
       developer.log('Błąd odczytu Remote Config w ShareService: $e');
       return null;
     }
   }
-
-  // --- GŁÓWNE METODY ---
 
   Future<void> shareLegislation({
     required BuildContext context,
@@ -87,22 +84,19 @@ class ShareService {
           name: 'bill.png',
         );
 
-        final deepLink = '$_baseDeepLinkUrl/$lang/$slug/$term/legislations/${legislation.id}';
+        final deepLink = '$_baseDeepLinkUrl/$lang/$slug/$term/legislations/${legislation.id}/';
         
-        // 1. Hashtagi
         final countryTag = _getParliamentHashtag(parliamentId);
         final translatedLawHash = _sanitizeHashtag(l10n.hashtagLaw);
         final catTag = legislation.category != null && legislation.category!.isNotEmpty 
             ? _sanitizeHashtag(legislation.category!) 
             : translatedLawHash;
-        // Unikamy duplikatu
+
         final typeTag = catTag == translatedLawHash ? '' : ' $translatedLawHash';
         final hashtags = '$countryTag $catTag$typeTag #Lustra';
 
-        // 2. Promo
         final promo = await _getPromoText(l10n);
 
-        // 3. Budowanie tekstu
         final sb = StringBuffer();
         sb.write(l10n.shareLegislationText(deepLink));
         sb.write('\n\n$hashtags');
@@ -119,7 +113,7 @@ class ShareService {
           );
         }
 
-        await Share.shareXFiles([xFile], text: fullShareText);
+        await SharePlus.instance.share(ShareParams(files: [xFile], text: fullShareText));
       }
     } catch (e) {
       developer.log('Błąd podczas renderowania i udostępniania legislacji: $e');
@@ -161,20 +155,17 @@ class ShareService {
           name: 'politician.png',
         );
 
-        final deepLink = '$_baseDeepLinkUrl/$lang/$slug/$term/members/${deputy.id}';
+        final deepLink = '$_baseDeepLinkUrl/$lang/$slug/$term/members/${deputy.id}/';
         
-        // 1. Hashtagi
         final countryTag = _getParliamentHashtag(parliamentId);
         final translatedPoliticianHash = _sanitizeHashtag(l10n.hashtagPolitician);
         final partyTag = deputy.club.isNotEmpty ? _sanitizeHashtag(deputy.club) : translatedPoliticianHash;
-        // Unikamy duplikatu
+
         final typeTag = partyTag == translatedPoliticianHash ? '' : '$translatedPoliticianHash ';
         final hashtags = '$typeTag$countryTag $partyTag #Lustra';
 
-        // 2. Promo
         final promo = await _getPromoText(l10n);
 
-        // 3. Budowanie tekstu
         final sb = StringBuffer();
         sb.write(l10n.shareDeputyText(deepLink));
         sb.write('\n\n$hashtags');
@@ -191,7 +182,7 @@ class ShareService {
           );
         }
         
-        await Share.shareXFiles([xFile], text: fullShareText);
+        await SharePlus.instance.share(ShareParams(files: [xFile], text: fullShareText));
       }
     } catch (e) {
       developer.log('Błąd podczas renderowania i udostępniania posła: $e');

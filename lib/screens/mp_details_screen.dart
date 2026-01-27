@@ -1,21 +1,26 @@
+import 'dart:developer' as developer;
+
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:cloud_functions/cloud_functions.dart';
-import '../services/parliament_service_interface.dart';
-import '../models/mp.dart';
-import 'dart:developer' as developer;
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import '../services/share_service.dart';
 import 'package:go_router/go_router.dart';
-import '../services/parliament_manager.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../widgets/citizen_poll_widget.dart';
 import 'package:lustra/providers/language_provider.dart';
-import '../services/api_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:url_launcher/link.dart';
+
+import '../models/mp.dart';
+import '../services/parliament_service_interface.dart';
+import '../services/share_service.dart';
+import '../services/parliament_manager.dart';
+import '../widgets/details_app_bar.dart';
+import '../widgets/error_report_dialog.dart';
+import '../widgets/citizen_poll_widget.dart';
+
+// --- LEGACY CODE --- 
+// potential for some rework
 
 class MPDetailsScreen extends StatefulWidget {
   final MP? mp;
@@ -34,7 +39,6 @@ class MPDetailsScreenState extends State<MPDetailsScreen> with SingleTickerProvi
   MP? _mp;
   bool _isInitialized = false;
   bool _isLoading = true;
-  bool _isFetchingDetails = false;
   String? _error;
   late TabController _tabController;
   List<ImportantVote> _mpVotings = [];
@@ -57,18 +61,20 @@ class MPDetailsScreenState extends State<MPDetailsScreen> with SingleTickerProvi
   bool _isLoadingMoreInterpellations = false;
 
 @override
-void initState() {
-  super.initState();
-  _tabController = TabController(length: 2, vsync: this);
-  if (widget.mp != null) {
-    _mp = widget.mp;
-    _isLoading = false;
-  } else if (widget.mpId != null) {
-     WidgetsBinding.instance.addPostFrameCallback((_) {
-        _fetchMpDetails();
-     });
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    if (widget.mp != null) {
+      _mp = widget.mp;
+      _isLoading = false;
+      } else if (widget.mpId != null) {
+       _mp = MP.empty().copyWith(id: widget.mpId!);
+       _isLoading = true; 
+       WidgetsBinding.instance.addPostFrameCallback((_) {
+          _fetchVotings(isRefresh: true, forceRefresh: false);
+       });
+    }
   }
-}
 
 @override
 void didChangeDependencies() {
@@ -86,9 +92,6 @@ void _initializeScreenState() {
   _tabController.removeListener(_onTabChanged);
   _tabController.addListener(_onTabChanged);
   _fetchVotings(isRefresh: false, forceRefresh: false);
-  if (_mp!.birthDate.isEmpty) {
-    _fetchMpDetails(isBackgroundFetch: true);
-  }
 }
 void _onTabChanged() {
   final activeService = Provider.of<ParliamentServiceInterface>(context, listen: false);
@@ -114,57 +117,14 @@ void didUpdateWidget(MPDetailsScreen oldWidget) {
     _error = null;
     if (widget.mp != null) {
        _isLoading = false;
-    } else if (widget.mpId != null) {
-      _fetchMpDetails();
+      } else if (widget.mpId != null) {
+      _mp = MP.empty().copyWith(id: widget.mpId!);
+      _isLoading = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+         _fetchVotings(isRefresh: true);
+      });
     }
     setState(() {});
-  }
-}
-
-Future<void> _fetchMpDetails({bool isBackgroundFetch = false}) async {
-  setState(() {
-    if (!isBackgroundFetch) {
-      _isLoading = true;
-    }
-    _isFetchingDetails = true;
-  });
-
-  try {
-    final activeService = Provider.of<ParliamentServiceInterface>(context, listen: false);
-    final mpIdToFetch = widget.mpId ?? _mp!.id;
-    final fetchedMp = await activeService.getMPDetails(context, mpIdToFetch);
-
-    if (mounted) {
-      if (fetchedMp != null) {
-        setState(() {
-          _mp = fetchedMp;
-        });
-        if (!isBackgroundFetch) {
-          _initializeScreenState();
-        }
-      } else {
-        if (!isBackgroundFetch) {
-          setState(() {
-            _error = "error";
-          });
-        }
-      }
-      setState(() {
-        _isLoading = false;
-        _isFetchingDetails = false;
-      });
-    }
-  } catch (e) {
-    developer.log('Failed to fetch MP details: $e');
-    if (mounted) {
-      setState(() {
-        if (!isBackgroundFetch) {
-          _error = "error";
-        }
-        _isLoading = false;
-        _isFetchingDetails = false;
-      });
-    }
   }
 }
 
@@ -209,16 +169,12 @@ Future<void> _fetchMpDetails({bool isBackgroundFetch = false}) async {
         developer.log('MPDetailsScreen: _fetchVotings - Service returned. Votings count: ${fetchedVotings.length}, serverHasMore: $serverHasMore, serverLastVoteId: $serverLastVoteId');
         
         setState(() {
-          _mp = _mp!.copyWith(
-            sponsoredBillsCount: tempMPWithVotings.sponsoredBillsCount,
-            cosponsoredBillsCount: tempMPWithVotings.cosponsoredBillsCount,
-            interpellationsCount: tempMPWithVotings.interpellationsCount,
-          );
-
+          _mp = tempMPWithVotings;
           _mpVotings.addAll(fetchedVotings);
           _votingsLoaded = true;
           _lastVoteId = serverLastVoteId; 
           _hasMoreVotings = serverHasMore;
+          if (_isLoading) _isLoading = false;
         });
       }
     } catch (e) {
@@ -258,21 +214,18 @@ Future<void> _fetchMpDetails({bool isBackgroundFetch = false}) async {
     try {
       final activeService = Provider.of<ParliamentServiceInterface>(context, listen: false);
       
-      // --- KLUCZOWA POPRAWKA: DYNAMICZNE OKREŚLANIE TYPU DANYCH ---
       final tabs = activeService.getMPActivityTabs(context);
       if (tabs.length < 2) {
-        // Jeśli serwis nie definiuje drugiej zakładki, nic nie rób.
         setState(() => _isLoadingInterpellations = false);
         return;
       }
       final String dataTypeForTab = tabs[1].type;
-      // --- KONIEC POPRAWKI ---
 
       developer.log('MPDetailsScreen: _fetchInterpellations - Calling service for ID: ${_mp!.id}, dataType: $dataTypeForTab');
       final tempMPWithInterpellations = await activeService.getMPData(
         context, 
         _mp!.id, 
-        dataType: dataTypeForTab, // Użycie dynamicznego typu
+        dataType: dataTypeForTab, // dynamic
         forceRefresh: forceRefresh,
         params: {
           'limit': isRefresh ? _initialInterpellationsLimit : _moreInterpellationsLimit,
@@ -386,108 +339,15 @@ void _shareMPDetails() {
     );
   }
 
-  void _showReportErrorDialog() {
-    final TextEditingController reportController = TextEditingController();
-    final formKey = GlobalKey<FormState>();
-    final mainScreenContext = context;
-    bool isSending = false;
-    showDialog(
-      context: mainScreenContext,
-      barrierDismissible: false,
-      builder: (dialogContext) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              title: Text(AppLocalizations.of(mainScreenContext)!.reportErrorButton),
-              content: Form(
-                key: formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (!isSending) ...[
-                      Text(AppLocalizations.of(mainScreenContext)!.reportErrorDescription),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: reportController,
-                        maxLines: 4,
-                        maxLength: 400,
-                        decoration: InputDecoration(
-                          hintText: AppLocalizations.of(mainScreenContext)!.reportErrorHint,
-                          border: const OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return AppLocalizations.of(mainScreenContext)!.reportErrorValidationEmpty;
-                          }
-                          return null;
-                        },
-                      ),
-                    ] else ...[
-                      const SizedBox(
-                        height: 100,
-                        child: Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: isSending ? null : () => Navigator.of(dialogContext).pop(),
-                  child: Text(AppLocalizations.of(mainScreenContext)!.actionCancel),
-                ),
-                if (!isSending)
-                  ElevatedButton(
-                    onPressed: () async {
-                      if (!(formKey.currentState?.validate() ?? false)) {
-                        return;
-                      }
-                      setDialogState(() {
-                        isSending = true;
-                      });
-                      final l10n = AppLocalizations.of(mainScreenContext)!;
-                      final navigator = Navigator.of(dialogContext);
-                      final messenger = ScaffoldMessenger.of(mainScreenContext);
-                      final parliamentManager = Provider.of<ParliamentManager>(mainScreenContext, listen: false);
-
-                      try {
-                        final apiService = ApiService();
-                        await apiService.callFunction(
-                          'reportError',
-                          params: {
-                            'targetId': _mp!.id,
-                            'targetType': 'deputy',
-                            'message': reportController.text.trim(),
-                            'source': parliamentManager.activeServiceId,
-                          },
-                        );
-                        if (navigator.context.mounted) navigator.pop();
-                        messenger.showSnackBar(
-                          SnackBar(content: Text(l10n.reportErrorSuccess), backgroundColor: Colors.green),
-                        );
-                      } on FirebaseFunctionsException catch (e) {
-                        if (navigator.context.mounted) navigator.pop();
-                        final errorMessage = e.message ?? l10n.errorFailedToLoadData;
-                        messenger.showSnackBar(
-                          SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
-                        );
-                      }
-                    },
-                    child: Text(AppLocalizations.of(mainScreenContext)!.actionSend),
-                  ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
   void _reportError() {
     if (FirebaseAuth.instance.currentUser != null) {
-      _showReportErrorDialog();
+      final manager = Provider.of<ParliamentManager>(context, listen: false);
+      showErrorReportDialog(
+        context: context,
+        targetId: _mp!.id,
+        targetType: 'deputy',
+        sourceId: manager.activeServiceId!,
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(AppLocalizations.of(context)!.mustBeLoggedInToReport)),
@@ -502,20 +362,13 @@ Widget build(BuildContext context) {
   final manager = Provider.of<ParliamentManager>(context);
   if (manager.isLoading || !manager.isInitialized) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: theme.primaryColor,
-        foregroundColor: Colors.white,
-      ),
+      appBar: DetailsAppBar(title: '', onShare: null),
       body: const Center(child: CircularProgressIndicator()),
     );
   }
   if (manager.error != null) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.errorFailedToLoadData),
-        backgroundColor: theme.primaryColor,
-        foregroundColor: Colors.white,
-      ),
+      appBar: DetailsAppBar(title: l10n.errorFailedToLoadData, onShare: null),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -536,20 +389,13 @@ Widget build(BuildContext context) {
   }
   if (_isLoading) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: theme.primaryColor,
-        foregroundColor: Colors.white,
-      ),
+      appBar: DetailsAppBar(title: '', onShare: null),
       body: const Center(child: CircularProgressIndicator()),
     );
   }
   if (_error != null) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.errorFailedToLoadData),
-        backgroundColor: theme.primaryColor,
-        foregroundColor: Colors.white,
-      ),
+      appBar: DetailsAppBar(title: l10n.errorFailedToLoadData, onShare: null),
       body: Center(
           child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -561,86 +407,14 @@ Widget build(BuildContext context) {
   final TextStyle? sectionTitleStyle = textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600);
   final TextStyle? subSectionTitleStyle = textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600);
   final displayMP = _mp!;
-final bool isWideScreen = kIsWeb && MediaQuery.of(context).size.width > 800;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.mpDetailsScreenTitle(displayMP.firstName, displayMP.lastName)),
-        backgroundColor: theme.primaryColor,
-        foregroundColor: Colors.white,
-        
-        leadingWidth: isWideScreen ? 140 : null,
-leading: Builder(
-          builder: (context) {
-            final bool showBack;
-            if (kIsWeb) {
-               showBack = widget.mp != null;
-            } else {
-               showBack = context.canPop();
-            }
-
-            void onNavigation() {
-              if (showBack) {
-                context.pop();
-              } else {
-                context.go('/');
-              }
-            }
-
-            if (isWideScreen) {
-              return InkWell(
-                onTap: onNavigation,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 16.0),
-                  child: Row(
-                    children: [
-                      Icon(showBack ? Icons.arrow_back : Icons.home, color: Colors.white),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          showBack ? l10n.actionBack : l10n.bottomNavHome,
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }
-
-            return IconButton(
-              icon: Icon(showBack ? Icons.arrow_back : Icons.home),
-              tooltip: showBack ? l10n.actionBack : l10n.bottomNavHome,
-              onPressed: onNavigation,
-            );
-          },
-        ),
-
-        // --- PRAWA STRONA (Udostępnij) ---
-        actions: [
-          if (isWideScreen)
-            TextButton(
-              onPressed: (_isFetchingDetails || _isLoadingVotings) ? null : _shareMPDetails,
-              child: Row(
-                children: [
-                  Text(l10n.shareAction, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                  const SizedBox(width: 8),
-                  const Icon(Icons.share, color: Colors.white),
-                ],
-              ),
-            )
-          else
-            IconButton(
-              icon: const Icon(Icons.share),
-              tooltip: l10n.shareProfileTooltip,
-              onPressed: (_isFetchingDetails || _isLoadingVotings) ? null : _shareMPDetails,
-            ),
-          const SizedBox(width: 8),
-        ],
+return Scaffold(
+      appBar: DetailsAppBar(
+        title: l10n.mpDetailsScreenTitle(displayMP.firstName, displayMP.lastName),
+        onShare: _shareMPDetails,
+        isShareEnabled: !(_isLoadingVotings),
       ),
-    // --- FIX WEB: Kartka na środku ---
-body: kIsWeb
+      body: kIsWeb
         ? SingleChildScrollView(
             child: Center(
               child: ConstrainedBox(
@@ -659,8 +433,9 @@ body: kIsWeb
           )
         : SingleChildScrollView(
             child: _buildContent(theme, textTheme, sectionTitleStyle, subSectionTitleStyle),
-          ),);
-}
+          ),
+    );
+  }
 
   Widget _buildContent(ThemeData theme, TextTheme textTheme, TextStyle? sectionTitleStyle, TextStyle? subSectionTitleStyle) {
     final l10n = AppLocalizations.of(context)!;
@@ -808,7 +583,7 @@ body: kIsWeb
               const SizedBox(height: 4),
               ...headerDetails.map((detail) {
                 Widget itemWidget;
-                if (detail.value != null) { // Specjalna obsługa dla Klubu z "dawniej"
+                if (detail.value != null) {
                   itemWidget = RichText(
                     text: TextSpan(
                       style: textStyle,
@@ -818,7 +593,7 @@ body: kIsWeb
                       ],
                     ),
                   );
-                } else { // Standardowe wyświetlanie dla reszty
+                } else {
                   itemWidget = Text(detail.label, style: textStyle);
                 }
                 return Padding(

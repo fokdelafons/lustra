@@ -3,8 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import '../services/payment_service.dart';
-import '../services/remote_config_service.dart';
+import '../../services/payment_service.dart';
+import '../../services/remote_config_service.dart';
 
 class SupportProjectScreen extends StatefulWidget {
   const SupportProjectScreen({super.key});

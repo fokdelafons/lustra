@@ -36,7 +36,10 @@ class AuthService {
   }
 
   Future<void> signUpWithEmailAndPassword({ required String email, required String password, }) async {
-    await _firebaseAuth.createUserWithEmailAndPassword(email: email, password: password);
+    UserCredential userCredential = await _firebaseAuth.createUserWithEmailAndPassword(email: email, password: password);
+    if (userCredential.user != null && !userCredential.user!.emailVerified) {
+      await userCredential.user!.sendEmailVerification();
+    }
   }
 
   Future<void> sendPasswordResetEmail({required String email}) async {
@@ -218,6 +221,17 @@ Future<UserCredential> signInWithApple() async {
     } catch (e) {
       developer.log("Błąd pobierania detali profilu: $e", name: 'AuthService');
       return null;
+    }
+  }
+  Future<bool> checkEmailVerified() async {
+    await _firebaseAuth.currentUser?.reload(); 
+    return _firebaseAuth.currentUser?.emailVerified ?? false;
+  }
+
+  Future<void> sendVerificationEmail() async {
+    final user = _firebaseAuth.currentUser;
+    if (user != null && !user.emailVerified) {
+      await user.sendEmailVerification();
     }
   }
 }

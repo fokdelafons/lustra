@@ -6,12 +6,15 @@ import '../models/home_screen_data.dart';
 import '../models/mp.dart';
 import '../services/voting_service.dart';
 import '../services/parliament_service_interface.dart';
+import '../services/parliament_manager.dart';
 import '../screens/login_screen.dart';
 import 'dart:developer' as developer;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../models/legislation.dart';
 import '../services/api_service.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:lustra/widgets/verification_guard.dart';
+import 'package:lustra/providers/user_provider.dart';
 
 class CitizenPollWidget extends StatefulWidget {
   final String targetType;
@@ -35,6 +38,7 @@ class CitizenPollWidget extends StatefulWidget {
 
 class _CitizenPollWidgetState extends State<CitizenPollWidget> {
   final VotingService _votingService = VotingService();
+  bool _isVoteProcessing = false;
 
   bool _hasVotedLocally = false;
   Map<String, int>? _pollCounters;
@@ -46,81 +50,95 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
     _initializeVoteStatus();
   }
 
+  Map<String, int> _extractCountersFromItemData() {
+    int likes = 0;
+    int dislikes = 0;
+    int popularity = 0;
+
+    if (widget.itemData is HomeScreenLegislationItem) {
+      likes = widget.itemData.likes ?? 0;
+      dislikes = widget.itemData.dislikes ?? 0;
+      popularity = widget.itemData.popularity;
+    } else if (widget.itemData is Legislation) {
+      likes = widget.itemData.likes ?? 0;
+      dislikes = widget.itemData.dislikes ?? 0;
+      popularity = widget.itemData.popularity ?? 0;
+    } else if (widget.itemData is MP) {
+      likes = widget.itemData.likes ?? 0;
+      dislikes = widget.itemData.dislikes ?? 0;
+      popularity = widget.itemData.popularity ?? 0;
+    }
+    return {'likes': likes, 'dislikes': dislikes, 'popularity': popularity};
+  }
+
   Future<void> _initializeVoteStatus() async {
     if (widget.targetId.isEmpty || widget.targetId == 'unknown') {
-      if (mounted) {
-        setState(() { _isLoading = false; });
-      }
+      if (mounted) setState(() => _isLoading = false);
       return;
     }
 
-    bool hasVoted = await _votingService.hasVotedLocally(widget.targetType, widget.targetId);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final parliamentManager = Provider.of<ParliamentManager>(context, listen: false);
     
+    final countryPrefix = parliamentManager.activeServiceId ?? 'unknown';
+    
+    final voteKey = '${countryPrefix}_${widget.targetType}_${widget.targetId}';
+    final bool hasVotedInProfile = userProvider.hasVoted(voteKey);
+
+    final hasVotedOnDevice = await _votingService.hasVotedLocally(widget.targetType, widget.targetId);
+    
+    final bool finalHasVoted = hasVotedInProfile || hasVotedOnDevice;
+
+    final persistedCounters = await _votingService.getOptimisticCounters(widget.targetType, widget.targetId);
+
     if (mounted) {
-      _votingService.getOptimisticCounters(widget.targetType, widget.targetId).then((persistedCounters) {
-        if (mounted) {
-          setState(() {
-            if (persistedCounters != null) {
-              _pollCounters = persistedCounters.cast<String, int>();
-            } else {
-              if (widget.itemData is HomeScreenLegislationItem) {
-                _pollCounters = {
-                  'likes': widget.itemData.likes ?? 0,
-                  'dislikes': widget.itemData.dislikes ?? 0,
-                  'popularity': widget.itemData.popularity,
-                };
-              } else if (widget.itemData is Legislation) {
-                 _pollCounters = {
-                  'likes': widget.itemData.likes ?? 0,
-                  'dislikes': widget.itemData.dislikes ?? 0,
-                  'popularity': widget.itemData.popularity ?? 0,
-                };
-              } else if (widget.itemData is MP) {
-                 _pollCounters = {
-                  'likes': widget.itemData.likes ?? 0,
-                  'dislikes': widget.itemData.dislikes ?? 0,
-                  'popularity': widget.itemData.popularity ?? 0,
-                };
-              }
-            }
-            _hasVotedLocally = hasVoted;
-            _isLoading = false;
-          });
+      setState(() {
+        _hasVotedLocally = finalHasVoted;
+        if (persistedCounters != null && finalHasVoted) {
+           _pollCounters = persistedCounters.cast<String, int>();
+        } else {
+           _pollCounters = _extractCountersFromItemData();
         }
+        _isLoading = false;
       });
     }
   }
 
-Future<void> _handleVoteButtonPressed(String voteType) async {
+  Future<void> _handleVoteButtonPressed(String voteType) async {
+    if (_isVoteProcessing) return;
     final user = Provider.of<User?>(context, listen: false);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final parliamentManager = Provider.of<ParliamentManager>(context, listen: false);
     final parliamentService = Provider.of<ParliamentServiceInterface>(context, listen: false);
+    
     final l10n = AppLocalizations.of(context)!;
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
+
+    final countryPrefix = parliamentManager.activeServiceId ?? 'unknown';
+    final voteKey = '${countryPrefix}_${widget.targetType}_${widget.targetId}';
+
     if (user == null) {
       navigator.push(MaterialPageRoute(builder: (context) => const LoginScreen()));
       return;
     }
+    setState(() => _isVoteProcessing = true);
+
+    final isVerified = await checkVerificationOrShowDialog(context);
+    if (!isVerified) {
+    if (mounted) setState(() => _isVoteProcessing = false);
+    return;
+    }
+
     final previousHasVoted = _hasVotedLocally;
     final previousCounters = _pollCounters != null ? Map<String, int>.from(_pollCounters!) : null;
 
     await _votingService.markAsVotedLocally(widget.targetType, widget.targetId);
-    Map<String, int> optimisticCounters = { 'likes': 0, 'dislikes': 0, 'popularity': 0 };
-    if (_pollCounters != null) {
-      optimisticCounters = Map<String, int>.from(_pollCounters!);
-    } else if (widget.itemData is HomeScreenLegislationItem) {
-      optimisticCounters['likes'] = widget.itemData.likes ?? 0;
-      optimisticCounters['dislikes'] = widget.itemData.dislikes ?? 0;
-      optimisticCounters['popularity'] = widget.itemData.popularity;
-    } else if (widget.itemData is Legislation) {
-      optimisticCounters['likes'] = widget.itemData.likes ?? 0;
-      optimisticCounters['dislikes'] = widget.itemData.dislikes ?? 0;
-      optimisticCounters['popularity'] = widget.itemData.popularity ?? 0;
-    } else if (widget.itemData is MP) {
-      optimisticCounters['likes'] = widget.itemData.likes ?? 0;
-      optimisticCounters['dislikes'] = widget.itemData.dislikes ?? 0;
-      optimisticCounters['popularity'] = widget.itemData.popularity ?? 0;
-    }
+    
+    userProvider.markAsVotedLocally(voteKey);
+
+    Map<String, int> currentCounters = _pollCounters ?? _extractCountersFromItemData();
+    Map<String, int> optimisticCounters = Map<String, int>.from(currentCounters);
 
     if (voteType == 'like') {
       optimisticCounters['likes'] = (optimisticCounters['likes'] ?? 0) + 1;
@@ -140,47 +158,62 @@ Future<void> _handleVoteButtonPressed(String voteType) async {
 
     try {
       final ApiService apiService = ApiService();
+      await user.reload(); 
+      await user.getIdToken(true);
+      developer.log("Wymuszono odświeżenie tokena przed głosowaniem", name: 'CitizenPollWidget');
       final responseData = await apiService.callFunction(
         parliamentService.citizenVoteFunctionName,
         params: { 'targetId': widget.targetId, 'targetType': widget.targetType, 'voteType': voteType, },
       );
+
       if (responseData.containsKey('counters')) {
         final backendCounters = Map<String, int>.from((responseData['counters'] as Map).map((k, v) => MapEntry(k.toString(), v as int)));
-        await _votingService.saveOptimisticCounters(widget.targetType, widget.targetId, backendCounters);
-        if (mounted) { setState(() { _pollCounters = backendCounters; }); }
-        widget.onVoteSuccess?.call(backendCounters);
-      }
+        
+        bool backendSeemsStale = (backendCounters['popularity'] ?? 0) < (optimisticCounters['popularity'] ?? 0);
+        final countersToDisplay = backendSeemsStale ? optimisticCounters : backendCounters;
+
+        await _votingService.saveOptimisticCounters(widget.targetType, widget.targetId, countersToDisplay);
+        
+        if (mounted) { 
+          setState(() { _pollCounters = countersToDisplay; }); 
+        }
+        widget.onVoteSuccess?.call(countersToDisplay);
+      } 
     } on FirebaseFunctionsException catch (e) {
+      if (mounted) setState(() => _isVoteProcessing = false);
       developer.log('Błąd Cloud Function (${e.code}): ${e.message}', name: 'CitizenPollWidget');
-      
-      String errorMessage;
-      if (e.code == 'permission-denied') {
-        errorMessage = l10n.pollPermissionDeniedError; // Używamy zmiennej 'l10n' z góry
-      } else {
-        errorMessage = l10n.authErrorDefault;
-      }
-      
-      await _votingService.clearVoteStatus(widget.targetType, widget.targetId);
-
-      if (mounted) {
-        setState(() { _hasVotedLocally = previousHasVoted; _pollCounters = previousCounters; });
-        scaffoldMessenger.showSnackBar(SnackBar(content: Text(errorMessage))); // Używamy 'scaffoldMessenger'
-      }
+      _handleError(e.code == 'permission-denied' ? l10n.pollPermissionDeniedError : l10n.authErrorDefault, previousHasVoted, previousCounters, scaffoldMessenger);
     } catch (e) {
-      developer.log('Błąd nie-Firebase podczas głosowania: $e', name: 'CitizenPollWidget');
-      await _votingService.clearVoteStatus(widget.targetType, widget.targetId);
-
-      if (mounted) {
-        setState(() { _hasVotedLocally = previousHasVoted; _pollCounters = previousCounters; });
-        scaffoldMessenger.showSnackBar(SnackBar(content: Text(l10n.authErrorDefault))); // Używamy 'scaffoldMessenger' i 'l10n'
-      }
+      developer.log('Błąd nie-Firebase: $e', name: 'CitizenPollWidget');
+      _handleError(l10n.authErrorDefault, previousHasVoted, previousCounters, scaffoldMessenger);
     }
+  }
+
+  Future<void> _handleError(String message, bool prevVoted, Map<String, int>? prevCounters, ScaffoldMessengerState messenger) async {
+      await _votingService.clearVoteStatus(widget.targetType, widget.targetId);
+      if (mounted) {
+        setState(() { 
+          _hasVotedLocally = prevVoted; 
+          _pollCounters = prevCounters; 
+          _isVoteProcessing = false;
+        });
+        messenger.showSnackBar(SnackBar(content: Text(message)));
+      }
   }
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = context.watch<UserProvider>(); 
+    final parliamentManager = context.read<ParliamentManager>();
     final l10n = AppLocalizations.of(context)!;
+    final countryPrefix = parliamentManager.activeServiceId ?? 'unknown';
+    final voteKey = '${countryPrefix}_${widget.targetType}_${widget.targetId}';
     
+    if (userProvider.hasVoted(voteKey) && !_hasVotedLocally) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+         _initializeVoteStatus();
+      });
+    }
     if (widget.targetId.isEmpty || widget.targetId == 'unknown' || _isLoading) {
       return Container(
         padding: const EdgeInsets.all(16),
@@ -195,27 +228,11 @@ Future<void> _handleVoteButtonPressed(String voteType) async {
       );
     }
 
-    int votesForCitizen = 0;
-    int votesAgainstCitizen = 0;
-    int totalCitizenVotes = 0;
+    final counters = _pollCounters ?? _extractCountersFromItemData();
 
-    if (_pollCounters != null) {
-      votesForCitizen = _pollCounters!['likes'] ?? 0;
-      votesAgainstCitizen = _pollCounters!['dislikes'] ?? 0;
-      totalCitizenVotes = _pollCounters!['popularity'] ?? 0;
-    } else if (widget.itemData is HomeScreenLegislationItem) {
-      votesForCitizen = widget.itemData.likes ?? 0;
-      votesAgainstCitizen = widget.itemData.dislikes ?? 0;
-      totalCitizenVotes = widget.itemData.popularity; 
-    } else if (widget.itemData is Legislation) {
-      votesForCitizen = widget.itemData.likes ?? 0;
-      votesAgainstCitizen = widget.itemData.dislikes ?? 0;
-      totalCitizenVotes = widget.itemData.popularity ?? 0;
-    } else if (widget.itemData is MP) {
-      votesForCitizen = widget.itemData.likes ?? 0;
-      votesAgainstCitizen = widget.itemData.dislikes ?? 0;
-      totalCitizenVotes = widget.itemData.popularity ?? 0;
-    }
+    int votesForCitizen = counters['likes'] ?? 0;
+    int votesAgainstCitizen = counters['dislikes'] ?? 0;
+    int totalCitizenVotes = counters['popularity'] ?? 0;
 
     final double forCitizenPercent = totalCitizenVotes > 0 ? (votesForCitizen / totalCitizenVotes * 100) : 0;
     final double againstCitizenPercent = totalCitizenVotes > 0 ? (votesAgainstCitizen / totalCitizenVotes * 100) : 0;

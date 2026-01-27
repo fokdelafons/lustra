@@ -1,24 +1,20 @@
 <!DOCTYPE html><html lang="en"><head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
   <base href="/">
   <meta charset="UTF-8">
   <meta name="google-signin-client_id" content="626018819854-er92orbfgkrlobslt7f6pkuf62aoeqac.apps.googleusercontent.com">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
 
-  <title>Lustra - Citizens Above Politics</title>
+  <title>Lustra</title>
   <meta name="description" content="Lustra provides transparent access to global legislation. Our bill summaries and voting records are presented in a concise, clear, and impartial way.">
+
+  <!-- Google tag (gtag.js) - Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-3SWK5GX4TP"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-3SWK5GX4TP', { 'send_page_view': true });
+  </script>
 
   <!-- Open Graph (Facebook, LinkedIn, Discord, etc.) -->
   <meta property="og:title" content="Lustra - Citizens Above Politics">
@@ -59,6 +55,12 @@
           background-size: 100% 100%;
     }
 
+    @keyframes pulse {
+      0% { transform: translate(-50%, -50%) scale(1);}
+      50% { transform: translate(-50%, -50%) scale(1.05);}
+      100% { transform: translate(-50%, -50%) scale(1);}
+    }
+
     .center {
       margin: 0;
       position: absolute;
@@ -66,6 +68,7 @@
       left: 50%;
       -ms-transform: translate(-50%, -50%);
       transform: translate(-50%, -50%);
+      animation: pulse 2s infinite ease-in-out;
     }
 
     .contain {
@@ -148,7 +151,7 @@
         "https://lustra.dev/",
         "https://www.facebook.com/LustraApp/",
         "https://www.instagram.com/lustraapp/",
-        "https://www.reddit.com/r/civicevolution/,
+        "https://www.reddit.com/r/civicevolution/",
         "https://lustrainitiative.substack.com/"
       ],
       "slogan": "Just the Facts. No Agenda."
@@ -162,7 +165,6 @@
       <source srcset="splash/img/dark-1x.png 1x, splash/img/dark-2x.png 2x, splash/img/dark-3x.png 3x, splash/img/dark-4x.png 4x" media="(prefers-color-scheme: dark)">
       <img class="center" aria-hidden="true" src="splash/img/light-1x.png" alt="">
   </picture>
-  
   
   <script src="flutter_bootstrap.js" async=""></script>
 

@@ -9,35 +9,33 @@ import 'package:lustra/services/share_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:lustra/providers/language_provider.dart';
-import 'package:intl/intl.dart' as intl;
+import '../partially_expandable_list_widget.dart';
 
 class CivicProjectCard extends StatelessWidget {
   final HomeScreenLegislationItem project;
-  final String? title;      // Zmiana na String?
-  final String? buttonText; // Zmiana na String?
+  final String? title;
+  final String? buttonText;
 
   const CivicProjectCard({
     super.key,
     required this.project,
-    this.title,       // Usuwamy domyślne wartości stąd
-    this.buttonText,  // Usuwamy domyślne wartości stąd
+    this.title,
+    this.buttonText,
   });
 
-  @override
+@override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
-    // --- TUTAJ USTALAMY WARTOŚCI DOMYŚLNE Z L10N ---
     final displayTitle = title ?? l10n.civicProjectsSectionTitle;
-    final displayButtonText = buttonText ?? l10n.submitCivicProjectButton;
-    // -----------------------------------------------
+
+    final headerActionText = l10n.civicRulesAction;
+
+    final bottomButtonText = l10n.actionSeeAll;
 
     final primaryColor = Colors.teal[700]!;
     final lightPrimaryColor = Colors.teal.withAlpha((255 * 0.05).round());
-    
     final activeService = context.read<ParliamentServiceInterface>();
 
-    // --- STRUKTURA 'buildClassicStyleCard' ---
     return Card(
       elevation: 4,
       clipBehavior: Clip.antiAlias,
@@ -52,7 +50,6 @@ class CivicProjectCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // HEADER
                 Padding(
                   padding: EdgeInsets.all(
                       kIsWeb ? 24.0 : MediaQuery.of(context).size.width * 0.04
@@ -72,29 +69,51 @@ class CivicProjectCard extends StatelessWidget {
                           maxLines: 1,
                         ),
                       ),
+                      const SizedBox(width: 8),
+                      InkWell(
+                        onTap: () {
+                          final manager = context.read<ParliamentManager>();
+                          final slug = manager.activeSlug;
+                          final lang = context.read<LanguageProvider>().appLanguageCode;
+                          context.smartNavigate('/$lang/$slug/civic-project');
+                        },
+                        borderRadius: BorderRadius.circular(16),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                headerActionText,
+                                style: TextStyle(
+                                  color: primaryColor,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Icon(Icons.info_outline, size: 16, color: primaryColor),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
                 const Divider(height: 1, thickness: 1),
-                
-                // CONTENT (Replika 'buildLegislationContent')
                 _buildLegislationContentReplica(context, project, l10n, primaryColor),
-
-                // ACTION BAR (Szczegóły | Udostępnij)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      // Przycisk SZCZEGÓŁY
                       Expanded(
                         child: InkWell(
                           onTap: () {
                             final manager = context.read<ParliamentManager>();
                             final slug = manager.activeSlug;
                             final lang = context.read<LanguageProvider>().appLanguageCode;
-                            final term = manager.currentTerm;
-                            context.smartNavigate('/$lang/$slug/$term/legislations/${project.id}', extra: project);
+                            context.smartNavigate('/$lang/$slug/civic/legislations/${project.id}', extra: project);
                           },
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 10),
@@ -112,9 +131,7 @@ class CivicProjectCard extends StatelessWidget {
                           ),
                         ),
                       ),
-                      // SEPARATOR PIONOWY
                       Container(height: 24, width: 1, color: Colors.grey[200]),
-                      // Przycisk UDOSTĘPNIJ
                       Expanded(
                         child: InkWell(
                           onTap: () {
@@ -188,8 +205,6 @@ class CivicProjectCard extends StatelessWidget {
               ],
             ),
           ),
-          
-          // BOTTOM BUTTON (Inny kolor)
           Container(
             color: lightPrimaryColor,
             child: InkWell(
@@ -197,8 +212,7 @@ class CivicProjectCard extends StatelessWidget {
                 final manager = context.read<ParliamentManager>();
                 final slug = manager.activeSlug;
                 final lang = context.read<LanguageProvider>().appLanguageCode;
-                final term = manager.currentTerm;
-                context.smartNavigate('/$lang/$slug/$term/civic-project');
+                context.smartNavigate('/$lang/$slug/civic/legislations');
               },
               child: Container(
                 width: double.infinity,
@@ -209,7 +223,7 @@ class CivicProjectCard extends StatelessWidget {
                   children: [
                     Flexible(
                       child: Text(
-                        displayButtonText,
+                        bottomButtonText,
                         style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 13),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
@@ -227,11 +241,9 @@ class CivicProjectCard extends StatelessWidget {
     );
   }
 
-  // --- REPLIKA 'buildLegislationContent' z home_screen.dart ---
   Widget _buildLegislationContentReplica(
       BuildContext context, HomeScreenLegislationItem data, AppLocalizations l10n, Color primaryColor) {
     final List<String> keyPoints = data.keyPoints;
-    final DateTime? processStartDate = data.processStartDate;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 16.0),
@@ -249,32 +261,17 @@ class CivicProjectCard extends StatelessWidget {
             style: TextStyle(fontSize: 14, color: Colors.grey[800]),
           ),
           const SizedBox(height: 8),
-          // Data rozpoczęcia (dla projektów obywatelskich może być null, ale zachowujemy układ)
-          if (processStartDate != null)
-            Row(
-              children: [
-                Icon(Icons.calendar_today, size: 14, color: Colors.grey[600]),
-                const SizedBox(width: 4),
-                Text(
-                  intl.DateFormat.yMMMMd(l10n.localeName).format(processStartDate),
-                  style: TextStyle(fontSize: 14, color: Colors.grey[600])
-                ),
-              ],
-            ),
-          const SizedBox(height: 12),
           
-          // Lista rozwijana (Replika widgetu z Home)
-          _PartiallyExpandableListReplica(
-            title: keyPoints.isNotEmpty ? l10n.keyPoints : l10n.noKeyPoints,
-            items: keyPoints,
-            initiallyVisibleCount: kIsWeb ? 20 : 2,
-            itemBuilder: (context, item) => _bulletPointReplica(context, item as String),
-            primaryColor: primaryColor, // Przekazujemy kolor dla strzałek
+          Theme(
+            data: Theme.of(context).copyWith(primaryColor: primaryColor),
+            child: PartiallyExpandableListWidget(
+              title: keyPoints.isNotEmpty ? l10n.keyPoints : l10n.noKeyPoints,
+              items: keyPoints,
+              itemBuilder: (context, item) => bulletPoint(context, item as String),
+            ),
           ),
           
           const SizedBox(height: 20),
-          
-          // Sonda (Wrapujemy w Theme, aby wymusić kolor, jeśli widget nie obsługuje parametru)
           Theme(
             data: Theme.of(context).copyWith(primaryColor: primaryColor),
             child: CitizenPollWidget(
@@ -287,116 +284,4 @@ class CivicProjectCard extends StatelessWidget {
       ),
     );
   }
-}
-
-// --- REPLIKI WIDGETÓW POMOCNICZYCH (Skopiowane 1:1 z home_screen.dart) ---
-
-class _PartiallyExpandableListReplica extends StatefulWidget {
-  final String title;
-  final List<dynamic> items;
-  final int initiallyVisibleCount;
-  final Widget Function(BuildContext, dynamic) itemBuilder;
-  final Color primaryColor;
-
-  const _PartiallyExpandableListReplica({
-    required this.title,
-    required this.items,
-    required this.initiallyVisibleCount,
-    required this.itemBuilder,
-    required this.primaryColor,
-  });
-
-  @override
-  State<_PartiallyExpandableListReplica> createState() =>
-      _PartiallyExpandableListReplicaState();
-}
-
-class _PartiallyExpandableListReplicaState extends State<_PartiallyExpandableListReplica> {
-  bool _isExpanded = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final bool canExpand = widget.items.length > widget.initiallyVisibleCount;
-    final List<dynamic> visibleItems = _isExpanded
-        ? widget.items
-        : widget.items.take(widget.initiallyVisibleCount).toList();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          widget.title,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: Colors.grey[700],
-          ),
-        ),
-        const SizedBox(height: 8),
-        ListView.builder(
-          padding: EdgeInsets.zero,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: visibleItems.length,
-          itemBuilder: (context, index) => widget.itemBuilder(context, visibleItems[index]),
-        ),
-        if (canExpand)
-          Padding(
-            padding: const EdgeInsets.only(top: 4.0),
-            child: InkWell(
-              onTap: () {
-                setState(() {
-                  _isExpanded = !_isExpanded;
-                });
-              },
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    _isExpanded ? AppLocalizations.of(context)!.actionCollapse : AppLocalizations.of(context)!.actionExpand,
-                    style: TextStyle(
-                      color: widget.primaryColor,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Icon(
-                    _isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                    size: 18,
-                    color: widget.primaryColor,
-                  ),
-                ],
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-Widget _bulletPointReplica(BuildContext context, String text) {
-  const double bulletSize = 5.0;
-  return Padding(
-    padding: const EdgeInsets.only(bottom: 6.0, left: 4.0),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          margin: const EdgeInsets.only(top: 6, right: 8.0),
-          width: bulletSize,
-          height: bulletSize,
-          decoration: BoxDecoration(
-            color: Colors.grey[600],
-            shape: BoxShape.circle,
-          ),
-        ),
-        Expanded(
-          child: Text(
-            text,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[800], height: 1.3),
-          ),
-        ),
-      ],
-    ),
-  );
 }

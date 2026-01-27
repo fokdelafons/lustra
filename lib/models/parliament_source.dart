@@ -29,7 +29,7 @@ class ParliamentSource {
   static const ParliamentSource eu = ParliamentSource(
     id: 'eu',
     slug: 'european-parliament',
-    name: 'European Union',
+    name: 'European Union (15%)',
     flagIconAsset: 'assets/flags/eu.svg',
     type: ParliamentType.european,
   );
@@ -45,7 +45,7 @@ class ParliamentSource {
   static const ParliamentSource uk = ParliamentSource(
     id: 'uk',
     slug: 'uk-parliament',
-    name: 'United Kingdom',
+    name: 'United Kingdom (70%)',
     flagIconAsset: 'assets/flags/gb.svg',
     type: ParliamentType.national,
   );
@@ -53,7 +53,7 @@ class ParliamentSource {
   static const ParliamentSource de = ParliamentSource(
     id: 'de',
     slug: 'bundestag',
-    name: 'Germany',
+    name: 'Germany (59%)',
     flagIconAsset: 'assets/flags/de.svg',
     type: ParliamentType.national,
   );
@@ -61,7 +61,7 @@ class ParliamentSource {
   static const ParliamentSource fr = ParliamentSource(
     id: 'fr',
     slug: 'assemblee-nationale',
-    name: 'France',
+    name: 'France (40%)',
     flagIconAsset: 'assets/flags/fr.svg',
     type: ParliamentType.national,
   );
@@ -78,11 +78,11 @@ class ParliamentSource {
   }
 
   static String getSlugById(String? id) {
-    if (id == null) return 'sejm';
+    if (id == null) return 'us-congress';
     try {
       return availableSources.firstWhere((s) => s.id == id).slug;
     } catch (e) {
-      return 'sejm';
+      return 'us-congress';
     }
   }
 }

@@ -92,7 +92,7 @@ class Legislation {
   final String description;
   final String status;
   final bool? isEU;
-  final DateTime? date;
+  final DateTime? votingDate;
   final DateTime? documentDate;
   final DateTime? processStartDate;
   final String category;
@@ -116,6 +116,7 @@ class Legislation {
   final MissingDataInfo? missingDataInfo;
   final DateTime? lastUpdated;
   final String? titleOfficial;
+  final String? fullContent;
   final bool noDocument;
   final Map<String, dynamic>? sponsor;
 
@@ -128,7 +129,7 @@ class Legislation {
     required this.status,
     this.votingUrl,
     this.isEU,
-    required this.date,
+    required this.votingDate,
     required this.documentDate,
     required this.processStartDate,
     required this.category,
@@ -151,6 +152,7 @@ class Legislation {
     this.missingDataInfo,
     this.lastUpdated,
     this.titleOfficial,
+    this.fullContent,
     this.noDocument = false,
     this.sponsor,
   });
@@ -181,7 +183,7 @@ class Legislation {
       description: _parseDynamicString(json['description'], fieldName: 'description', itemId: itemIdForLog) ?? '',
       status: _parseDynamicString(json['status'], fieldName: 'status', itemId: itemIdForLog) ?? '',
       isEU: json['isEU'] as bool?,
-      date: _parseDateTime(json['votingDate']),
+      votingDate: _parseDateTime(json['votingDate']),
       documentDate: _parseDateTime(json['documentDate']),
       processStartDate: _parseDateTime(json['processStartDate']),
       category: (json['category'] as List<dynamic>? ?? []).join(', '),
@@ -207,6 +209,7 @@ class Legislation {
           : null,
       lastUpdated: _parseDateTime(json['lastUpdated']),
       titleOfficial: _parseDynamicString(json['titleOfficial'], fieldName: 'titleOfficial', itemId: itemIdForLog),
+      fullContent: _parseDynamicString(json['fullContent'], fieldName: 'fullContent', itemId: itemIdForLog),
       noDocument: json['noDocument'] as bool? ?? false,
       sponsor: json['sponsor'] != null ? Map<String, dynamic>.from(json['sponsor']) : null,
     );
@@ -222,7 +225,7 @@ class Legislation {
       'description': description,
       'status': status,
       'isEU': isEU,
-      'votingDate': date?.toIso8601String(),
+      'votingDate': votingDate?.toIso8601String(),
       'documentDate': documentDate?.toIso8601String(),
       'processStartDate': processStartDate?.toIso8601String(),
       'category': category.split(', ').where((s) => s.isNotEmpty).toList(),
@@ -245,6 +248,7 @@ class Legislation {
       'missingDataInfo': missingDataInfo?.toJson(),
       'lastUpdated': lastUpdated?.toIso8601String(),
       'titleOfficial': titleOfficial,
+      'fullContent': fullContent,
       'noDocument': noDocument,
       'sponsor': sponsor,
     };
@@ -258,7 +262,7 @@ class Legislation {
     String? description,
     String? status,
     bool? isEU,
-    DateTime? date,
+    DateTime? votingDate,
     DateTime? documentDate,
     DateTime? processStartDate,
     String? category,
@@ -279,6 +283,7 @@ class Legislation {
     MissingDataInfo? missingDataInfo,
     DateTime? lastUpdated,
     String? titleOfficial,
+    String? fullContent,
     bool? noDocument,
     Map<String, dynamic>? sponsor,
   }) {
@@ -290,7 +295,7 @@ class Legislation {
       description: description ?? this.description,
       status: status ?? this.status,
       isEU: isEU ?? this.isEU,
-      date: date ?? this.date,
+      votingDate: votingDate ?? this.votingDate,
       documentDate: documentDate ?? this.documentDate,
       processStartDate: processStartDate ?? this.processStartDate,
       category: category ?? this.category,
@@ -311,6 +316,7 @@ class Legislation {
       missingDataInfo: missingDataInfo ?? this.missingDataInfo,
       lastUpdated: lastUpdated ?? this.lastUpdated,
       titleOfficial: titleOfficial ?? this.titleOfficial,
+      fullContent: fullContent ?? this.fullContent,
       noDocument: noDocument ?? this.noDocument,
       sponsor: sponsor ?? this.sponsor,
     );
@@ -328,7 +334,7 @@ class Legislation {
           description == other.description &&
           status == other.status &&
           isEU == other.isEU &&
-          date == other.date &&
+          votingDate == other.votingDate &&
           documentDate == other.documentDate &&
           processStartDate == other.processStartDate &&
           category == other.category &&
@@ -349,6 +355,7 @@ class Legislation {
           missingDataInfo == other.missingDataInfo &&
         lastUpdated == other.lastUpdated &&
           titleOfficial == other.titleOfficial &&
+          fullContent == other.fullContent &&
           noDocument == other.noDocument &&
           sponsor.toString() == other.sponsor.toString();
 
@@ -361,7 +368,7 @@ class Legislation {
         description,
         status,
         isEU,
-        date,
+        votingDate,
         documentDate,
         processStartDate,
         category,
@@ -382,6 +389,7 @@ class Legislation {
         missingDataInfo,
         lastUpdated,
         titleOfficial,
+        fullContent,
         noDocument,
       ]);
 }

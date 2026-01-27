@@ -109,6 +109,8 @@ String translateUSStatus(BuildContext context, String? backendStatus) {
     "Failed": l10n.statusFailed,
     "Placed on Calendar": l10n.statusPlacedOnCalendar,
     "Initiative": l10n.statusInitiative,
+    "Adopted": l10n.statusAdopted,
+    "Expired": l10n.statusExpired,
   };
   return statusMap[backendStatus] ?? backendStatus;
 }

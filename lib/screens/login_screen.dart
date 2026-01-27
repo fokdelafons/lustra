@@ -125,14 +125,11 @@ class _LoginScreenState extends State<LoginScreen> {
     }
  
     if (authError == null && mounted) {
-      if (kIsWeb) {
-        context.go('/');
+      final navigator = Navigator.of(context);
+      if (navigator.canPop()) {
+        navigator.pop(); 
       } else {
-        if (context.canPop()) {
-          context.pop();
-        } else {
-          context.go('/');
-        }
+        context.go('/'); 
       }
     }
   }

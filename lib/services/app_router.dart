@@ -3,33 +3,44 @@ import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:lustra/models/mp.dart';
-import 'package:lustra/models/legislation.dart';
-import 'package:lustra/models/home_screen_data.dart';
-import 'package:lustra/models/parliament_source.dart';
-import 'package:lustra/services/parliament_manager.dart';
-import 'package:lustra/screens/home_screen.dart';
-import 'package:lustra/screens/login_screen.dart';
-import 'package:lustra/screens/post_social_login_consent_screen.dart';
-import 'package:lustra/screens/info_screen.dart';
-import 'package:lustra/screens/terms_screen.dart'; 
-import 'package:lustra/screens/tech_screen.dart';
-import 'package:lustra/screens/support_project_screen.dart';
-import 'package:lustra/screens/future_features_screen.dart';
-import 'package:lustra/screens/mp_screen.dart';
-import 'package:lustra/screens/mp_details_screen.dart';
-import 'package:lustra/screens/legislation_details_screen.dart';
-import 'package:lustra/screens/civic_project_screen.dart';
-import 'package:lustra/screens/legislation_wrapper_screen.dart';
-import 'package:lustra/providers/language_provider.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+
+import '../models/mp.dart';
+import '../models/legislation.dart';
+import '../models/home_screen_data.dart';
+import '../models/parliament_source.dart';
+import '../providers/language_provider.dart';
+import '../screens/home/home_screen.dart';
+import '../screens/login_screen.dart';
+import '../screens/post_social_login_consent_screen.dart';
+import '../screens/home/info_screen.dart';
+import '../screens/home/terms_screen.dart'; 
+import '../screens/home/tech_screen.dart';
+import '../screens/home/support_project_screen.dart';
+import '../screens/home/future_features_screen.dart';
+import '../screens/mp_details_screen.dart';
+import '../screens/legislation_details_screen.dart';
+import '../screens/civic_project_rules.dart';
+import '../widgets/lists_specific/legislations_lists_wrapper.dart';
+import '../widgets/lists_specific/mp_list_wrapper.dart';
+import 'parliament_manager.dart';
+
+final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+final FirebaseAnalyticsObserver observer = FirebaseAnalyticsObserver(analytics: analytics);
 
 final GoRouter router = GoRouter(
   initialLocation: '/',
+  observers: [observer],
+  redirect: (context, state) {
+    final goTarget = state.uri.queryParameters['go'];
+    if (goTarget != null && goTarget.isNotEmpty) {
+       return goTarget;
+    }
+    return null;
+  },
   routes: [
-    // --- SHELL ROUTE (Główna Ramka z Paskami Nawigacji) ---
     ShellRoute(
       builder: (context, state, child) {
-        // Przekazujemy "child" do NewHomeScreen, który wyświetli go w body
         return NewHomeScreen(child: child);
       },
       routes: [
@@ -39,7 +50,7 @@ final GoRouter router = GoRouter(
           builder: (context, state) => const HomeContent(),
         ),
 
-        // 2. INFO (z podstronami)
+        // 2. INFO
         GoRoute(
           path: '/info',
           builder: (context, state) => const InfoScreen(),
@@ -63,9 +74,6 @@ final GoRouter router = GoRouter(
         ),
       ],
     ),
-
-    // --- EKRANY PEŁNOEKRANOWE (POZA RAMKĄ) ---
-    // Nie mają dolnego paska nawigacji (Login, Zgody)
     
     GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
     
@@ -80,7 +88,7 @@ final GoRouter router = GoRouter(
       },
     ),
 
-    // 1. POSŁOWIE (/:lang/:pid/:term/members)
+    // 1. (/:lang/:pid/:term/members)
     GoRoute(
       path: '/:lang/:slug/:term/members',
       redirect: (context, state) {
@@ -100,7 +108,7 @@ final GoRouter router = GoRouter(
           targetLang: lang,
           targetParliamentId: pid,
           targetTerm: term,
-          child: const MPScreen(),
+          child: const MPWrapperScreen(),
         );
       },
       routes: [
@@ -157,7 +165,7 @@ final GoRouter router = GoRouter(
       ]
     ),
 
-  // 2. LEGISLACJA
+  // 2. LEGISLATION
     GoRoute(
       path: '/:lang/:slug/:term/legislations',
       redirect: (context, state) {
@@ -171,14 +179,15 @@ final GoRouter router = GoRouter(
       builder: (context, state) {
         final lang = state.pathParameters['lang'];
         final slug = state.pathParameters['slug'];
-        final term = state.pathParameters['term'];
-        final type = state.uri.queryParameters['list'] ?? 'voted';
+        final termParam = state.pathParameters['term'];
         final pid = ParliamentSource.getIdBySlug(slug)!;
+        final isCivicRoute = termParam == 'civic';
+        final type = isCivicRoute ? 'civic' : (state.uri.queryParameters['list'] ?? 'voted');
 
         return RouteContextGuard(
           targetLang: lang,
           targetParliamentId: pid,
-          targetTerm: term,
+          targetTerm: termParam,
           child: LegislationWrapperScreen(type: type),
         );
       },
@@ -189,28 +198,39 @@ final GoRouter router = GoRouter(
              final slug = state.pathParameters['slug'];
              final pid = ParliamentSource.getIdBySlug(slug)!;
              final legislationId = state.pathParameters['legislationId']!;
+             final termParam = state.pathParameters['term'];
+             final isCivicRoute = termParam == 'civic';
+             final listType = isCivicRoute ? 'civic' : null;
              Widget child;
-             
              if (state.extra is Legislation) {
-                child = LegislationDetailsScreen(bill: state.extra as Legislation);
+                child = LegislationDetailsScreen(
+                  bill: state.extra as Legislation,
+                  listType: listType
+                );
              } else if (state.extra is HomeScreenLegislationItem) {
                 final homeItem = state.extra as HomeScreenLegislationItem;
                 final legislation = Legislation(
                   id: homeItem.id, title: homeItem.title, description: homeItem.summary ?? '', 
-                  status: homeItem.status, date: homeItem.votingDate, processStartDate: homeItem.processStartDate, 
+                  status: homeItem.status, votingDate: homeItem.votingDate, processStartDate: homeItem.processStartDate, 
                   keyPoints: homeItem.keyPoints, likes: homeItem.likes ?? 0, dislikes: homeItem.dislikes ?? 0, 
                   popularity: homeItem.popularity, summaryGeneratedBy: homeItem.summaryGeneratedBy, 
                   upcomingProceedingDates: homeItem.upcomingProceedingDates, documentType: homeItem.documentType, 
                   votesFor: homeItem.votesFor, votesAgainst: homeItem.votesAgainst, votesAbstain: homeItem.votesAbstain, 
                   term: 0, number: '', documentDate: null, category: '', points: 0
                 );
-                child = LegislationDetailsScreen(bill: legislation);
+                child = LegislationDetailsScreen(
+                  bill: legislation,
+                  listType: listType
+                );
              } else {
-                child = LegislationDetailsScreen(legislationId: legislationId);
+                child = LegislationDetailsScreen(
+                  legislationId: legislationId,
+                  listType: listType
+                );
              }
-
              return RouteContextGuard(
                targetParliamentId: pid,
+               targetTerm: termParam,
                child: child,
              );
           },
@@ -218,7 +238,7 @@ final GoRouter router = GoRouter(
       ],
     ),
 GoRoute(
-      path: '/:lang/:slug/:term/civic-project',
+      path: '/:lang/:slug/civic-project',
       redirect: (context, state) {
         final slug = state.pathParameters['slug'];
         if (ParliamentSource.getIdBySlug(slug) == null) {
@@ -229,12 +249,10 @@ GoRoute(
       builder: (context, state) {
         final lang = state.pathParameters['lang'];
         final slug = state.pathParameters['slug'];
-        final term = state.pathParameters['term'];
         final pid = ParliamentSource.getIdBySlug(slug)!;
         return RouteContextGuard(
           targetLang: lang,
           targetParliamentId: pid,
-          targetTerm: term,
           child: const CivicProjectScreen(),
         );
       },
@@ -284,9 +302,13 @@ class RouteContextGuard extends StatelessWidget {
     bool termMatch = true;
     int? parsedTerm;
     if (targetTerm != null) {
-      parsedTerm = int.tryParse(targetTerm!);
-      if (sourceMatch && parsedTerm != null && pManager.currentTerm != parsedTerm) {
-        termMatch = false;
+      if (targetTerm == 'civic') {
+        termMatch = true; 
+      } else {
+        parsedTerm = int.tryParse(targetTerm!);
+        if (sourceMatch && parsedTerm != null && pManager.currentTerm != parsedTerm) {
+          termMatch = false;
+        }
       }
     }
 
