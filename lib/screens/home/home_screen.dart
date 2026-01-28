@@ -3,7 +3,6 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../models/home_screen_data.dart';
@@ -20,6 +19,7 @@ import '../../widgets/home_specific/process_card.dart';
 import '../../widgets/home_specific/politicians_card.dart';
 import '../../widgets/home_specific/web_app_bar.dart';
 import '../../widgets/home_specific/mobile_app_bar.dart';
+import '../../widgets/home_specific/mobile_nav_bar.dart';
 
 
 class NewHomeScreen extends StatefulWidget {
@@ -32,20 +32,6 @@ class NewHomeScreen extends StatefulWidget {
 }
 
 class NewHomeScreenState extends State<NewHomeScreen> {
-
-  @override
-  void initState() {
-    super.initState();
-  }
-  
-int _calculateSelectedIndex(BuildContext context) {
-    // URL router
-    final String location = GoRouterState.of(context).uri.toString();
-    if (location.startsWith('/info')) return 1;
-    if (location.startsWith('/support')) return 2;
-    if (location.startsWith('/future')) return 3;
-    return 0; // Home
-  }
 
 @override
   Widget build(BuildContext context) {
@@ -89,13 +75,11 @@ int _calculateSelectedIndex(BuildContext context) {
       );
     }
 
-    final int currentIndex = _calculateSelectedIndex(context);
-
     return ChangeNotifierProvider.value(
       value: manager.activeService,
       child: 
         Scaffold(
-          // --- PASEK NA WEBIE ---
+          // --- WEB APP BAR --- 
           appBar: useWideLayout ? const WebAppBar() : null,
           body: useWideLayout 
             ? widget.child
@@ -103,35 +87,8 @@ int _calculateSelectedIndex(BuildContext context) {
                 onTap: () => FocusScope.of(context).unfocus(),
                 child: widget.child,
               ),
-
           // BOTTOM BAR (mobile)
-          bottomNavigationBar: useWideLayout ? null : BottomNavigationBar(
-            items: <BottomNavigationBarItem>[
-              BottomNavigationBarItem(icon: const Icon(Icons.home), label: l10n.bottomNavHome),
-              BottomNavigationBarItem(icon: const Icon(Icons.info_outline), label: l10n.bottomNavInfo),
-              BottomNavigationBarItem(icon: const Icon(Icons.favorite_outline), label: l10n.bottomNavSupport),
-              BottomNavigationBarItem(icon: const Icon(Icons.lightbulb_outline), label: l10n.bottomNavFutureFeatures),
-            ],
-            currentIndex: currentIndex,
-            selectedItemColor: Theme.of(context).primaryColor,
-            unselectedItemColor: Colors.grey,
-            type: BottomNavigationBarType.fixed,
-            onTap: (index) {
-              switch (index) {
-                case 0:
-                  context.smartNavigate('/');
-                case 1:
-                  context.smartNavigate('/info');
-                  break;
-                case 2:
-                  context.smartNavigate('/support');
-                  break;
-                case 3:
-                  context.smartNavigate('/future');
-                  break;
-              }
-            },
-          ),
+          bottomNavigationBar: useWideLayout ? null : const MobileNavBar(),
         ),
     );
   }
@@ -156,12 +113,6 @@ class HomeContentState extends State<HomeContent> {
   ParliamentServiceInterface? _activeService;
   int? _currentTerm;
   String? _currentLanguageCode;
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
 
   @override
   void didChangeDependencies() {
@@ -319,7 +270,8 @@ Widget _buildBodyContent(BuildContext context) {
       );
     }
     
-    if (_isLoading) {
+  final manager = context.watch<ParliamentManager>();
+    if (_isLoading || manager.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
     
