@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter_animate/flutter_animate.dart';
+
 import '../../models/home_screen_data.dart';
 import '../../services/share_service.dart';
 import '../../services/parliament_manager.dart';
@@ -123,10 +125,22 @@ class HomeSectionCard extends StatelessWidget {
                                 const SizedBox(width: 8),
                                 Text(
                                   l10n.shareAction,
-                                  style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 14),
+                                  style: TextStyle(
+                                    color: primaryColor, 
+                                    fontWeight: FontWeight.bold, 
+                                    fontSize: 14
+                                  ),
                                 ),
                               ],
-                            ),
+                            )
+                            .animate(onPlay: (controller) => controller.repeat(reverse: false))
+                            .shimmer(
+                                delay: 2500.ms, 
+                                duration: 1200.ms, 
+                                color: Colors.white.withValues(alpha: 0.8),
+                                size: 2 // Shimmer wideness
+                             )
+                            .then(delay: 2000.ms), // Pause
                           ),
                         ),
                       ),

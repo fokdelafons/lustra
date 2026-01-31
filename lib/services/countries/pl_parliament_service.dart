@@ -57,15 +57,7 @@ class PLParliamentService with ChangeNotifier implements ParliamentServiceInterf
 
   @override
   int calculateTotalTenureInYears(MP mp) {
-    if (mp.parliamentaryHistory == null || mp.parliamentaryHistory!['terms'] is! List) {
-      return 0;
-    }
-  
-    final terms = (mp.parliamentaryHistory!['terms'] as List).map((term) {
-      if (term is int) return term;
-      if (term is String) return int.tryParse(term);
-      return null;
-    }).whereType<int>().toList();
+    final terms = mp.termsUS.map((t) => t.term).toList();
 
     int totalYears = 0;
     for (var termNum in terms) {
@@ -376,12 +368,21 @@ class PLParliamentService with ChangeNotifier implements ParliamentServiceInterf
   List<MPDetailItem> getMPHeaderDetails(BuildContext context, MP mp) {
     final l10n = AppLocalizations.of(context)!;
     final details = <MPDetailItem>[];
+    
     List<String> previousClubs = [];
-    if (mp.parliamentaryHistory != null && mp.parliamentaryHistory!['clubs'] is List) {
-      List<dynamic> historyClubs = mp.parliamentaryHistory!['clubs'];
-      if (historyClubs.length > 1) {
-        previousClubs = historyClubs.sublist(1).map((club) => club.toString()).where((clubName) => clubName.isNotEmpty && clubName != mp.club).toList();
-      }
+    if (mp.clubsUS.isNotEmpty) {
+       final historyClubs = mp.clubsUS.map((c) => c.party).toList();
+       
+       if (historyClubs.length > 1) {
+          previousClubs = historyClubs.sublist(1)
+            .where((clubName) => clubName.isNotEmpty && clubName != mp.club)
+            .toList();
+       }
+    } else if (mp.parliamentaryHistory != null && mp.parliamentaryHistory!['clubs'] is List) {
+       List<dynamic> historyClubs = mp.parliamentaryHistory!['clubs'];
+        if (historyClubs.length > 1 && historyClubs.first is String) {
+          previousClubs = historyClubs.sublist(1).map((c) => c.toString()).where((c) => c.isNotEmpty && c != mp.club).toList();
+        }
     }
     String currentClubText = mp.club.isNotEmpty ? mp.club : l10n.unaffiliatedClub;
     String? formerlyText;
@@ -410,14 +411,10 @@ class PLParliamentService with ChangeNotifier implements ParliamentServiceInterf
   @override
   MPDetailSection? getMPTenureDetails(BuildContext context, MP mp) {
     final l10n = AppLocalizations.of(context)!;
-    List<int> terms = [];
-    if (mp.parliamentaryHistory != null && mp.parliamentaryHistory!['terms'] is List) {
-      terms = (mp.parliamentaryHistory!['terms'] as List)
-          .map((term) => (term is String) ? int.tryParse(term) : term as int?)
-          .whereType<int>()
-          .toList();
-      terms.sort((a, b) => b.compareTo(a));
-    }
+    
+    List<int> terms = mp.termsUS.map((t) => t.term).toList();
+    terms.sort((a, b) => b.compareTo(a));
+
     if (terms.isEmpty) {
       return MPDetailSection(
         title: getTenureTitle(context, mp),
