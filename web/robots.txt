@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /*?go=
 
 Sitemap: https://lustra.news/sitemaps.xml
