@@ -35,6 +35,10 @@ class UserProvider with ChangeNotifier {
     }
   }
 
+  Future<void> refreshProfile() async {
+    await _fetchUserProfile();
+  }
+
   Future<void> _fetchUserProfile() async {
     developer.log("Pobieranie profilu użytkownika (UserProvider)...", name: 'UserProvider');
     try {

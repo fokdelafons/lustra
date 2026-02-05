@@ -83,8 +83,14 @@ class ShareService {
           mimeType: 'image/png',
           name: 'bill.png',
         );
-
-        final deepLink = '$_baseDeepLinkUrl/$lang/$slug/$term/legislations/${legislation.id}/';
+// docType might be null, I used status as backup
+        final docType = (legislation.documentType ?? '').toUpperCase();
+        final status = legislation.status.toUpperCase();
+        
+        final isCivic = docType.contains('CIVIC') || status.contains('INITIATIVE');
+        final urlTerm = isCivic ? 'civic' : term.toString();
+        
+        final deepLink = '$_baseDeepLinkUrl/$lang/$slug/$urlTerm/legislations/${legislation.id}/';
         
         final countryTag = _getParliamentHashtag(parliamentId);
         final translatedLawHash = _sanitizeHashtag(l10n.hashtagLaw);

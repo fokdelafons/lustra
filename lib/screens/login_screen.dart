@@ -8,6 +8,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import '../services/parliament_manager.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import '../providers/user_provider.dart';
 import 'dart:developer' as developer;
 
 
@@ -82,6 +83,8 @@ class _LoginScreenState extends State<LoginScreen> {
  
     try {
       final authService = Provider.of<AuthService>(context, listen: false);
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      
       if (_isLoginMode) {
         await authService.signInWithEmailAndPassword(
           email: _emailController.text.trim(),
@@ -96,6 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
           marketingConsent: _marketingConsent,
           parliamentId: _selectedParliamentId!,
         );
+        await userProvider.refreshProfile();
       }
     } on FirebaseAuthException catch (e) {
       switch (e.code) {

@@ -1,7 +1,7 @@
 name: lustra
 description: "Media reimagined"
 publish_to: 'none'
-version: 1.2.3+30
+version: 1.2.4+31
 
 environment:
   sdk: ^3.7.2
