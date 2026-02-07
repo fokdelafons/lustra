@@ -1,0 +1,18 @@
+{
+  "name": "lustra-backend",
+  "version": "1.0.0",
+  "description": "Lustra Backend on Cloud Run",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@google-cloud/secret-manager": "^6.1.1",
+    "cors": "^2.8.5",
+    "express": "5.1.0",
+    "firebase-admin": "12.1.1",
+    "node-snowball": "^0.8.0",
+    "resend": "^6.9.1",
+    "stemmer_pl": "1.0.1"
+  }
+}

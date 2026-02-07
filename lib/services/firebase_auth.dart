@@ -47,7 +47,20 @@ class AuthService {
   }
 
   Future<void> completeOnboarding({ required bool marketingConsent, required String parliamentId, }) async {
-    await _apiService.callFunction('userOnboarding', params: {'marketingConsent': marketingConsent, 'parliamentId': parliamentId,});
+    if (_firebaseAuth.currentUser == null) {
+      developer.log('[CRITICAL] Próba onboardingu bez zalogowanego użytkownika!', name: 'AuthService');
+      throw FirebaseAuthException(code: 'no-user', message: 'Session lost. Please log in again.');
+    }
+    try {
+      await _firebaseAuth.currentUser!.reload();
+      await _firebaseAuth.currentUser!.getIdToken(true);
+    } catch (e) {
+      developer.log('[WARNING] Nie udało się odświeżyć sesji przed onboardingiem: $e', name: 'AuthService');
+    }
+    await _apiService.callFunction('userOnboarding', params: {
+      'marketingConsent': marketingConsent, 
+      'parliamentId': parliamentId,
+    });
   }
   
   Future<UserCredential> signInWithGoogle() async {

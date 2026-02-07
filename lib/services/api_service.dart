@@ -56,9 +56,14 @@ class ApiService {
     final currentUser = _auth.currentUser;
     if (currentUser != null) {
       try {
-        authToken = await _auth.currentUser!.getIdToken();
+        authToken = await currentUser.getIdToken(false);
       } catch (e) {
-        developer.log('Nie udało się uzyskać tokenu Auth użytkownika: $e', name: 'ApiService');
+        developer.log('Błąd tokenu z cache. Próba ratunkowa (force refresh)...', name: 'ApiService');
+        try {
+          authToken = await currentUser.getIdToken(true);
+        } catch (e2) {
+          developer.log('KRYTYCZNE: Nie udało się uzyskać tokenu Auth. Request pójdzie jako anonimowy (ryzyko 401).', name: 'ApiService', error: e2);
+        }
       }
     }
 

@@ -127,14 +127,8 @@ class _LoginScreenState extends State<LoginScreen> {
         _errorMessage = authError;
       });
     }
- 
     if (authError == null && mounted) {
-      final navigator = Navigator.of(context);
-      if (navigator.canPop()) {
-        navigator.pop(); 
-      } else {
-        context.go('/'); 
-      }
+      _handleSmartNavigation();
     }
   }
 
@@ -174,26 +168,28 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _signInWithGoogle() async {
     final l10n = AppLocalizations.of(context)!;
     final authService = Provider.of<AuthService>(context, listen: false);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
     setState(() { _isGoogleLoading = true; _errorMessage = null; });
     try {
       await authService.signInWithGoogle();
+      await userProvider.refreshProfile();
+
       if (!mounted) return;
       final bool hasProfile = await authService.hasCompletedProfile();
+      
       if (!mounted) return;
       if (hasProfile) {
-        if (kIsWeb) {
-          context.go('/');
-        } else {
-          if (context.canPop()) {
-            context.pop();
-          } else {
-            context.go('/');
-          }
-        }
+        _handleSmartNavigation();
       } else {
         final user = authService.currentUser;
         if (user != null) {
-          context.pushReplacement('/post-social-login-consent', extra: user);
+          final nextParam = GoRouterState.of(context).uri.queryParameters['next'];
+          String route = '/post-social-login-consent';
+          if (nextParam != null && nextParam.isNotEmpty) {
+            route += '?next=$nextParam';
+          }
+          context.pushReplacement(route, extra: user);
         }
       }
     } on FirebaseAuthException catch (e) {
@@ -215,26 +211,27 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _signInWithFacebook() async {
     final l10n = AppLocalizations.of(context)!;
     final authService = Provider.of<AuthService>(context, listen: false);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
     setState(() { _isFacebookLoading = true; _errorMessage = null; });
     try {
       await authService.signInWithFacebook();
+      await userProvider.refreshProfile();
+
       if (!mounted) return;
       final bool hasProfile = await authService.hasCompletedProfile();
+      
       if (!mounted) return;
       if (hasProfile) {
-        if (kIsWeb) {
-          context.go('/');
-        } else {
-          if (context.canPop()) {
-            context.pop();
-          } else {
-            context.go('/');
-          }
-        }
+        _handleSmartNavigation();
       } else {
         final user = authService.currentUser;
         if (user != null) {
-          context.pushReplacement('/post-social-login-consent', extra: user);
+          final nextParam = GoRouterState.of(context).uri.queryParameters['next'];
+          String route = '/post-social-login-consent';
+          if (nextParam != null && nextParam.isNotEmpty) {
+            route += '?next=$nextParam';
+          }
+          context.pushReplacement(route, extra: user);
         }
       }
     } on FirebaseAuthException catch (e) {
@@ -257,26 +254,27 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _signInWithApple() async {
 		final l10n = AppLocalizations.of(context)!;
 		final authService = Provider.of<AuthService>(context, listen: false);
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+
 		setState(() { _isAppleLoading = true; _errorMessage = null; });
 		try {
 			await authService.signInWithApple();
+            await userProvider.refreshProfile();
+
 			if (!mounted) return;
 			final bool hasProfile = await authService.hasCompletedProfile();
 			if (!mounted) return;
 			if (hasProfile) {
-        if (kIsWeb) {
-          context.go('/');
-        } else {
-          if (context.canPop()) {
-            context.pop();
-          } else {
-            context.go('/');
-          }
-        }
+        _handleSmartNavigation();
 			} else {
 				final user = authService.currentUser;
 				if (user != null) {
-					context.pushReplacement('/post-social-login-consent', extra: user);
+          final nextParam = GoRouterState.of(context).uri.queryParameters['next'];
+          String route = '/post-social-login-consent';
+          if (nextParam != null && nextParam.isNotEmpty) {
+            route += '?next=$nextParam';
+          }
+					context.pushReplacement(route, extra: user);
 				}
 			}
 		} on FirebaseAuthException catch (e) {
@@ -551,5 +549,20 @@ Widget build(BuildContext context) {
         ),
       ),
   ));
+  }
+  void _handleSmartNavigation() {
+    if (!mounted) return;
+    final nextParam = GoRouterState.of(context).uri.queryParameters['next'];
+    
+    if (nextParam != null && nextParam.isNotEmpty) {
+      developer.log('[NAV] Przekierowanie do celu: $nextParam', name: 'LoginScreen');
+      context.go(nextParam);
+    } else {
+      if (Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+      } else {
+        context.go('/');
+      }
+    }
   }
 }

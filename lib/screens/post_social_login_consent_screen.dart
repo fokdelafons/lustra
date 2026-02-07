@@ -7,6 +7,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../services/parliament_manager.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../services/app_router.dart';
+import '../providers/user_provider.dart';
 
 class PostSocialLoginConsentScreen extends StatefulWidget {
   final User user;
@@ -28,32 +29,48 @@ class _PostSocialLoginConsentScreenState extends State<PostSocialLoginConsentScr
   Future<void> _completeRegistration() async {
     final l10n = AppLocalizations.of(context)!;
     final isValid = _formKey.currentState?.validate() ?? false;
-    if (!isValid) {
-      return;
-    }
+    if (!isValid) return;
+
     if (!_termsAccepted) {
       setState(() {
         _errorMessage = l10n.validatorAcceptTerms;
       });
       return;
     }
+
     setState(() { _isLoading = true; _errorMessage = null; });
+
     try {
       final authService = Provider.of<AuthService>(context, listen: false);
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await user.reload();
+        await user.getIdToken(true);
+      } else {
+        throw FirebaseAuthException(code: 'no-user', message: 'User session lost');
+      }
       await authService.completeOnboarding(
         marketingConsent: _marketingConsent,
         parliamentId: _selectedParliamentId!,
       );
+      await userProvider.refreshProfile();
+
       if (mounted) {
-        await FirebaseAuth.instance.currentUser?.getIdToken(true);
-        if (!mounted) return;
-        context.go('/'); 
+        final nextParams = GoRouterState.of(context).uri.queryParameters['next'];
+        if (nextParams != null && nextParams.isNotEmpty) {
+          context.go(nextParams);
+        } else {
+          context.go('/');
+        }
       }
     } catch (e) {
-      setState(() { 
-        _errorMessage = l10n.authErrorUnexpected; 
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() { 
+          _errorMessage = l10n.authErrorUnexpected;
+          _isLoading = false;
+        });
+      }
     } 
   }
 
