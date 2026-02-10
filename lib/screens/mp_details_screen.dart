@@ -891,7 +891,7 @@ return Scaffold(
                          final internalPath = '/$lang/$slug/$term/legislations/${vote.link}';
                          final fullWebUrl = kIsWeb 
                              ? Uri.parse('${Uri.base.origin}/#$internalPath')
-                             : Uri.parse(Uri.base.origin + internalPath);
+                             : Uri.parse('https://lustra.dev$internalPath');
                          
                          return Link(
                            uri: fullWebUrl,

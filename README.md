@@ -1,4 +1,4 @@
-# Lustra - Citizens Above Politics 🏛️
+# Lustra - Mirror Parliament 🏛️
 
 [![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm%20Noncommercial-blue.svg)](https://polyformproject.org/licenses/noncommercial/1.0.0/)
 [![Flutter](https://img.shields.io/badge/Built%20with-Flutter-02569B.svg)](https://flutter.dev)

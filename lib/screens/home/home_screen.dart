@@ -117,7 +117,7 @@ class HomeContentState extends State<HomeContent> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final manager = Provider.of<ParliamentManager>(context);
+    final manager = Provider.of<ParliamentManager>(context, listen: false);
     if (!manager.isReady || manager.isLoading) return;
     final newActiveService = Provider.of<ParliamentServiceInterface>(context);
     final newTerm = newActiveService.currentTerm;
