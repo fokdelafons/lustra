@@ -1,20 +1,22 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+import 'package:cloud_functions/cloud_functions.dart';
+import 'package:lustra/widgets/verification_guard.dart';
+import 'package:lustra/providers/user_provider.dart';
+import 'package:go_router/go_router.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import '../models/legislation.dart';
 import '../models/home_screen_data.dart';
 import '../models/mp.dart';
 import '../services/voting_service.dart';
 import '../services/parliament_service_interface.dart';
 import '../services/parliament_manager.dart';
-import '../screens/login_screen.dart';
-import 'dart:developer' as developer;
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import '../models/legislation.dart';
 import '../services/api_service.dart';
-import 'package:cloud_functions/cloud_functions.dart';
-import 'package:lustra/widgets/verification_guard.dart';
-import 'package:lustra/providers/user_provider.dart';
 
 class CitizenPollWidget extends StatefulWidget {
   final String targetType;
@@ -113,13 +115,13 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
     
     final l10n = AppLocalizations.of(context)!;
     final scaffoldMessenger = ScaffoldMessenger.of(context);
-    final navigator = Navigator.of(context);
 
     final countryPrefix = parliamentManager.activeServiceId ?? 'unknown';
     final voteKey = '${countryPrefix}_${widget.targetType}_${widget.targetId}';
 
     if (user == null) {
-      navigator.push(MaterialPageRoute(builder: (context) => const LoginScreen()));
+      final currentPath = GoRouterState.of(context).uri.toString();
+      context.push(Uri(path: '/login', queryParameters: {'next': currentPath}).toString());
       return;
     }
     setState(() => _isVoteProcessing = true);
@@ -385,7 +387,8 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
         icon: const Icon(Icons.login, size: 18),
         label: Text(AppLocalizations.of(context)!.loginToVote),
         onPressed: () {
-          Navigator.of(context).push(MaterialPageRoute(builder: (context) => const LoginScreen()));
+          final currentPath = GoRouterState.of(context).uri.toString();
+          context.push(Uri(path: '/login', queryParameters: {'next': currentPath}).toString());
         },
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),

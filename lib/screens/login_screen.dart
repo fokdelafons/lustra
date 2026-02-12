@@ -24,7 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  var _isLoginMode = true;
+  String _mode = 'login'; // 'login', 'register', 'onboarding'
   var _isLoading = false;
   var _isGoogleLoading = false;
   var _isFacebookLoading = false;
@@ -49,6 +49,17 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+@override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final queryMode = GoRouterState.of(context).uri.queryParameters['mode'];
+    if (queryMode != null && ['login', 'register', 'onboarding'].contains(queryMode)) {
+      setState(() {
+        _mode = queryMode;
+      });
+    }
+  }
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -63,8 +74,16 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    if (!_isLoginMode && !_termsAccepted) {
+    if (_mode != 'onboarding' && _mode != 'login' && !_termsAccepted) {
       setState(() {
+        _termsValidationError = true;
+        _errorMessage = l10n.validatorAcceptTerms;
+      });
+      return;
+    }
+    
+    if (_mode == 'onboarding' && !_termsAccepted) {
+       setState(() {
         _termsValidationError = true;
         _errorMessage = l10n.validatorAcceptTerms;
       });
@@ -80,28 +99,37 @@ class _LoginScreenState extends State<LoginScreen> {
     });
  
     String? authError;
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
  
     try {
       final authService = Provider.of<AuthService>(context, listen: false);
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
       
-      if (_isLoginMode) {
+      if (_mode == 'login') {
         await authService.signInWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
-      } else {
+      } else if (_mode == 'register') {
+        userProvider.setOnboardingStatus(true);
+
         await authService.signUpWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         );
-        await authService.completeOnboarding(
+        await userProvider.createProfile(
           marketingConsent: _marketingConsent,
           parliamentId: _selectedParliamentId!,
         );
-        await userProvider.refreshProfile();
+      } else if (_mode == 'onboarding') {
+        userProvider.setOnboardingStatus(true);
+        
+        await userProvider.createProfile(
+          marketingConsent: _marketingConsent,
+          parliamentId: _selectedParliamentId!,
+        );
       }
     } on FirebaseAuthException catch (e) {
+      userProvider.setOnboardingStatus(false);
       switch (e.code) {
         case 'invalid-credential':
         case 'user-not-found':
@@ -114,11 +142,16 @@ class _LoginScreenState extends State<LoginScreen> {
         case 'weak-password':
           authError = l10n.authErrorWeakPassword;
           break;
+        case 'no-user': 
+          authError = "Sesja wygasła. Zaloguj się ponownie.";
+          break;
         default:
           authError = l10n.authErrorDefault;
       }
     } catch (e) {
+      userProvider.setOnboardingStatus(false);
       authError = l10n.authErrorUnexpected;
+      developer.log("Error during submit: $e", name: "LoginScreen");
     }
  
     if (mounted) {
@@ -165,40 +198,38 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> _signInWithGoogle() async {
+ Future<void> _signInWithGoogle() async {
     final l10n = AppLocalizations.of(context)!;
     final authService = Provider.of<AuthService>(context, listen: false);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-
     setState(() { _isGoogleLoading = true; _errorMessage = null; });
+    userProvider.setOnboardingStatus(true);
     try {
       await authService.signInWithGoogle();
-      await userProvider.refreshProfile();
-
       if (!mounted) return;
       final bool hasProfile = await authService.hasCompletedProfile();
-      
       if (!mounted) return;
       if (hasProfile) {
+        userProvider.setOnboardingStatus(false);
         _handleSmartNavigation();
       } else {
         final user = authService.currentUser;
         if (user != null) {
-          final nextParam = GoRouterState.of(context).uri.queryParameters['next'];
-          String route = '/post-social-login-consent';
-          if (nextParam != null && nextParam.isNotEmpty) {
-            route += '?next=$nextParam';
-          }
-          context.pushReplacement(route, extra: user);
+          setState(() {
+            _mode = 'onboarding';
+            _errorMessage = null;
+          });
         }
       }
     } on FirebaseAuthException catch (e) {
+      userProvider.setOnboardingStatus(false);
       if (e.code == 'account-exists-with-different-credential') {
         _errorMessage = l10n.authErrorAccountExists;
       } else if (e.code != 'sign-in-cancelled') {
         _errorMessage = l10n.authErrorGoogleFailed;
       }
     } catch (e, s) {
+      userProvider.setOnboardingStatus(false);
       developer.log('Google Sign-In Error in UI', name: 'LoginScreen', error: e, stackTrace: s);
       _errorMessage = '${l10n.authErrorGoogleFailed}: ${e.toString()}';
     } finally {
@@ -213,36 +244,33 @@ class _LoginScreenState extends State<LoginScreen> {
     final authService = Provider.of<AuthService>(context, listen: false);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     setState(() { _isFacebookLoading = true; _errorMessage = null; });
+    userProvider.setOnboardingStatus(true); 
     try {
       await authService.signInWithFacebook();
-      await userProvider.refreshProfile();
-
       if (!mounted) return;
       final bool hasProfile = await authService.hasCompletedProfile();
-      
       if (!mounted) return;
       if (hasProfile) {
+        userProvider.setOnboardingStatus(false);
+        await userProvider.refreshProfile();
         _handleSmartNavigation();
       } else {
-        final user = authService.currentUser;
-        if (user != null) {
-          final nextParam = GoRouterState.of(context).uri.queryParameters['next'];
-          String route = '/post-social-login-consent';
-          if (nextParam != null && nextParam.isNotEmpty) {
-            route += '?next=$nextParam';
-          }
-          context.pushReplacement(route, extra: user);
-        }
+        setState(() {
+          _mode = 'onboarding';
+          _errorMessage = null;
+        });
       }
     } on FirebaseAuthException catch (e) {
-      developer.log('Facebook FirebaseAuthException in UI', name: 'LoginScreen', error: e, stackTrace: e.stackTrace);
+      userProvider.setOnboardingStatus(false);
+      developer.log('Facebook Auth Error', name: 'LoginScreen', error: e);
       if (e.code == 'account-exists-with-different-credential') {
         _errorMessage = l10n.authErrorAccountExists;
       } else if (e.code != 'sign-in-cancelled') {
-        _errorMessage = '${l10n.authErrorFacebookFailed}: ${e.message} (${e.code})';
+        _errorMessage = '${l10n.authErrorFacebookFailed}: ${e.message}';
       }
     } catch (e, s) {
-      developer.log('Facebook Sign-In Generic Error in UI', name: 'LoginScreen', error: e, stackTrace: s);
+      userProvider.setOnboardingStatus(false);
+      developer.log('Facebook Generic Error', name: 'LoginScreen', error: e, stackTrace: s);
       _errorMessage = '${l10n.authErrorFacebookFailed}: ${e.toString()}';
     } finally {
       if (mounted) {
@@ -251,41 +279,40 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> _signInWithApple() async {
+ Future<void> _signInWithApple() async {
 		final l10n = AppLocalizations.of(context)!;
 		final authService = Provider.of<AuthService>(context, listen: false);
         final userProvider = Provider.of<UserProvider>(context, listen: false);
-
 		setState(() { _isAppleLoading = true; _errorMessage = null; });
+        userProvider.setOnboardingStatus(true);
 		try {
 			await authService.signInWithApple();
-            await userProvider.refreshProfile();
-
 			if (!mounted) return;
 			final bool hasProfile = await authService.hasCompletedProfile();
 			if (!mounted) return;
 			if (hasProfile) {
-        _handleSmartNavigation();
+                userProvider.setOnboardingStatus(false);
+                _handleSmartNavigation();
 			} else {
 				final user = authService.currentUser;
-				if (user != null) {
-          final nextParam = GoRouterState.of(context).uri.queryParameters['next'];
-          String route = '/post-social-login-consent';
-          if (nextParam != null && nextParam.isNotEmpty) {
-            route += '?next=$nextParam';
-          }
-					context.pushReplacement(route, extra: user);
-				}
+                if (user != null) {
+                    setState(() {
+                        _mode = 'onboarding';
+                        _errorMessage = null;
+                    });
+                }
 			}
 		} on FirebaseAuthException catch (e) {
-      developer.log('Apple FirebaseAuthException in UI', name: 'LoginScreen', error: e, stackTrace: e.stackTrace);
+            userProvider.setOnboardingStatus(false);
+            developer.log('Apple FirebaseAuthException in UI', name: 'LoginScreen', error: e, stackTrace: e.stackTrace);
 			if (e.code == 'account-exists-with-different-credential') {
 				_errorMessage = l10n.authErrorAccountExists;
 			} else if (e.code != 'sign-in-cancelled') {
 				_errorMessage = '${l10n.authErrorAppleFailed}: ${e.message} (${e.code})';
 			}
 		} catch (e, s) {
-      developer.log('Apple Sign-In Generic Error in UI', name: 'LoginScreen', error: e, stackTrace: s);
+            userProvider.setOnboardingStatus(false);
+            developer.log('Apple Sign-In Generic Error in UI', name: 'LoginScreen', error: e, stackTrace: s);
 			_errorMessage = '${l10n.authErrorAppleFailed}: ${e.toString()}';
 		} finally {
 			if (mounted) {
@@ -325,7 +352,10 @@ Widget build(BuildContext context) {
   final l10n = AppLocalizations.of(context)!;
   return Scaffold(
     appBar: AppBar(
-      title: Text(_isLoginMode ? l10n.loginScreenTitle : l10n.registrationScreenTitle),
+      title: Text(_mode == 'login' 
+          ? l10n.loginScreenTitle 
+          : (_mode == 'register' ? l10n.registrationScreenTitle : l10n.registrationFinishTitle)),
+      automaticallyImplyLeading: _mode != 'onboarding',
     ),
     body: Center(
       child: SingleChildScrollView(
@@ -338,6 +368,21 @@ Widget build(BuildContext context) {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                if (_mode == 'onboarding') ...[
+                   Text(
+                    l10n.welcomeMessage,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.finalStepMessage,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 32),
+                ],
+                if (_mode != 'onboarding') ...[
                 TextFormField(
                   controller: _emailController,
                   decoration: InputDecoration(labelText: l10n.emailLabel, border: const OutlineInputBorder()),
@@ -363,7 +408,8 @@ Widget build(BuildContext context) {
                     return null;
                   },
                 ),
-                if (_isLoginMode)
+                ], // End of non-onboarding fields
+                if (_mode == 'login')
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
@@ -371,7 +417,7 @@ Widget build(BuildContext context) {
                       child: Text(l10n.forgotPasswordButton),
                     ),
                   ),
-                if (!_isLoginMode) ...[
+                if (_mode != 'login') ...[
                   const SizedBox(height: 16),
                   Consumer<ParliamentManager>(
                     builder: (context, parliamentManager, child) {
@@ -482,9 +528,12 @@ Widget build(BuildContext context) {
                   ElevatedButton(
                     onPressed: _submit,
                     style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
-                    child: Text(_isLoginMode ? l10n.loginButton : l10n.registerButton),
+                    child: Text(_mode == 'login' 
+                        ? l10n.loginButton 
+                        : (_mode == 'register' ? l10n.registerButton : l10n.continueButton)),
                   ),
                 const SizedBox(height: 16),
+                if (_mode == 'login') ...[
                 Row(
                   children: [
                     const Expanded(child: Divider()),
@@ -534,15 +583,17 @@ Widget build(BuildContext context) {
                         ),
                       ),
                   ],
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      _isLoginMode = !_isLoginMode;
-                      _errorMessage = null;
-                    });
-                  },
-                  child: Text(_isLoginMode ? l10n.promptToRegister : l10n.promptToLogin),
-                ),
+                ], // End of social login block
+                if (_mode != 'onboarding')
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _mode = _mode == 'login' ? 'register' : 'login';
+                        _errorMessage = null;
+                      });
+                    },
+                    child: Text(_mode == 'login' ? l10n.promptToRegister : l10n.promptToLogin),
+                  ),
               ],
             ),
           ),

@@ -71,7 +71,7 @@
             return res.status(200).json({ data: { status: 'warmed_up_successfully' } });
         }
         const startTime = Date.now();
-    try {
+            try {
             const data = req.body.data || req.body;
             const { type, country, searchQuery, lang: uiLang, term, limit: queryLimit, offset: queryOffset, ...otherParams } = data;
             const offset = parseInt(queryOffset) || 0;
@@ -87,8 +87,6 @@
             if (type === 'legislations' && !term) {
                 return res.status(400).json({ error: { code: 'invalid-argument', message: "Brak wymaganego parametru 'term' dla wyszukiwania legislacji." } });
             }
-
-// 1. Normalizacja i Tokenizacja (bez stemmowania na tym etapie)
             const normalizedRawText = searchQuery.toLowerCase()
                 .replace(/[äăâàá]/g, 'a').replace(/[öôòó]/g, 'o').replace(/[üûùú]/g, 'u')
                 .replace(/ß/g, 'ss').replace(/[ęėèé]/g, 'e').replace(/[ąãà]/g, 'a')
@@ -96,7 +94,6 @@
                 .replace(/[śšş]/g, 's').replace(/[żźž]/g, 'z').replace(/[ýỳ]/g, 'y')
                 .replace(/[îì]/g, 'i').replace(/[^a-z0-9\s]/g, '');
             
-            // Dzielimy na słowa, odrzucamy puste
             const rawTokens = normalizedRawText.split(/\s+/).filter(w => w.length > 0);
 
             if (rawTokens.length === 0) {
@@ -108,27 +105,21 @@
             const docIdSets = [];
             const priorityIds = new Map(); 
 
-            // Helper do stemmerów
             const getStemmer = (lang) => stemmers[lang] || ((t) => t);
 
-            // 2. Pętla po tokenach (Multi-Stemming)
             for (const rawToken of rawTokens) {
-                // Generujemy warianty słowa dla obu języków (np. "energy" i "energ")
                 const stem1 = getStemmer(searchLang)(rawToken);       
                 const stem2 = getStemmer(normalizedUiLang)(rawToken); 
                 
-                // Zbiór słów do sprawdzenia w bazie (unikalne)
                 const wordsToCheck = new Set([stem1, stem2]);
-                // Opcjonalnie: sprawdź też oryginał jeśli długi (na wypadek braku stemmera)
                 if (rawToken.length > 2) wordsToCheck.add(rawToken); 
                 
                 const docRefs = [];
                 wordsToCheck.forEach(w => {
-                    docRefs.push(wordsCollectionRef.doc(w));       // Zwykłe
-                    docRefs.push(wordsCollectionRef.doc(`id_${w}`)); // ID
+                    docRefs.push(wordsCollectionRef.doc(w));
+                    docRefs.push(wordsCollectionRef.doc(`id_${w}`));
                 });
 
-                // Pobieramy wszystkie warianty na raz
                 const docsSnapshots = await db.getAll(...docRefs);
 
                 const idsForThisToken = new Set();
@@ -145,7 +136,7 @@
                          if (data[lang] && Array.isArray(data[lang])) {
                              data[lang].forEach(id => {
                                  idsForThisToken.add(id);
-                                 if (isIdDoc) { // Logic: Priority Map
+                                 if (isIdDoc) {
                                      const currentScore = priorityIds.get(id) || 0;
                                      priorityIds.set(id, currentScore + 1);
                                  }
@@ -167,7 +158,6 @@
                 }
             }
 
-            // Jeśli po odfiltrowaniu ignorowanych słów nic nie zostało, zwróć pusty wynik.
             if (docIdSets.length === 0) {
                 return res.status(200).json({ data: { results: [], meta: { total: 0, count: 0 } } });
             }
@@ -193,7 +183,6 @@
                 finalResults = finalResults.filter(item => item.club === otherParams.club);
             }
 
-// Przygotowanie do szukania frazy w tekście (dla lepszego sortowania)
             const lowerQuery = searchQuery.toLowerCase();
 
             finalResults.sort((a, b) => {

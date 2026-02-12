@@ -13,8 +13,12 @@ class UserProvider with ChangeNotifier {
   
   bool _isInitialized = false;
   bool _profileExists = true;
+  bool _isOnboarding = false;
 
   bool get profileExists => _profileExists;
+  void setOnboardingStatus(bool status) {
+    _isOnboarding = status;
+  }
   String? _currentUserId;
 
   bool get isInitialized => _isInitialized;
@@ -31,12 +35,31 @@ class UserProvider with ChangeNotifier {
       _clear();
     } else if (_currentUserId != firebaseUser.uid) {
       _currentUserId = firebaseUser.uid;
-      _fetchUserProfile();
+      if (!_isOnboarding) {
+        _fetchUserProfile();
+      }
     }
   }
 
   Future<void> refreshProfile() async {
     await _fetchUserProfile();
+  }
+
+  Future<void> createProfile({required bool marketingConsent, required String parliamentId}) async {
+    try {
+      await _apiService.callFunction('userOnboarding', params: {
+        'marketingConsent': marketingConsent, 
+        'parliamentId': parliamentId,
+      });
+      _marketingConsent = marketingConsent;
+      _profileExists = true;
+      _isOnboarding = false;
+      _isInitialized = true;
+      notifyListeners();
+    } catch (e) {
+      developer.log("Błąd tworzenia profilu: $e", name: 'UserProvider');
+      rethrow;
+    }
   }
 
   Future<void> _fetchUserProfile() async {
@@ -71,13 +94,12 @@ class UserProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // Metoda do aktualizacji zgód z poziomu UI (np. Switch)
   Future<void> updatePreferences({bool? marketing, bool? notifications, String? parliamentId, String? fcmToken}) async {
     if (marketing != null) _marketingConsent = marketing;
     if (notifications != null) _notificationsEnabled = notifications;
     if (parliamentId != null) _notificationParliamentId = parliamentId;
     
-    notifyListeners(); // Optimistic UI update
+    notifyListeners();
 
     try {
       final Map<String, dynamic> data = {};
@@ -85,14 +107,8 @@ class UserProvider with ChangeNotifier {
       if (notifications != null) data['notificationsEnabled'] = notifications;
       if (parliamentId != null) data['notificationParliamentId'] = parliamentId;
       if (fcmToken != null) data['fcmToken'] = fcmToken;
-
-      // Zakładamy, że AuthService ma metodę update, ale tutaj używamy ApiService lub AuthService z contextu w UI.
-      // Aby zachować czystość UserProvidera, ta metoda aktualizuje stan lokalny, 
-      // a faktyczny strzał do API może iść przez AuthService wywołany w UI, 
-      // LUB (lepiej) dodaj tu logikę zapisu jeśli masz odpowiedni endpoint w ApiService.
     } catch (e) {
       developer.log("Błąd aktualizacji preferencji: $e", name: 'UserProvider');
-      // Revert on error logic here if needed
     }
   }
 

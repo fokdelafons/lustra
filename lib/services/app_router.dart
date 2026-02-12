@@ -1,8 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart'; 
 import 'package:firebase_analytics/firebase_analytics.dart';
 
 import '../models/mp.dart';
@@ -12,7 +11,6 @@ import '../models/parliament_source.dart';
 import '../providers/language_provider.dart';
 import '../screens/home/home_screen.dart';
 import '../screens/login_screen.dart';
-import '../screens/post_social_login_consent_screen.dart';
 import '../screens/home/info_screen.dart';
 import '../screens/home/terms_screen.dart'; 
 import '../screens/home/tech_screen.dart';
@@ -75,17 +73,9 @@ final GoRouter router = GoRouter(
       ],
     ),
     
-    GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
-    
     GoRoute(
-      path: '/post-social-login-consent',
-      builder: (context, state) {
-        if (state.extra is User) {
-          final user = state.extra as User;
-          return PostSocialLoginConsentScreen(user: user);
-        }
-        return const NewHomeScreen(child: HomeContent()); 
-      },
+      path: '/login',
+      builder: (context, state) => const LoginScreen(),
     ),
 
     // 1. (/:lang/:pid/:term/members)
