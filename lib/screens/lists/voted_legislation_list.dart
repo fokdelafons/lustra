@@ -6,6 +6,8 @@ import 'package:provider/provider.dart';
 import 'package:lustra/providers/language_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:web_smooth_scroll/web_smooth_scroll.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../services/parliament_service_interface.dart';
 import '../../models/legislation.dart';
@@ -97,6 +99,12 @@ class LegislationScreenState extends State<LegislationScreen> with AutomaticKeep
        }
      });
    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
 Future<void> _loadFilterOptions() async {
@@ -333,47 +341,32 @@ Widget build(BuildContext context) {
 }
 
   Widget _buildListComponent(List<Legislation> processedBills) {
-    developer.log('Building list component. isLoading: $_isLoading, errorMessage: $_errorMessage, processed count: ${processedBills.length}', name: 'LegislationScreen.ListComponent');
-    if (_isLoading && _bills.isEmpty) {
-      developer.log('Showing initial loading indicator.', name: 'LegislationScreen.ListComponent');
-      return const Center(child: CircularProgressIndicator());
-    }
-    if (_errorMessage != null) {
-       developer.log('Showing error widget: $_errorMessage', name: 'LegislationScreen.ListComponent');
-      return _buildErrorWidget();
-    }
-    if (!_isLoading && processedBills.isEmpty) {
-       developer.log('Showing empty list widget. Original bills count: ${_bills.length}', name: 'LegislationScreen.ListComponent');
-      return _buildEmptyListWidget();
-    }
-    developer.log('Showing list view with ${processedBills.length} items. isLoadingMore: $_isLoadingMore', name: 'LegislationScreen.ListComponent');
-    return RefreshIndicator(
-      onRefresh: () async {
-        _resetAndLoadData(forceRefresh: false);
-      },
-      child: NotificationListener<ScrollNotification>(
-        onNotification: (ScrollNotification scrollInfo) {
-          bool canLoadMore = !_isLoadingMore &&
-                             _hasMoreData &&
-                             !_isLoading && 
-                             scrollInfo.metrics.pixels > scrollInfo.metrics.maxScrollExtent - 300; 
-          if (canLoadMore) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted && !_isLoadingMore && _hasMoreData && !_isLoading) { 
-                 _loadMoreBills();
-              }
-            });
-          }
-          return true; 
-        },
-        child: ListView.builder(
-          key: const PageStorageKey<String>('ended_legislation_list_scroll'),
-          controller: _scrollController,
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0), 
-          itemCount: processedBills.length + (_isLoadingMore ? 1 : 0),
-          itemBuilder: (context, index) {
-            if (index == processedBills.length) {
-              return _isLoadingMore
+      developer.log('Building list component. isLoading: $_isLoading, errorMessage: $_errorMessage, processed count: ${processedBills.length}', name: 'LegislationScreen.ListComponent');
+      
+      if (_isLoading && _bills.isEmpty) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      if (_errorMessage != null) {
+        return _buildErrorWidget();
+      }
+      if (!_isLoading && processedBills.isEmpty) {
+        return _buildEmptyListWidget();
+      }
+
+      final bool isDesktopWeb = kIsWeb && MediaQuery.of(context).size.width > 750;
+
+      Widget listView = ListView.builder(
+        controller: _scrollController,
+        
+        physics: isDesktopWeb 
+            ? const NeverScrollableScrollPhysics() 
+            : const AlwaysScrollableScrollPhysics(),
+            
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        itemCount: processedBills.length + (_isLoadingMore ? 1 : 0),
+        itemBuilder: (context, index) {
+          if (index == processedBills.length) {
+            return _isLoadingMore
                 ? const Center(
                     child: Padding(
                       padding: EdgeInsets.symmetric(vertical: 16.0),
@@ -381,39 +374,76 @@ Widget build(BuildContext context) {
                     ),
                   )
                 : const SizedBox.shrink();
-            }
-            final bill = processedBills[index];
-            Widget? votingInfoWidget;
-            if (bill.votingDate != null) {
-              votingInfoWidget = Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: Icon(Icons.how_to_vote_outlined, size: 16, color: Colors.grey[600]),
-                  ),
-                  Text(
-                    DateFormat.yMMMd(Localizations.localeOf(context).languageCode).format(bill.votingDate!),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[700]),
-                  ),
-                ],
-              );
-            }
-            return LegislationListCard(
-              bill: bill,
-              additionalInfoWidget: votingInfoWidget,
-              onTap: () {
-                final manager = context.read<ParliamentManager>();
-                final slug = manager.activeSlug;
-                final lang = context.read<LanguageProvider>().appLanguageCode;
-                final term = manager.currentTerm;
-                context.smartNavigate('/$lang/$slug/$term/legislations/${bill.id}?list=voted', extra: bill);
-              },
+          }
+          final bill = processedBills[index];
+          Widget? votingInfoWidget;
+          if (bill.votingDate != null) {
+            votingInfoWidget = Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: Icon(Icons.how_to_vote_outlined,
+                      size: 16, color: Colors.grey[600]),
+                ),
+                Text(
+                  DateFormat.yMMMd(Localizations.localeOf(context).languageCode)
+                      .format(bill.votingDate!),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: Colors.grey[700]),
+                ),
+              ],
             );
+          }
+          return LegislationListCard(
+            bill: bill,
+            additionalInfoWidget: votingInfoWidget,
+            onTap: () {
+              final manager = context.read<ParliamentManager>();
+              final slug = manager.activeSlug;
+              final lang = context.read<LanguageProvider>().appLanguageCode;
+              final term = manager.currentTerm;
+              context.smartNavigate(
+                  '/$lang/$slug/$term/legislations/${bill.id}?list=voted',
+                  extra: bill);
+            },
+          );
+        },
+      );
+
+      return RefreshIndicator(
+        onRefresh: () async {
+          _resetAndLoadData(forceRefresh: false);
+        },
+        child: NotificationListener<ScrollNotification>(
+          onNotification: (ScrollNotification scrollInfo) {
+            bool canLoadMore = !_isLoadingMore &&
+                _hasMoreData &&
+                !_isLoading &&
+                scrollInfo.metrics.pixels >
+                    scrollInfo.metrics.maxScrollExtent - 300;
+            if (canLoadMore) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted && !_isLoadingMore && _hasMoreData && !_isLoading) {
+                  _loadMoreBills();
+                }
+              });
+            }
+            return true;
           },
+          child: isDesktopWeb
+              ? WebSmoothScroll(
+                controller: _scrollController,
+                scrollAnimationLength: 600,
+                scrollSpeed: 2.5,
+                curve: Curves.easeOutQuart,
+                child: listView,
+              )
+              : listView,
         ),
-      ),
-    );
-  }
+      );
+    }
 
   Widget _buildErrorWidget() {
     final l10n = AppLocalizations.of(context)!;

@@ -107,6 +107,18 @@
       bottom: 0;
       right: 0;
     }
+
+    .seo-links {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+    }
   </style>
   <script id="splash-screen-script">
     function removeSplashFromWeb() {
@@ -166,16 +178,16 @@
       <img class="center" aria-hidden="true" src="splash/img/light-1x.png" alt="">
   </picture>
     <!-- SEO LAYER START -->
-  <noscript>
-    <nav>
-      <h1>Lustra Legislation Archive</h1>
-      <p>Independent, AI-powered legislative intelligence platform providing summaries and full texts of bills from:</p>
-      <ul>
-        <li><a href="/en/us-congress/119/">United States Congress – 119th Term</a></li>
-        <!-- add other hubs -->
-      </ul>
-    </nav>
-  </noscript>
+<div class="seo-links">
+  <nav>
+    <h1>Lustra Legislation Archive</h1>
+    <ul>
+      <li><a href="/en/us-congress/">United States Congress – Index</a></li>
+      <li><a href="/en/us-congress/119/">United States Congress – 119th Term</a></li>
+       <!-- reszta linków -->
+    </ul>
+  </nav>
+</div>
   <!-- SEO LAYER END -->
   <script src="flutter_bootstrap.js" async=""></script>
 

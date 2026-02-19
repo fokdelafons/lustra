@@ -12,6 +12,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:lustra/models/home_screen_data.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:web_smooth_scroll/web_smooth_scroll.dart';
 
 import '../models/legislation.dart';
 import '../services/parliament_service_interface.dart';
@@ -46,6 +47,7 @@ class LegislationDetailsScreen extends StatefulWidget {
 }
 
 class _LegislationDetailsScreenState extends State<LegislationDetailsScreen> {
+  final ScrollController _pageScrollController = ScrollController();
   Legislation? _bill;
   bool _isLoading = false;
   bool _isFetchingDetails = false;
@@ -57,8 +59,14 @@ class _LegislationDetailsScreenState extends State<LegislationDetailsScreen> {
   }
 
   @override
+  void dispose() {
+    _pageScrollController.dispose();
+    super.dispose();
+  }
+  @override
   void initState() {
     super.initState();
+    
     if (widget.bill != null) {
       _bill = widget.bill;
       _isLoading = false;
@@ -147,26 +155,27 @@ void _initializeStateData() {
     );
   }
 
-Widget _buildCitizenPoll(BuildContext context) {
-    final voteTargetType = (widget.listType == 'civic') ? 'civic' : 'legislation';
-
-    return CitizenPollWidget(
-      targetType: voteTargetType,
-      targetId: _bill!.id,
-      itemData: _bill!,
-      onVoteSuccess: (updatedCounters) {
-        if (mounted) {
-          setState(() {
-            _bill = _bill!.copyWith(
-              likes: updatedCounters['likes'],
-              dislikes: updatedCounters['dislikes'],
-               popularity: updatedCounters['popularity'],
-             );
-          });
-         }
-      },
-    );
-  }
+  Widget _buildCitizenPoll(BuildContext context) {
+      final voteTargetType = (widget.listType == 'civic') ? 'civic' : 'legislation';
+      return CitizenPollWidget(
+        targetType: voteTargetType,
+        targetId: _bill!.id,
+        itemData: _bill!,
+        enablePostVoteAction: true,
+        onShare: _shareLegislation,
+        onVoteSuccess: (updatedCounters) {
+          if (mounted) {
+            setState(() {
+              _bill = _bill!.copyWith(
+                likes: updatedCounters['likes'],
+                dislikes: updatedCounters['dislikes'],
+                popularity: updatedCounters['popularity'],
+              );
+            });
+          }
+        },
+      );
+    }
 
 void _shareLegislation() {
     // 1. Service Instance
@@ -604,13 +613,11 @@ void _reportError() {
       ],
     );
 
-    return Scaffold(
-      appBar: DetailsAppBar(
-        title: l10n.detailsScreenTitle,
-        onShare: _shareLegislation,
-        isShareEnabled: !_isFetchingDetails,
-      ),
-      body: SingleChildScrollView(
+    final bool isDesktopWeb = kIsWeb && MediaQuery.of(context).size.width > 750;
+
+    Widget contentBody = SingleChildScrollView(
+        controller: _pageScrollController,
+        physics: isDesktopWeb ? const NeverScrollableScrollPhysics() : const AlwaysScrollableScrollPhysics(),
         padding: kIsWeb ? const EdgeInsets.symmetric(vertical: 32.0) : const EdgeInsets.all(16.0),
         child: kIsWeb 
           ? Center(
@@ -633,7 +640,23 @@ void _reportError() {
           padding: EdgeInsets.zero, 
           child: contentColumn,
         ),
+      );
+
+    return Scaffold(
+      appBar: DetailsAppBar(
+        title: l10n.detailsScreenTitle,
+        onShare: _shareLegislation,
+        isShareEnabled: !_isFetchingDetails,
       ),
+      body: isDesktopWeb
+          ? WebSmoothScroll(
+              controller: _pageScrollController,
+              scrollAnimationLength: 600,
+              scrollSpeed: 2.5,
+              curve: Curves.easeOutCubic,
+              child: contentBody,
+            )
+          : contentBody,
     );
   }
 }

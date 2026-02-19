@@ -10,6 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:lustra/providers/language_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:url_launcher/link.dart';
+import 'package:web_smooth_scroll/web_smooth_scroll.dart';
 
 import '../models/mp.dart';
 import '../services/parliament_service_interface.dart';
@@ -59,6 +60,7 @@ class MPDetailsScreenState extends State<MPDetailsScreen> with SingleTickerProvi
   String? _lastInterpellationId;
   bool _hasMoreInterpellations = true;
   bool _isLoadingMoreInterpellations = false;
+  final ScrollController _pageScrollController = ScrollController();
 
 @override
   void initState() {
@@ -265,6 +267,7 @@ void didUpdateWidget(MPDetailsScreen oldWidget) {
   @override
   void dispose() {
     _tabController.dispose();
+    _pageScrollController.dispose();
     super.dispose();
   }
 
@@ -408,14 +411,11 @@ Widget build(BuildContext context) {
   final TextStyle? subSectionTitleStyle = textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600);
   final displayMP = _mp!;
 
-return Scaffold(
-      appBar: DetailsAppBar(
-        title: l10n.mpDetailsScreenTitle(displayMP.firstName, displayMP.lastName),
-        onShare: _shareMPDetails,
-        isShareEnabled: !(_isLoadingVotings),
-      ),
-      body: kIsWeb
+  final bool isDesktopWeb = kIsWeb && MediaQuery.of(context).size.width > 750;
+    Widget contentBody = kIsWeb
         ? SingleChildScrollView(
+            controller: _pageScrollController,
+            physics: isDesktopWeb ? const NeverScrollableScrollPhysics() : const AlwaysScrollableScrollPhysics(),
             child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 750),
@@ -432,11 +432,29 @@ return Scaffold(
             ),
           )
         : SingleChildScrollView(
+            controller: _pageScrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
             child: _buildContent(theme, textTheme, sectionTitleStyle, subSectionTitleStyle),
-          ),
+          );
+
+
+return Scaffold(
+      appBar: DetailsAppBar(
+        title: l10n.mpDetailsScreenTitle(displayMP.firstName, displayMP.lastName),
+        onShare: _shareMPDetails,
+        isShareEnabled: !(_isLoadingVotings),
+      ),
+      body: isDesktopWeb
+          ? WebSmoothScroll(
+              controller: _pageScrollController,
+              scrollAnimationLength: 600,
+              scrollSpeed: 2.5,
+              curve: Curves.easeOutCubic,
+              child: contentBody,
+            )
+          : contentBody,
     );
   }
-
   Widget _buildContent(ThemeData theme, TextTheme textTheme, TextStyle? sectionTitleStyle, TextStyle? subSectionTitleStyle) {
     final l10n = AppLocalizations.of(context)!;
     return Padding(

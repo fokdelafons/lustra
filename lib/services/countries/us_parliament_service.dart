@@ -18,7 +18,7 @@ import '../../providers/language_provider.dart';
 import '../../providers/translators.dart';
 import '../parliament_service_interface.dart';
 import '../api_service.dart';
-import '../parliament_cache_manager.dart';
+import '../cache/parliament_cache_manager.dart';
 import '../parliament_manager.dart';
 
 class USParliamentService with ChangeNotifier implements ParliamentServiceInterface {

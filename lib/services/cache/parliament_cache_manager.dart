@@ -1,7 +1,7 @@
 import 'package:lustra/models/home_screen_data.dart';
 import 'package:lustra/models/legislation.dart';
 import 'package:lustra/models/mp.dart';
-import 'package:lustra/services/cache_service.dart';
+import 'package:lustra/services/cache/cache_service.dart';
 
 class ParliamentCacheManager {
   final String prefix;

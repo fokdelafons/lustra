@@ -11,11 +11,10 @@ class CivicProjectScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!; // <-- Dodane
-    // Kolorystyka
-    final primaryColor = Colors.teal[800]!; // Ciemniejszy teal dla tekstów
-    final accentColor = Colors.teal[700]!;  // Akcent dla belek
-    final backgroundColor = Colors.grey[100]!; // Tło pod kartą
+    final l10n = AppLocalizations.of(context)!;
+    final primaryColor = Colors.teal[800]!;
+    final accentColor = Colors.teal[700]!;
+    final backgroundColor = Colors.grey[100]!;
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -37,7 +36,7 @@ class CivicProjectScreen extends StatelessWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               color: Colors.white,
               child: Padding(
-                padding: const EdgeInsets.all(32.0), // Margines wewnętrzny karty
+                padding: const EdgeInsets.all(32.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -116,7 +115,6 @@ class CivicProjectScreen extends StatelessWidget {
                       _ListItem(bold: l10n.civicStructureArticlesItem, text: l10n.civicStructureArticlesText),
                       _ListItem(bold: l10n.civicStructureExposeItem, text: l10n.civicStructureExposeText),
                     ]),
-                    // Zagnieżdżona lista dla Exposé
                     Padding(
                       padding: const EdgeInsets.only(left: 32.0, top: 4.0),
                       child: Column(
@@ -155,13 +153,13 @@ class CivicProjectScreen extends StatelessWidget {
                     const SizedBox(height: 24),
                     _SubHeader(title: l10n.civicThresholdsTitle),
                     const SizedBox(height: 8),
-                    _buildThresholdRow(Colors.red, "0-40 (Draft)", l10n.civicThresholdRejected),
-                    _buildThresholdRow(Colors.orange, "41-70 (Candidate)", l10n.civicThresholdCandidate),
-                    _buildThresholdRow(Colors.green, "71-100 (Ready)", l10n.civicThresholdReady),
+                    _buildThresholdRow(Colors.red, "0-40", l10n.civicThresholdRejected),
+                    _buildThresholdRow(Colors.orange, "41-85", l10n.civicThresholdCandidate),
+                    _buildThresholdRow(Colors.green, "86-100", l10n.civicThresholdReady),
 
                     const SizedBox(height: 40),
 
-// --- SECTION 4: TEMPLATE ---
+                    // --- SECTION 4: TEMPLATE ---
                     _SectionHeader(title: l10n.civicSection4Title, color: accentColor),
                     const SizedBox(height: 16),
                     _BodyText(l10n.civicSection4Intro),
@@ -211,7 +209,7 @@ class CivicProjectScreen extends StatelessWidget {
     );
   }
 
-  // --- LOGIKA EMAIL ---
+  // --- EMAIL ---
   Future<void> _launchEmail(BuildContext context) async {
     final activeService = context.read<ParliamentManager>().activeService;
     final l10n = AppLocalizations.of(context)!;
@@ -312,7 +310,7 @@ void _showManualEmailDialog(BuildContext context, AppLocalizations l10n, String 
     );
   }
 
-  // --- WIDGETY POMOCNICZE (WIZUALNE) ---
+  // --- VISUALS ---
 
   Widget _buildOrderedList(List<_ListItem> items) {
     return Column(

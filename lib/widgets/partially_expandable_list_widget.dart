@@ -53,34 +53,34 @@ class PartiallyExpandableListWidgetState extends State<PartiallyExpandableListWi
           itemBuilder: (context, index) => widget.itemBuilder(context, visibleItems[index]),
         ),
         if (canExpand)
-          Padding(
-            padding: const EdgeInsets.only(top: 4.0),
-            child: InkWell(
-              onTap: () {
-                setState(() {
-                  _isExpanded = !_isExpanded;
-                });
-              },
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    _isExpanded ? AppLocalizations.of(context)!.actionCollapse : AppLocalizations.of(context)!.actionExpand,
-                    style: TextStyle(
-                      color: Theme.of(context).primaryColor,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Icon(
-                    _isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                    size: 18,
-                    color: Theme.of(context).primaryColor,
-                  ),
-                ],
-              ),
+        Padding(
+          padding: const EdgeInsets.only(top: 4.0),
+          child: TextButton(
+            onPressed: () {
+              setState(() {
+                _isExpanded = !_isExpanded;
+              });
+            },
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  _isExpanded ? AppLocalizations.of(context)!.actionCollapse : AppLocalizations.of(context)!.actionExpand,
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                ),
+                Icon(
+                  _isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                  size: 18,
+                ),
+              ],
             ),
           ),
+        )
       ],
     );
   }

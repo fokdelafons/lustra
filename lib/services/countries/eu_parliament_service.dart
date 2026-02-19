@@ -16,7 +16,7 @@ import '../../providers/language_provider.dart';
 import '../../providers/translators.dart';
 import '../parliament_service_interface.dart';
 import '../api_service.dart';
-import '../parliament_cache_manager.dart';
+import '../cache/parliament_cache_manager.dart';
 
 class EUParliamentService with ChangeNotifier implements ParliamentServiceInterface {
   final ApiService _apiService = ApiService();

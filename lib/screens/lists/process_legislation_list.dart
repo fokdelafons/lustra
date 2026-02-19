@@ -6,6 +6,8 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:lustra/providers/language_provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:web_smooth_scroll/web_smooth_scroll.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../services/parliament_service_interface.dart';
 import '../../models/legislation.dart';
@@ -145,6 +147,12 @@ import '../../widgets/lists_specific/legislation_list_card.dart';
         });
       }
     }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
     Future<void> _loadFilterOptions() async {
       if (!mounted) return;
@@ -382,75 +390,87 @@ Future<void> _loadMoreBills() async {
       );
     }
 
-    Widget _buildListComponent(List<Legislation> processedBills) {
-      if (_isLoading && _bills.isEmpty) {
-        return const Center(child: CircularProgressIndicator());
-      }
+  Widget _buildListComponent(List<Legislation> processedBills) {
+        if (_isLoading && _bills.isEmpty) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-      if (_errorMessage != null) {
-        return _buildErrorWidget();
-      }
+        if (_errorMessage != null) {
+          return _buildErrorWidget();
+        }
 
-      if (!_isLoading && processedBills.isEmpty) {
-        return _buildEmptyListWidget();
-      }
+        if (!_isLoading && processedBills.isEmpty) {
+          return _buildEmptyListWidget();
+        }
 
-      return RefreshIndicator(
-        onRefresh: () async => _resetAndLoadData(forceRefresh: true),
-        child: NotificationListener<ScrollNotification>(
-          onNotification: (ScrollNotification scrollInfo) {
-            if (!_isLoadingMore && _hasMoreData && !_isLoading && scrollInfo.metrics.pixels > scrollInfo.metrics.maxScrollExtent - 300) {
-              _loadMoreBills();
+        final bool isDesktopWeb = kIsWeb && MediaQuery.of(context).size.width > 750;
+
+        Widget listView = ListView.builder(
+          controller: _scrollController,
+          physics: isDesktopWeb ? const NeverScrollableScrollPhysics() : const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          itemCount: processedBills.length + (_isLoadingMore ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (index == processedBills.length) {
+              return _isLoadingMore ? const Center(child: Padding(padding: EdgeInsets.symmetric(vertical: 16.0), child: CircularProgressIndicator())) : const SizedBox.shrink();
             }
-            return true;
-          },
-          child: ListView.builder(
-						key: const PageStorageKey<String>('process_legislation_list_scroll'),
-            controller: _scrollController,
-						padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-						itemCount: processedBills.length + (_isLoadingMore ? 1 : 0),
-            itemBuilder: (context, index) {
-              if (index == processedBills.length) {
-                return _isLoadingMore ? const Center(child: Padding(padding: EdgeInsets.symmetric(vertical: 16.0), child: CircularProgressIndicator())) : const SizedBox.shrink();
-              }
-              final bill = processedBills[index];
-              final l10n = AppLocalizations.of(context)!;
+            final bill = processedBills[index];
+            final l10n = AppLocalizations.of(context)!;
 
-              Widget? processInfoWidget;
+            Widget? processInfoWidget;
 
-              if (bill.processStartDate != null) {
-                processInfoWidget = Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: Icon(Icons.play_circle_outline, size: 16, color: Colors.grey[600]),
-                    ),
-                      Text(
-                        l10n.processStartDateCardLabel(
-                          DateFormat.yMMMd(Localizations.localeOf(context).languageCode).format(bill.processStartDate!)
-                        ),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[700]),
+            if (bill.processStartDate != null) {
+              processInfoWidget = Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: Icon(Icons.play_circle_outline, size: 16, color: Colors.grey[600]),
+                  ),
+                    Text(
+                      l10n.processStartDateCardLabel(
+                        DateFormat.yMMMd(Localizations.localeOf(context).languageCode).format(bill.processStartDate!)
                       ),
-                  ],
-                );
-              }
-
-              return LegislationListCard(
-                bill: bill,
-                additionalInfoWidget: processInfoWidget,
-                onTap: () {
-                  final manager = context.read<ParliamentManager>();
-                  final slug = manager.activeSlug;
-                  final lang = context.read<LanguageProvider>().appLanguageCode;
-                  final term = manager.currentTerm;
-                  context.smartNavigate('/$lang/$slug/$term/legislations/${bill.id}?list=process', extra: bill);
-                },
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey[700]),
+                    ),
+                ],
               );
+            }
+
+            return LegislationListCard(
+              bill: bill,
+              additionalInfoWidget: processInfoWidget,
+              onTap: () {
+                final manager = context.read<ParliamentManager>();
+                final slug = manager.activeSlug;
+                final lang = context.read<LanguageProvider>().appLanguageCode;
+                final term = manager.currentTerm;
+                context.smartNavigate('/$lang/$slug/$term/legislations/${bill.id}?list=process', extra: bill);
+              },
+            );
+          },
+        );
+
+        return RefreshIndicator(
+          onRefresh: () async => _resetAndLoadData(forceRefresh: true),
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification scrollInfo) {
+              if (!_isLoadingMore && _hasMoreData && !_isLoading && scrollInfo.metrics.pixels > scrollInfo.metrics.maxScrollExtent - 300) {
+                _loadMoreBills();
+              }
+              return true;
             },
+            child: isDesktopWeb
+                ? WebSmoothScroll(
+                controller: _scrollController,
+                scrollAnimationLength: 600,
+                scrollSpeed: 2.5,
+                curve: Curves.easeOutQuart,
+                child: listView,
+              )
+                : listView,
           ),
-        ),
-      );
-    }
+        );
+      }
 
     Widget _buildErrorWidget() {
       final l10n = AppLocalizations.of(context)!;

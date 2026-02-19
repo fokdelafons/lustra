@@ -11,6 +11,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lustra/providers/language_provider.dart';
 import 'package:flutter/foundation.dart';
 import '../../services/app_router.dart';
+import 'package:web_smooth_scroll/web_smooth_scroll.dart';
 
 // --- LEGACY CODE --- 
 // potential for some rework
@@ -460,70 +461,83 @@ Widget _buildFilterChips() {
 }
 
   Widget _buildMPList(List<MP> filteredMPs) {
-  final l10n = AppLocalizations.of(context)!;
-  if (_isLoading && _mps.isEmpty) {
-    return const Center(child: CircularProgressIndicator());
-  }
-  if (_errorMessage != null && _mps.isEmpty) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, color: Colors.red, size: 48),
-            const SizedBox(height: 16),
-            Text(_errorMessage!, textAlign: TextAlign.center, style: const TextStyle(fontSize: 16)),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.refresh),
-              label: Text(l10n.tryAgainButton),
-              onPressed: () => _resetAndLoadData(forceRefresh: false)
+      final l10n = AppLocalizations.of(context)!;
+      if (_isLoading && _mps.isEmpty) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      if (_errorMessage != null && _mps.isEmpty) {
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, color: Colors.red, size: 48),
+                const SizedBox(height: 16),
+                Text(_errorMessage!, textAlign: TextAlign.center, style: const TextStyle(fontSize: 16)),
+                const SizedBox(height: 16),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.refresh),
+                  label: Text(l10n.tryAgainButton),
+                  onPressed: () => _resetAndLoadData(forceRefresh: false)
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-    );
-  }
-  if (filteredMPs.isEmpty && !_isLoading) {
-    String message = (_isSearchActive || _selectedFilter != l10n.allFilter)
-        ? l10n.noMPsMatchFilter
-        : l10n.noMPsForSource;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.search_off, size: 48, color: Colors.grey),
-            const SizedBox(height: 16),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16, color: Colors.grey),
-            ),
-          ],
-        )
-      ),
-    );
-  }
-	return ListView.builder(
-		key: const PageStorageKey<String>('mp_list_scroll'),
-		controller: _scrollController,
-		padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),
-    itemCount: filteredMPs.length + (_isLoadingMore ? 1 : 0),
-    itemBuilder: (context, index) {
-      if (index == filteredMPs.length) {
-        return const Padding(
-          padding: EdgeInsets.symmetric(vertical: 16.0),
-          child: Center(child: CircularProgressIndicator()),
+          ),
         );
       }
-      final mp = filteredMPs[index];
-      return _buildMPCard(mp);
-    },
-  );
-}
+      if (filteredMPs.isEmpty && !_isLoading) {
+        String message = (_isSearchActive || _selectedFilter != l10n.allFilter)
+            ? l10n.noMPsMatchFilter
+            : l10n.noMPsForSource;
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.search_off, size: 48, color: Colors.grey),
+                const SizedBox(height: 16),
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 16, color: Colors.grey),
+                ),
+              ],
+            )
+          ),
+        );
+      }
+
+      final bool isDesktopWeb = kIsWeb && MediaQuery.of(context).size.width > 750;
+
+      Widget listView = ListView.builder(
+        controller: _scrollController,
+        physics: isDesktopWeb ? const NeverScrollableScrollPhysics() : const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),
+        itemCount: filteredMPs.length + (_isLoadingMore ? 1 : 0),
+        itemBuilder: (context, index) {
+          if (index == filteredMPs.length) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 16.0),
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+          final mp = filteredMPs[index];
+          return _buildMPCard(mp);
+        },
+      );
+
+      return isDesktopWeb
+          ? WebSmoothScroll(
+                controller: _scrollController,
+                scrollAnimationLength: 600,
+                scrollSpeed: 2.5,
+                curve: Curves.easeOutQuart,
+                child: listView,
+              )
+          : listView;
+    }
 
   Widget _buildAttendanceWidget(double percentage) {
     final l10n = AppLocalizations.of(context)!;

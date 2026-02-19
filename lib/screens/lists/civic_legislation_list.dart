@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lustra/providers/language_provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:web_smooth_scroll/web_smooth_scroll.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../services/parliament_service_interface.dart';
 import '../../models/legislation.dart';
@@ -121,7 +123,13 @@ import '../../widgets/lists_specific/legislation_list_card.dart';
 
   final ScrollController _scrollController = ScrollController();
 
-void _resetAndLoadData({bool forceRefresh = false, bool newSourceChanged = false}) {
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _resetAndLoadData({bool forceRefresh = false, bool newSourceChanged = false}) {
       developer.log('Resetowanie stanu. forceRefresh: $forceRefresh, newSourceChanged: $newSourceChanged', name: 'CivicLegislationScreen');
       if (!mounted) return;
 
@@ -309,54 +317,66 @@ void _resetAndLoadData({bool forceRefresh = false, bool newSourceChanged = false
       );
     }
 
-    Widget _buildListComponent(List<Legislation> processedBills) {
-      if (_isLoading && _bills.isEmpty) {
-        return const Center(child: CircularProgressIndicator());
-      }
+  Widget _buildListComponent(List<Legislation> processedBills) {
+        if (_isLoading && _bills.isEmpty) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-      if (_errorMessage != null) {
-        return _buildErrorWidget();
-      }
+        if (_errorMessage != null) {
+          return _buildErrorWidget();
+        }
 
-      if (!_isLoading && processedBills.isEmpty) {
-        return _buildEmptyListWidget();
-      }
+        if (!_isLoading && processedBills.isEmpty) {
+          return _buildEmptyListWidget();
+        }
 
-      return RefreshIndicator(
-        onRefresh: () async => _resetAndLoadData(forceRefresh: true),
-        child: NotificationListener<ScrollNotification>(
-          onNotification: (ScrollNotification scrollInfo) {
-            if (!_isLoadingMore && _hasMoreData && !_isLoading && scrollInfo.metrics.pixels > scrollInfo.metrics.maxScrollExtent - 300) {
-              _loadMoreBills();
+        final bool isDesktopWeb = kIsWeb && MediaQuery.of(context).size.width > 750;
+
+        Widget listView = ListView.builder(
+          controller: _scrollController,
+          physics: isDesktopWeb ? const NeverScrollableScrollPhysics() : const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          itemCount: processedBills.length + (_isLoadingMore ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (index == processedBills.length) {
+              return _isLoadingMore ? const Center(child: Padding(padding: EdgeInsets.symmetric(vertical: 16.0), child: CircularProgressIndicator())) : const SizedBox.shrink();
             }
-            return true;
+            final bill = processedBills[index];
+            
+            return LegislationListCard(
+              bill: bill,
+              additionalInfoWidget: null,
+              onTap: () {
+                final manager = context.read<ParliamentManager>();
+                final slug = manager.activeSlug;
+                final lang = context.read<LanguageProvider>().appLanguageCode;
+                context.smartNavigate('/$lang/$slug/civic/legislations/${bill.id}?list=civic', extra: bill);
+              },
+            );
           },
-          child: ListView.builder(
-						key: const PageStorageKey<String>('civic_legislation_list_scroll'),
-            controller: _scrollController,
-						padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-						itemCount: processedBills.length + (_isLoadingMore ? 1 : 0),
-            itemBuilder: (context, index) {
-              if (index == processedBills.length) {
-                return _isLoadingMore ? const Center(child: Padding(padding: EdgeInsets.symmetric(vertical: 16.0), child: CircularProgressIndicator())) : const SizedBox.shrink();
+        );
+
+        return RefreshIndicator(
+          onRefresh: () async => _resetAndLoadData(forceRefresh: true),
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification scrollInfo) {
+              if (!_isLoadingMore && _hasMoreData && !_isLoading && scrollInfo.metrics.pixels > scrollInfo.metrics.maxScrollExtent - 300) {
+                _loadMoreBills();
               }
-              final bill = processedBills[index];
-              
-              return LegislationListCard(
-                bill: bill,
-                additionalInfoWidget: null,
-                onTap: () {
-                  final manager = context.read<ParliamentManager>();
-                  final slug = manager.activeSlug;
-                  final lang = context.read<LanguageProvider>().appLanguageCode;
-                  context.smartNavigate('/$lang/$slug/civic/legislations/${bill.id}?list=civic', extra: bill);
-                },
-              );
+              return true;
             },
+            child: isDesktopWeb
+                ? WebSmoothScroll(
+                controller: _scrollController,
+                scrollAnimationLength: 600,
+                scrollSpeed: 2.5,
+                curve: Curves.easeOutQuart,
+                child: listView,
+              )
+                : listView,
           ),
-        ),
-      );
-    }
+        );
+      }
 
     Widget _buildErrorWidget() {
       final l10n = AppLocalizations.of(context)!;

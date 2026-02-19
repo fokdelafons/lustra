@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/foundation.dart';
+import 'package:web_smooth_scroll/web_smooth_scroll.dart';
 
 import '../../models/home_screen_data.dart';
 import '../../providers/language_provider.dart';
@@ -282,31 +283,30 @@ Widget _buildContentList(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final homeData = _data;
 
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final bool isDesktopWeb = kIsWeb && screenWidth > 750;
+
     if (homeData == null) {
       return const SizedBox.shrink();
     }
 
     List<Widget> sectionWidgets = [];
-    //  0: Popular
     if (homeData.popularVoted != null && homeData.popularVoted!.id.isNotEmpty) {
       sectionWidgets.add(VotedCard(item: homeData.popularVoted!));
     }
-    //  1: Upcoming
     if (homeData.upcomingVote != null && homeData.upcomingVote!.id.isNotEmpty) {
       sectionWidgets.add(UpcomingCard(item: homeData.upcomingVote!));
     }
-    //  2: Process
     if (homeData.popularInProcess != null && homeData.popularInProcess!.id.isNotEmpty) {
       sectionWidgets.add(ProcessCard(item: homeData.popularInProcess!));
     }
-    // 3: Civic
     if (homeData.civicProject != null) {
-      sectionWidgets.add(CivicProjectCard(project: homeData.civicProject!,));
+      sectionWidgets.add(CivicProjectCard(project: homeData.civicProject!));
     }
-    // 4: Politicians
     if (homeData.topDeputies != null && homeData.topDeputies!.deputies.isNotEmpty) {
-        sectionWidgets.add(PoliticiansCard(deputies: homeData.topDeputies!.deputies));
-      }
+      sectionWidgets.add(PoliticiansCard(deputies: homeData.topDeputies!.deputies));
+    }
+
     if (sectionWidgets.isEmpty) {
       Widget emptyContent = ListView(
         padding: const EdgeInsets.all(16.0),
@@ -316,17 +316,49 @@ Widget _buildContentList(BuildContext context) {
           Center(child: Text(l10n.errorNoDataForTerm)),
         ],
       );
-      
-      if (kIsWeb) {
-         return Center(
-           child: ConstrainedBox(
-             constraints: const BoxConstraints(maxWidth: 750),
-             child: emptyContent
-           )
-         );
+      if (isDesktopWeb) {
+        return Center(
+            child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 750),
+                child: emptyContent));
       }
       return emptyContent;
     }
+
+    Widget listView = ListView.separated(
+      controller: _scrollController,
+      
+      physics: isDesktopWeb 
+          ? const NeverScrollableScrollPhysics() 
+          : const AlwaysScrollableScrollPhysics(),
+          
+      padding: kIsWeb
+          ? const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0)
+          : const EdgeInsets.all(16.0),
+      itemCount: sectionWidgets.length + 1,
+      itemBuilder: (context, index) {
+        Widget content;
+        if (index == 0) {
+          content = Container(
+            key: _searchWidgetKey,
+            child: _buildSearchWidget(context),
+          );
+        } else {
+          content = sectionWidgets[index - 1];
+        }
+        
+        if (screenWidth > 1140 || isDesktopWeb) { 
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 750),
+              child: content,
+            ),
+          );
+        }
+        return content;
+      },
+      separatorBuilder: (context, index) => const SizedBox(height: 16),
+    );
 
     return NotificationListener<ScrollNotification>(
       onNotification: (notification) {
@@ -337,34 +369,15 @@ Widget _buildContentList(BuildContext context) {
       },
       child: Opacity(
         opacity: _isInitialScrollPerformed ? 1.0 : 0.0,
-        child: ListView.separated(
-          controller: _scrollController,
-          padding: kIsWeb 
-              ? const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0) 
-              : const EdgeInsets.all(16.0),
-          itemCount: sectionWidgets.length + 1,
-          itemBuilder: (context, index) {
-            Widget content;
-            if (index == 0) {
-              content = Container(
-                key: _searchWidgetKey,
-                child: _buildSearchWidget(context),
-              );
-            } else {
-              content = sectionWidgets[index - 1];
-            }
-            if (kIsWeb) {
-              return Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 750),
-                  child: content,
-                ),
-              );
-            }
-            return content;
-          },
-          separatorBuilder: (context, index) => const SizedBox(height: 16),
-        ),
+        child: isDesktopWeb
+            ? WebSmoothScroll(
+                controller: _scrollController,
+                scrollAnimationLength: 600,
+                scrollSpeed: 2.5,
+                curve: Curves.easeOutQuart,
+                child: listView,
+              )
+            : listView,
       ),
     );
   }

@@ -121,7 +121,7 @@ void _handleNotificationNavigation(Map<String, dynamic> data) {
       return;
     }
     final slug = ParliamentSource.getSlugById(parliamentId);
-    final location = '/$lang/$slug/$term/legislations?list=in-process';
+    final location = '/$lang/$slug/$term/legislations?list=process';
     router.push(
       location,
       extra: {
