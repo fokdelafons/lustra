@@ -434,21 +434,25 @@ class USParliamentService with ChangeNotifier implements ParliamentServiceInterf
   }
 
 @override
-  VoidCallback? getInterpellationTapAction(BuildContext context, InterpellationPreview interp) {
-    if (interp.id.isNotEmpty) {
-      return () async {
-        final parliamentId = context.read<ParliamentManager>().activeServiceId;
-        final path = '/$parliamentId/legislations/${interp.id}';
-        if (kIsWeb) {
-          final fullUrl = Uri.parse(Uri.base.origin + path);
-          await launchUrl(fullUrl, webOnlyWindowName: '_blank');
-        } else {
-          context.push(path);
-        }
-      };
-    }
-    return null;
+VoidCallback? getInterpellationTapAction(BuildContext context, InterpellationPreview interp) {
+  if (interp.id.isNotEmpty) {
+    return () async {
+      final pManager = context.read<ParliamentManager>();
+      final lang = context.read<LanguageProvider>().appLanguageCode;
+      final parliamentId = pManager.activeServiceId;
+      final term = pManager.currentTerm;
+      final slug = ParliamentSource.getSlugById(parliamentId);
+      final path = '/#/$lang/$slug/$term/legislations/${interp.id}';
+      if (kIsWeb) {
+        final fullUrl = Uri.parse(Uri.base.origin + path);
+        await launchUrl(fullUrl, webOnlyWindowName: '_blank');
+      } else {
+        context.push(path);
+      }
+    };
   }
+  return null;
+}
   
   @override
   String getTenureTitle(BuildContext context, MP mp) {
