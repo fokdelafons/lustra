@@ -13,6 +13,7 @@ import '../../services/parliament_service_interface.dart';
 import '../../services/app_router.dart';
 import '../../services/parliament_manager.dart';
 import '../../services/firebase_auth.dart';
+import '../../services/notification_service.dart';
 import '../../widgets/home_specific/civic_project_card.dart';
 import '../../widgets/home_specific/voted_card.dart';
 import '../../widgets/home_specific/upcoming_card.dart';
@@ -21,6 +22,7 @@ import '../../widgets/home_specific/politicians_card.dart';
 import '../../widgets/home_specific/web_app_bar.dart';
 import '../../widgets/home_specific/mobile_app_bar.dart';
 import '../../widgets/home_specific/mobile_nav_bar.dart';
+
 
 
 class NewHomeScreen extends StatefulWidget {
@@ -114,6 +116,16 @@ class HomeContentState extends State<HomeContent> {
   ParliamentServiceInterface? _activeService;
   int? _currentTerm;
   String? _currentLanguageCode;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        NotificationService.instance.consumePendingNotification(context);
+      }
+    });
+  }
 
   @override
   void didChangeDependencies() {

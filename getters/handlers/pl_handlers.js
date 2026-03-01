@@ -628,8 +628,6 @@ const getLegislations = async (req, res) => {
 
         let query = db.collection('pl_legislations').where('term', '==', parseInt(termToUse, 10));
 
-        const isSortingByDate = sortBy && sortBy !== 'popularity';
-
         if (statusFilter) {
             const statusArray = statusFilter.split(',').map(s => s.trim()).filter(Boolean);
             if (statusArray.length > 0) {
@@ -642,7 +640,7 @@ const getLegislations = async (req, res) => {
                     query = query.where('status', '==', statusArray[0]);
                 }
             }
-        } else if (!isSortingByDate) {
+        } else {
             query = query.where('status', 'in', [...ACCEPTED_STATUS_VARIANTS, ...REJECTED_STATUS_VARIANTS]);
         }
         

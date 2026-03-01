@@ -306,35 +306,49 @@ const getDeputies = async (req, res) => {
         if (!requestedTerm) {
             return res.status(400).json({ error: { code: 'invalid-argument', message: "Brak wymaganego parametru 'term'." } });
         }
-        
-        let query = db.collection('us_deputies');
-        const termPrefix = `${requestedTerm}_`;
-        query = query.where(admin.firestore.FieldPath.documentId(), '>=', termPrefix)
-                    .where(admin.firestore.FieldPath.documentId(), '<', termPrefix + '\uf8ff');
 
-        if (club) {
-            query = query.where('club', '==', club);
-        }
-        
-        if (sortBy === 'attendance') {
-            query = query.orderBy('votingStats.attendance_percentage', 'asc');
-        } else {
-            query = query.orderBy('popularity', 'desc');
-        }
-
-        if (lastVisibleDocId) {
-            const lastDoc = await db.collection('us_deputies').doc(lastVisibleDocId).get();
-            if(lastDoc.exists) {
-                query = query.startAfter(lastDoc);
+        const cacheKey = `us-deputies-${requestedTerm}-${club || 'all'}-${sortBy || 'popularity'}-${limit}-${lastVisibleDocId || 'firstPage'}`;
+        if (cache.has(cacheKey)) {
+            const cachedEntry = cache.get(cacheKey);
+            if ((Date.now() - cachedEntry.timestamp) / 1000 < CACHE_TTL_SECONDS) {
+                const result = await cachedEntry.promise;
+                return res.status(200).json({ data: result });
             }
         }
 
-        query = query.limit(limit);
-        const snapshot = await query.get();
-        const deputies = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        const newLastVisibleDocId = snapshot.docs[snapshot.docs.length - 1]?.id || null;
+        const fetchPromise = (async () => {
+            let query = db.collection('us_deputies');
+            const termPrefix = `${requestedTerm}_`;
+            query = query.where(admin.firestore.FieldPath.documentId(), '>=', termPrefix)
+                        .where(admin.firestore.FieldPath.documentId(), '<', termPrefix + '\uf8ff');
 
-        return res.status(200).json({ data: { deputies, nextCursor: newLastVisibleDocId } });
+            if (club) {
+                query = query.where('club', '==', club);
+            }
+            
+            if (sortBy === 'attendance') {
+                query = query.orderBy('votingStats.attendance_percentage', 'asc');
+            } else {
+                query = query.orderBy('popularity', 'desc');
+            }
+
+            if (lastVisibleDocId) {
+                const lastDoc = await db.collection('us_deputies').doc(lastVisibleDocId).get();
+                if(lastDoc.exists) {
+                    query = query.startAfter(lastDoc);
+                }
+            }
+
+            query = query.limit(limit);
+            const snapshot = await query.get();
+            const deputies = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const newLastVisibleDocId = snapshot.docs[snapshot.docs.length - 1]?.id || null;
+            return { deputies, nextCursor: newLastVisibleDocId };
+        })();
+
+        cache.set(cacheKey, { promise: fetchPromise, timestamp: Date.now() });
+        const result = await fetchPromise;
+        return res.status(200).json({ data: result });
 
     } catch (error) {
         console.error('[us_getDeputies] Błąd podczas pobierania posłów:', error);
@@ -541,7 +555,6 @@ const getLegislations = async (req, res) => {
     }
     try {
         const data = req.body.data || req.body;
-        // ZMIANA: Dodano 'processStartDateAfter' do listy
         const { status: statusFilter, category, sortBy: rawSortBy, sortOrder: rawSortOrder, term: requestedTerm, documentType: documentTypeFilter, limit: rawLimit, lastVisibleDocId, lang: requestedLangParam, raw, processStartDateAfter } = data;
         
         const limit = parseInt(rawLimit) || 20;
@@ -564,14 +577,12 @@ const getLegislations = async (req, res) => {
         const lang = normalizeLang(requestedLangParam, 'eng');
         const defaultLang = 'eng';
 
-        // ZMIANA: Nowa, inteligentna logika walidacji i pobierania kadencji
         if (!requestedTerm && !processStartDateAfter) {
             return res.status(400).json({ error: { code: 'invalid-argument', message: "Missing 'term' or 'processStartDateAfter' parameter." } });
         }
 
         let termToUse;
         if (processStartDateAfter) {
-            // Zapytanie z powiadomienia: pobieramy aktualną kadencję z metadanych
             console.log("us_getLegislations: Wykryto zapytanie z powiadomienia. Pobieram aktualną kadencję.");
             const metadataDoc = await db.collection('us_metadata').doc('last_update').get();
             if (!metadataDoc.exists) {
@@ -579,61 +590,74 @@ const getLegislations = async (req, res) => {
             }
             termToUse = metadataDoc.data().currentTerm;
         } else {
-            // Standardowe zapytanie: używamy kadencji z żądania
             termToUse = requestedTerm;
         }
 
-        let query = db.collection('us_legislations').where('term', '==', parseInt(termToUse, 10));
-
-        if (statusFilter) {
-            const statusArray = statusFilter.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
-            if (statusArray.length > 0) {
-                 query = query.where('subStatus', 'in', statusArray);
-            }
-        } else {
-            query = query.where('subStatus', 'in', ["accepted", "rejected"]);
-        }
-        
-        if (category) {
-            query = query.where('category', 'array-contains', category);
-        }
-
-        if (documentTypeFilter) {
-            const subTypes = documentTypeFilter.split(',').map(type => type.trim().toLowerCase()).filter(Boolean);
-            if (subTypes.length > 0) {
-                 query = query.where('subType', 'in', subTypes);
+        const cacheKey = `us-legs-${termToUse}-${statusFilter || 'all'}-${category || 'all'}-${documentTypeFilter || 'all'}-${sortBy}-${sortOrder}-${processStartDateAfter || 'none'}-${lang}-${limit}-${lastVisibleDocId || 'firstPage'}-${raw || 'false'}`;
+        if (cache.has(cacheKey)) {
+            const cachedEntry = cache.get(cacheKey);
+            if ((Date.now() - cachedEntry.timestamp) / 1000 < CACHE_TTL_SECONDS) {
+                const result = await cachedEntry.promise;
+                return res.status(200).json({ data: result });
             }
         }
 
-        // ZMIANA: Dodano filtrowanie po dacie dla zapytań z powiadomień
-        if (processStartDateAfter) {
-            const startDate = new Date(processStartDateAfter);
-            query = query.where('processStartDate', '>=', startDate);
-        }
+        const fetchPromise = (async () => {
+            let query = db.collection('us_legislations').where('term', '==', parseInt(termToUse, 10));
 
-        query = query.orderBy(sortBy, sortOrder).orderBy(admin.firestore.FieldPath.documentId(), 'asc');
-        
-        if (lastVisibleDocId) {
-            const lastDoc = await db.collection('us_legislations').doc(lastVisibleDocId).get();
-            if(lastDoc.exists) {
-                query = query.startAfter(lastDoc);
+            if (statusFilter) {
+                const statusArray = statusFilter.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+                if (statusArray.length > 0) {
+                     query = query.where('subStatus', 'in', statusArray);
+                }
+            } else {
+                query = query.where('subStatus', 'in', ["accepted", "rejected"]);
             }
-        }
+            
+            if (category) {
+                query = query.where('category', 'array-contains', category);
+            }
 
-        query = query.limit(limit);
-        const snapshot = await query.get();
-        
-        if (snapshot.empty) {
-            return res.status(200).json({ data: { legislations: [], nextCursor: null } });
-        }
-        
-        const legislations = snapshot.docs.map(doc => {
-            const docData = doc.data();
-            return raw === 'true' ? { id: doc.id, ...docData } : { id: doc.id, ...localizeUsDocument(docData, lang, defaultLang) };
-        });
-        
-        const newLastVisibleDocId = snapshot.docs[snapshot.docs.length - 1]?.id || null;
-        return res.status(200).json({ data: { legislations, nextCursor: newLastVisibleDocId } });
+            if (documentTypeFilter) {
+                const subTypes = documentTypeFilter.split(',').map(type => type.trim().toLowerCase()).filter(Boolean);
+                if (subTypes.length > 0) {
+                     query = query.where('subType', 'in', subTypes);
+                }
+            }
+
+            if (processStartDateAfter) {
+                const startDate = new Date(processStartDateAfter);
+                query = query.where('processStartDate', '>=', startDate);
+            }
+
+            query = query.orderBy(sortBy, sortOrder).orderBy(admin.firestore.FieldPath.documentId(), 'asc');
+            
+            if (lastVisibleDocId) {
+                const lastDoc = await db.collection('us_legislations').doc(lastVisibleDocId).get();
+                if(lastDoc.exists) {
+                    query = query.startAfter(lastDoc);
+                }
+            }
+
+            query = query.limit(limit);
+            const snapshot = await query.get();
+            
+            if (snapshot.empty) {
+                return { legislations: [], nextCursor: null };
+            }
+            
+            const legislations = snapshot.docs.map(doc => {
+                const docData = doc.data();
+                return raw === 'true' ? { id: doc.id, ...docData } : { id: doc.id, ...localizeUsDocument(docData, lang, defaultLang) };
+            });
+            
+            const newLastVisibleDocId = snapshot.docs[snapshot.docs.length - 1]?.id || null;
+            return { legislations, nextCursor: newLastVisibleDocId };
+        })();
+
+        cache.set(cacheKey, { promise: fetchPromise, timestamp: Date.now() });
+        const result = await fetchPromise;
+        return res.status(200).json({ data: result });
 
     } catch (error) {
         console.error('[us_getLegislations] Błąd:', error);
@@ -650,16 +674,14 @@ const getCivicProjects = async (req, res) => {
     try {
         const data = req.body.data || req.body;
         const { limit: rawLimit, lastVisibleDocId, lang: requestedLangParam, category } = data;
-        let { sortBy } = data; // Pobieramy sortBy jako let, żeby móc nadpisać
+        let { sortBy } = data; 
         
         const limit = parseInt(rawLimit) || 20;
         let sortOrder = 'desc';
 
-        // FIX: Jeśli frontend prosi o sortowanie po 'processStartDate', my w bazie szukamy po 'documentDate'
         if (sortBy === 'processStartDate') {
             sortBy = 'documentDate';
         }
-        // Domyślne sortowanie, jeśli brak parametru
         if (!sortBy) {
             sortBy = 'popularity';
         }
@@ -669,42 +691,56 @@ const getCivicProjects = async (req, res) => {
 
         console.log(`[DEBUG] us_getCivicProjects: SortBy=${sortBy}, Category=${category}`);
 
-        let query = db.collection('us_civic');
-
-        if (category) {
-            query = query.where('category', 'array-contains', category);
-        }
-
-        // Sortowanie
-        query = query.orderBy(sortBy, sortOrder).orderBy(admin.firestore.FieldPath.documentId(), 'asc');
-
-        if (lastVisibleDocId) {
-            const lastDoc = await db.collection('us_civic').doc(lastVisibleDocId).get();
-            if(lastDoc.exists) {
-                query = query.startAfter(lastDoc);
+        const cacheKey = `us-civic-${category || 'all'}-${sortBy}-${sortOrder}-${lang}-${limit}-${lastVisibleDocId || 'firstPage'}`;
+        if (cache.has(cacheKey)) {
+            const cachedEntry = cache.get(cacheKey);
+            if ((Date.now() - cachedEntry.timestamp) / 1000 < CACHE_TTL_SECONDS) {
+                const result = await cachedEntry.promise;
+                return res.status(200).json({ data: result });
             }
         }
 
-        query = query.limit(limit);
-        const snapshot = await query.get();
+        const fetchPromise = (async () => {
+            let query = db.collection('us_civic');
 
-        if (snapshot.empty) {
-            return res.status(200).json({ data: { projects: [], nextCursor: null } });
-        }
-
-        const projects = snapshot.docs.map(doc => {
-            const docData = doc.data();
-            const localized = localizeUsDocument(docData, lang, defaultLang);
-            
-            if (!localized.processStartDate && localized.documentDate) {
-                localized.processStartDate = localized.documentDate;
+            if (category) {
+                query = query.where('category', 'array-contains', category);
             }
 
-            return { id: doc.id, ...localized };
-        });
+            query = query.orderBy(sortBy, sortOrder).orderBy(admin.firestore.FieldPath.documentId(), 'asc');
 
-        const newLastVisibleDocId = snapshot.docs[snapshot.docs.length - 1]?.id || null;
-        return res.status(200).json({ data: { projects, nextCursor: newLastVisibleDocId } });
+            if (lastVisibleDocId) {
+                const lastDoc = await db.collection('us_civic').doc(lastVisibleDocId).get();
+                if(lastDoc.exists) {
+                    query = query.startAfter(lastDoc);
+                }
+            }
+
+            query = query.limit(limit);
+            const snapshot = await query.get();
+
+            if (snapshot.empty) {
+                return { projects: [], nextCursor: null };
+            }
+
+            const projects = snapshot.docs.map(doc => {
+                const docData = doc.data();
+                const localized = localizeUsDocument(docData, lang, defaultLang);
+                
+                if (!localized.processStartDate && localized.documentDate) {
+                    localized.processStartDate = localized.documentDate;
+                }
+
+                return { id: doc.id, ...localized };
+            });
+
+            const newLastVisibleDocId = snapshot.docs[snapshot.docs.length - 1]?.id || null;
+            return { projects, nextCursor: newLastVisibleDocId };
+        })();
+
+        cache.set(cacheKey, { promise: fetchPromise, timestamp: Date.now() });
+        const result = await fetchPromise;
+        return res.status(200).json({ data: result });
 
     } catch (error) {
         console.error('[us_getCivicProjects] Błąd:', error);

@@ -19,9 +19,9 @@ import 'services/firebase_auth.dart';
 import 'services/app_router.dart';
 import 'services/remote_config_service.dart';
 import 'services/parliament_service_interface.dart';
+import 'services/notification_service.dart';
 import 'screens/force_update_screen.dart';
 import 'widgets/mobile_app_banner_wrapper.dart';
-import 'models/parliament_source.dart'; 
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -50,17 +50,8 @@ void main() async {
     );
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      developer.log('Wykryto otwarcie powiadomienia z aplikacji w tle: ${message.data}', name: 'Notifications');
-      _handleNotificationNavigation(message.data);
-    });
-
-    FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
-      if (message != null) {
-        developer.log('Aplikacja uruchomiona z powiadomienia: ${message.data}', name: 'Notifications');
-        _handleNotificationNavigation(message.data);
-      }
-    });
+    // Inicjalizacja dedykowanego serwisu powiadomień
+    await NotificationService.instance.init();
   }
   final remoteConfigService = await RemoteConfigService.create();
   
@@ -98,39 +89,6 @@ void main() async {
       ),
 		),
 	);
-}
-
-void _handleNotificationNavigation(Map<String, dynamic> data) {
-  final String? filterTimestamp = data['filterTimestamp'];
-  final String? parliamentId = data['parliamentId'];
-  final String? termStr = data['term'];
-
-  if (filterTimestamp != null && parliamentId != null) {
-    final context = router.routerDelegate.navigatorKey.currentContext;
-    if (context == null) return;
-    final pManager = Provider.of<ParliamentManager>(context, listen: false);
-    final lang = Provider.of<LanguageProvider>(context, listen: false).appLanguageCode;
-    int? term;
-    if (termStr != null) {
-      term = int.tryParse(termStr);
-    } else if (pManager.activeServiceId == parliamentId) {
-      term = pManager.currentTerm;
-    }
-    if (term == null) {
-      developer.log("Błąd nawigacji: Brak parametru 'term' dla $parliamentId", name: "Notifications");
-      return;
-    }
-    final slug = ParliamentSource.getSlugById(parliamentId);
-    final location = '/$lang/$slug/$term/legislations?list=process';
-    router.push(
-      location,
-      extra: {
-        'filterFromTimestamp': filterTimestamp,
-        'parliamentId': parliamentId,
-      },
-    );
-    developer.log("Nawigacja do: $location", name: "Notifications");
-  }
 }
 
 class MyApp extends StatelessWidget {
