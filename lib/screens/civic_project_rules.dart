@@ -5,6 +5,8 @@ import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:lustra/services/parliament_manager.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CivicProjectScreen extends StatelessWidget {
   const CivicProjectScreen({super.key});
@@ -101,6 +103,30 @@ class CivicProjectScreen extends StatelessWidget {
                       _ListItem(bold: l10n.civicPolicyTrashTitle, text: l10n.civicPolicyTrashText),
                     ]),
 
+                    const SizedBox(height: 40),
+                    
+                  // --- DRAFTER AI BUTTON ---
+                    SizedBox(
+                      width: double.infinity,
+                      height: 64,
+                      child: ElevatedButton.icon(
+                        onPressed: () => _launchDrafter(context),
+                        icon: const Icon(Icons.auto_awesome, size: 24),
+                        label: Text(
+                          l10n.drafterButtonTitle,
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 0.5),
+                          textAlign: TextAlign.center,
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue[800],
+                          foregroundColor: Colors.white,
+                          elevation: 4,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 40),
 
                     // --- SECTION 2: STANDARD ---
@@ -371,6 +397,35 @@ void _showManualEmailDialog(BuildContext context, AppLocalizations l10n, String 
         );
       }).toList(),
     );
+  }
+
+// --- DRAFTER AI LAUNCHER ---
+  Future<void> _launchDrafter(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.drafterAuthRequired)),
+      );
+      return;
+    }
+
+    try {
+      final idToken = await user.getIdToken(true);
+      final url = Uri.parse('https://drafter.lustra.news/?token=$idToken');
+
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        throw 'Browser hook failed.';
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("${l10n.drafterLaunchError} $e")),
+        );
+      }
+    }
   }
 
   Widget _buildThresholdRow(Color color, String label, String desc) {
