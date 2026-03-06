@@ -526,7 +526,7 @@ void _reportError() {
               final term = _bill!.term; 
 
               final compositeId = '${_bill!.term}_$sponsorId';
-              final internalPath = '/$lang/$slug/$term/members/$compositeId';
+              final internalPath = '/#/$lang/$slug/$term/members/$compositeId';
               final fullWebUrl = kIsWeb 
                   ? Uri.parse(Uri.base.origin + internalPath)
                   : Uri.parse('https://lustra.dev$internalPath');

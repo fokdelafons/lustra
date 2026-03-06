@@ -517,7 +517,7 @@
     "supportStripeButton": "Apoiar (Stripe)",
 "supportFounderMessage": "Não há uma grande corporação por trás deste projeto, apenas eu e meu laptop. Construí isso porque acredito que tal tecnologia deve existir e permanecer 100% independente do capital, que sempre dita a narrativa. Este é meu presente para o mundo.",
 "civicProjectTitle": "Projeto Cívico",
-  "civicRulesAction": "Propor",
+  "civicRulesAction": "Crie o seu projeto",
 "drafterAuthRequired": "Autenticação necessária. Faça login no Lustra primeiro.",
   "drafterLaunchError": "Falha ao iniciar o Gateway Drafter:",
   "drafterButtonTitle": "USE O LUSTRA DRAFTER PARA CRIAR UMA LEI A PARTIR DE UMA IDEIA EM 5 MINUTOS",

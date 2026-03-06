@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:lustra/services/parliament_manager.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 
 class CivicProjectScreen extends StatelessWidget {
   const CivicProjectScreen({super.key});
@@ -412,7 +413,9 @@ void _showManualEmailDialog(BuildContext context, AppLocalizations l10n, String 
 
     try {
       final idToken = await user.getIdToken(true);
-      final url = Uri.parse('https://drafter.lustra.news/?token=$idToken');
+      // TARCZA: Pobieramy token i doklejamy do URL
+      final appCheckToken = await FirebaseAppCheck.instance.getToken(true);
+      final url = Uri.parse('https://drafter.lustra.news/#token=$idToken&appcheck=$appCheckToken');
 
       if (await canLaunchUrl(url)) {
         await launchUrl(url, mode: LaunchMode.externalApplication);
