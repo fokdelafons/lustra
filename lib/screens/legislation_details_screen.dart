@@ -15,15 +15,18 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:web_smooth_scroll/web_smooth_scroll.dart';
 
 import '../models/legislation.dart';
+import '../providers/interaction_provider.dart';
 import '../services/parliament_service_interface.dart';
 import '../services/share_service.dart';
 import '../services/parliament_manager.dart';
+import '../services/tracking_service.dart';
 import '../widgets/parliamentary_vote_painter.dart';
 import '../widgets/partially_expandable_list_widget.dart';
 import '../widgets/citizen_poll_widget.dart';
 import '../widgets/missing_data_widget.dart';
 import '../widgets/details_app_bar.dart';
 import '../widgets/error_report_dialog.dart';
+import '../widgets/lists_specific/curated_list_manager_dialog.dart';
 
 
 class LegislationDetailsScreen extends StatefulWidget {
@@ -32,6 +35,7 @@ class LegislationDetailsScreen extends StatefulWidget {
   final String? summarizedBy;
   final String? usedPrompt;
   final String? listType;
+  final String? initialAction;
 
   const LegislationDetailsScreen({
     super.key,
@@ -40,6 +44,7 @@ class LegislationDetailsScreen extends StatefulWidget {
     this.summarizedBy,
     this.usedPrompt,
     this.listType,
+    this.initialAction,
   }) : assert(bill != null || legislationId != null, 'Either bill or legislationId must be provided.');
 
   @override
@@ -48,6 +53,7 @@ class LegislationDetailsScreen extends StatefulWidget {
 
 class _LegislationDetailsScreenState extends State<LegislationDetailsScreen> {
   final ScrollController _pageScrollController = ScrollController();
+  final TrackingService _trackingService = TrackingService();
   Legislation? _bill;
   bool _isLoading = false;
   bool _isFetchingDetails = false;
@@ -88,7 +94,57 @@ class _LegislationDetailsScreenState extends State<LegislationDetailsScreen> {
   }
 
 void _initializeStateData() {
-  // Empty, ready for future
+  if (widget.initialAction != null) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _handleInitialAction(widget.initialAction!);
+    });
+  }
+}
+
+void _handleInitialAction(String action) {
+  if (!mounted || _bill == null) return;
+  
+  developer.log('LEGISLATION_SCREEN: Intercepted action: $action', name: 'LegislationDetailsScreen');
+  
+  if (action == 'share') {
+    _shareLegislation();
+  } else if (action == 'track') {
+    _toggleTracking();
+  }
+}
+
+Future<void> _toggleTracking() async {
+  if (FirebaseAuth.instance.currentUser == null) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.mustBeLoggedInToReport)));
+    return;
+  }
+
+  final activeService = Provider.of<ParliamentManager>(context, listen: false).activeServiceId;
+  if (activeService == null) return;
+
+  final interactionProvider = context.read<InteractionProvider>();
+  final currentDocType = (_bill!.documentType == 'civic' || widget.listType == 'civic') ? 'civic' : 'bill';
+  final isCurrentlyTracked = interactionProvider.isTracked(_bill!.id, docType: currentDocType);
+  interactionProvider.toggleTrackingLocally(_bill!.id, !isCurrentlyTracked, docType: currentDocType);
+
+  try {
+    await _trackingService.toggleTrackBill(activeService, _bill!.id, docType: currentDocType);
+    
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(!isCurrentlyTracked ? "Added to your tracking list." : "Removed from tracking list."),// TODO l10n
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  } catch (e) {
+    interactionProvider.toggleTrackingLocally(_bill!.id, isCurrentlyTracked, docType: currentDocType);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.errorFailedToLoadData)));
+    }
+  }
 }
 
   Future<void> _fetchLegislationDetails({bool isBackgroundFetch = false}) async {
@@ -264,12 +320,31 @@ void _shareLegislation() {
                   );
                 },
               ),
+              ListTile(
+                leading: const Icon(Icons.playlist_add),
+                title: const Text("Manage in Public List"), // TODO: L10N
+                onTap: () {
+                  Navigator.of(bottomSheetContext).pop();
+                  if (FirebaseAuth.instance.currentUser == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("You must be logged in."))); // TODO: L10N
+                    return;
+                  }
+                  showDialog(
+                    context: context,
+                    builder: (dialogContext) => CuratedListManagerDialog(
+                      bill: _bill!,
+                      listType: widget.listType ?? 'bill',
+                    ),
+                  );
+                },
+              ),
             ],
           ),
         );
       },
     );
   }
+
 
 void _reportError() {
   if (FirebaseAuth.instance.currentUser != null) {
@@ -419,6 +494,30 @@ void _reportError() {
               )
             );
           }
+          if (buttonWidgets.isNotEmpty) buttonWidgets.add(const SizedBox(width: 12));
+          final interactionProvider = context.watch<InteractionProvider>();
+          final currentDocType = (_bill!.documentType == 'civic' || widget.listType == 'civic') ? 'civic' : 'bill';
+          final isCurrentlyTracked = interactionProvider.isTracked(_bill!.id, docType: currentDocType);
+
+          buttonWidgets.add(
+            Expanded(
+              child: OutlinedButton.icon(
+                icon: Icon(isCurrentlyTracked ? Icons.notifications_active : Icons.notifications_none,
+                        color: isCurrentlyTracked ? Theme.of(context).primaryColor : null),
+                label: Text(
+                  isCurrentlyTracked ? "Tracked" : "Track this Bill", 
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: isCurrentlyTracked ? Theme.of(context).primaryColor : null),
+                ),
+                onPressed: _toggleTracking,
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  side: isCurrentlyTracked ? BorderSide(color: Theme.of(context).primaryColor) : null,
+                ),
+              ),
+            )
+          );
+
           if (buttonWidgets.isEmpty) return const SizedBox.shrink();
           return Padding(padding: const EdgeInsets.symmetric(vertical: 8.0), child: Row(children: buttonWidgets));
         }),

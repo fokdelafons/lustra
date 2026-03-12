@@ -22,6 +22,8 @@ import '../../widgets/home_specific/politicians_card.dart';
 import '../../widgets/home_specific/web_app_bar.dart';
 import '../../widgets/home_specific/mobile_app_bar.dart';
 import '../../widgets/home_specific/mobile_nav_bar.dart';
+import '../../widgets/home_specific/tracked_card.dart';
+import '../../widgets/home_specific/curated_list_card.dart';
 
 
 
@@ -303,6 +305,9 @@ Widget _buildContentList(BuildContext context) {
     }
 
     List<Widget> sectionWidgets = [];
+
+    sectionWidgets.add(const TrackedCard());
+
     if (homeData.popularVoted != null && homeData.popularVoted!.id.isNotEmpty) {
       sectionWidgets.add(VotedCard(item: homeData.popularVoted!));
     }
@@ -312,6 +317,12 @@ Widget _buildContentList(BuildContext context) {
     if (homeData.popularInProcess != null && homeData.popularInProcess!.id.isNotEmpty) {
       sectionWidgets.add(ProcessCard(item: homeData.popularInProcess!));
     }
+
+    final userProvider = context.watch<UserProvider>();
+    for (String listId in userProvider.subscribedLists) {
+      sectionWidgets.add(CuratedListCard(listId: listId));
+    }
+
     if (homeData.civicProject != null) {
       sectionWidgets.add(CivicProjectCard(project: homeData.civicProject!));
     }
@@ -338,8 +349,9 @@ Widget _buildContentList(BuildContext context) {
     }
 
     Widget listView = ListView.separated(
-      controller: _scrollController,
+      cacheExtent: 3000.0, 
       
+      controller: _scrollController,
       physics: isDesktopWeb 
           ? const NeverScrollableScrollPhysics() 
           : const AlwaysScrollableScrollPhysics(),

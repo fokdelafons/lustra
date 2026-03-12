@@ -10,6 +10,10 @@ class UserProvider with ChangeNotifier {
   bool _marketingConsent = false;
   bool _notificationsEnabled = false;
   String? _notificationParliamentId;
+
+  List<String> _subscribedLists = [];
+  List<String> _createdLists = [];
+  bool _isCurator = false;
   
   bool _isInitialized = false;
   bool _profileExists = true;
@@ -26,9 +30,19 @@ class UserProvider with ChangeNotifier {
   bool get notificationsEnabled => _notificationsEnabled;
   String? get notificationParliamentId => _notificationParliamentId;
 
-  bool hasVoted(String targetKey) {
-    return _votes.containsKey(targetKey);
+  List<String> get subscribedLists => _subscribedLists;
+  List<String> get createdLists => _createdLists;
+  bool get isCurator => _isCurator;
+  bool isSubscribedToList(String listId) => _subscribedLists.contains(listId);
+  void updateListSubscriptionLocally(String listId, bool isSubscribed) {
+    if (isSubscribed && !_subscribedLists.contains(listId)) {
+      _subscribedLists.add(listId);
+    } else if (!isSubscribed) {
+      _subscribedLists.remove(listId);
+    }
+    notifyListeners();
   }
+
 
   void updateAuthStatus(User? firebaseUser) {
     if (firebaseUser == null) {
@@ -81,17 +95,15 @@ class UserProvider with ChangeNotifier {
         } else {
           _votes = {};
         }
+        _subscribedLists = List<String>.from(profile['subscribedLists'] ?? []);
+        _createdLists = List<String>.from(profile['createdLists'] ?? []);
+        _isCurator = profile['isCurator'] ?? false;
       }
       _isInitialized = true;
       notifyListeners();
     } catch (e) {
       developer.log("Błąd pobierania profilu: $e", name: 'UserProvider');
     }
-  }
-
-  void markAsVotedLocally(String targetKey) {
-    _votes[targetKey] = true;
-    notifyListeners();
   }
 
   Future<void> updatePreferences({bool? marketing, bool? notifications, String? parliamentId, String? fcmToken}) async {
@@ -117,8 +129,18 @@ class UserProvider with ChangeNotifier {
     _marketingConsent = false;
     _notificationsEnabled = false;
     _notificationParliamentId = null;
+    _subscribedLists = [];
+    _createdLists = [];
+    _isCurator = false;
     _currentUserId = null;
     _isInitialized = false;
+    notifyListeners();
+  }
+
+  int curatedListUpdateStamp = 0;
+
+  void triggerCuratedListsRebuild() {
+    curatedListUpdateStamp++;
     notifyListeners();
   }
 }

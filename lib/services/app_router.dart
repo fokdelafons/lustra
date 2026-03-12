@@ -171,14 +171,19 @@ final GoRouter router = GoRouter(
         final slug = state.pathParameters['slug'];
         final termParam = state.pathParameters['term'];
         final pid = ParliamentSource.getIdBySlug(slug)!;
-        final isCivicRoute = termParam == 'civic';
-        final type = isCivicRoute ? 'civic' : (state.uri.queryParameters['list'] ?? 'voted');
+        final queryList = state.uri.queryParameters['list'];
+        final listId = state.uri.queryParameters['listId'];
+        
+        String type = queryList ?? 'voted';
+        if (queryList == 'tracked') type = 'tracked';
+        if (queryList == 'curated') type = 'curated';
+        if (termParam == 'civic' && queryList != 'curated') type = 'civic';
 
         return RouteContextGuard(
           targetLang: lang,
           targetParliamentId: pid,
           targetTerm: termParam,
-          child: LegislationWrapperScreen(type: type),
+          child: LegislationWrapperScreen(type: type, listId: listId),
         );
       },
       routes: [
@@ -191,11 +196,14 @@ final GoRouter router = GoRouter(
              final termParam = state.pathParameters['term'];
              final isCivicRoute = termParam == 'civic';
              final listType = isCivicRoute ? 'civic' : null;
+             final initialAction = state.uri.queryParameters['action'];
              Widget child;
+             
              if (state.extra is Legislation) {
                 child = LegislationDetailsScreen(
                   bill: state.extra as Legislation,
-                  listType: listType
+                  listType: listType,
+                  initialAction: initialAction,
                 );
              } else if (state.extra is HomeScreenLegislationItem) {
                 final homeItem = state.extra as HomeScreenLegislationItem;
@@ -210,12 +218,14 @@ final GoRouter router = GoRouter(
                 );
                 child = LegislationDetailsScreen(
                   bill: legislation,
-                  listType: listType
+                  listType: listType,
+                  initialAction: initialAction,
                 );
              } else {
                 child = LegislationDetailsScreen(
                   legislationId: legislationId,
-                  listType: listType
+                  listType: listType,
+                  initialAction: initialAction,
                 );
              }
              return RouteContextGuard(

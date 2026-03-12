@@ -52,6 +52,17 @@ const functionsMap = {
     'deleteAccount': globalHandlers.deleteAccount,
     'reportError': globalHandlers.reportError,
     'updateUserProfile': globalHandlers.updateUserProfile,
+    'getUserInteractions': globalHandlers.getUserInteractions,
+    'toggleBillTracking': globalHandlers.toggleBillTracking,
+    'getTrackedItems': globalHandlers.getTrackedItems,
+    'createCuratedList': globalHandlers.createCuratedList,
+    'toggleBillInCuratedList': globalHandlers.toggleBillInCuratedList,
+    'subscribeToCuratedList': globalHandlers.subscribeToCuratedList,
+    'getCuratedListFeed': globalHandlers.getCuratedListFeed,
+    'getMyCuratedLists': globalHandlers.getMyCuratedLists,
+    'deleteCuratedList': globalHandlers.deleteCuratedList,
+    'renameCuratedList': globalHandlers.renameCuratedList,
+    'setHighlightedBill': globalHandlers.setHighlightedBill,
 // --- PL ---
     'pl_getMetadata': plHandlers.getMetadata,
     'pl_getHomeScreenData': plHandlers.getHomeScreenData,
@@ -59,7 +70,7 @@ const functionsMap = {
     'pl_getDeputies': plHandlers.getDeputies,
     'pl_getDeputyDetails': plHandlers.getDeputyDetails,
     'pl_getLegislations': plHandlers.getLegislations,
-    'pl_citizenVote': plHandlers.citizenVote,
+    'pl_citizenVote': globalHandlers.citizenVote,
 // --- DE ---
     'de_getMetadata': deHandlers.getMetadata,
     'de_getHomeScreenData': deHandlers.getHomeScreenData,
@@ -67,7 +78,7 @@ const functionsMap = {
     'de_getDeputies': deHandlers.getDeputies,
     'de_getDeputyDetails': deHandlers.getDeputyDetails,
     'de_getLegislations': deHandlers.getLegislations,
-    'de_citizenVote': deHandlers.citizenVote,
+    'de_citizenVote': globalHandlers.citizenVote,
 // --- UE ---
     'ue_getMetadata': ueHandlers.getMetadata,
     'ue_getHomeScreenData': ueHandlers.getHomeScreenData,
@@ -75,7 +86,7 @@ const functionsMap = {
     'ue_getDeputies': ueHandlers.getDeputies,
     'ue_getDeputyDetails': ueHandlers.getDeputyDetails,
     'ue_getLegislations': ueHandlers.getLegislations,
-    'ue_citizenVote': ueHandlers.citizenVote,
+    'ue_citizenVote': globalHandlers.citizenVote,
 // --- FR ---
     'fr_getMetadata': frHandlers.getMetadata,
     'fr_getHomeScreenData': frHandlers.getHomeScreenData,
@@ -83,7 +94,7 @@ const functionsMap = {
     'fr_getDeputies': frHandlers.getDeputies,
     'fr_getDeputyDetails': frHandlers.getDeputyDetails,
     'fr_getLegislations': frHandlers.getLegislations,
-    'fr_citizenVote': frHandlers.citizenVote,
+    'fr_citizenVote': globalHandlers.citizenVote,
 // --- US ---
     'us_getMetadata': usHandlers.getMetadata,
     'us_getHomeScreenData': usHandlers.getHomeScreenData,
@@ -92,7 +103,7 @@ const functionsMap = {
     'us_getDeputyDetails': usHandlers.getDeputyDetails,
     'us_getLegislations': usHandlers.getLegislations,
     'us_getCivicProjects': usHandlers.getCivicProjects,
-    'us_citizenVote': usHandlers.citizenVote,
+    'us_citizenVote': globalHandlers.citizenVote,
 // --- UK ---
     'uk_getMetadata': ukHandlers.getMetadata,
     'uk_getHomeScreenData': ukHandlers.getHomeScreenData,
@@ -100,7 +111,7 @@ const functionsMap = {
     'uk_getDeputies': ukHandlers.getDeputies,
     'uk_getDeputyDetails': ukHandlers.getDeputyDetails,
     'uk_getLegislations': ukHandlers.getLegislations,
-    'uk_citizenVote': ukHandlers.citizenVote,
+    'uk_citizenVote': globalHandlers.citizenVote,
 };
 
 app.post(/.*/, (req, res) => {

@@ -14,6 +14,7 @@ import 'package:flutter/foundation.dart';
 
 import 'providers/user_provider.dart';
 import 'providers/language_provider.dart';
+import 'providers/interaction_provider.dart';
 import 'services/parliament_manager.dart';
 import 'services/firebase_auth.dart';
 import 'services/app_router.dart';
@@ -74,6 +75,14 @@ void main() async {
                 ),
 				ChangeNotifierProvider(create: (context) => ParliamentManager()),
 				ChangeNotifierProvider(create: (context) => LanguageProvider()),
+                ChangeNotifierProxyProvider2<User?, ParliamentManager, InteractionProvider>(
+                  lazy: false,
+                  create: (_) => InteractionProvider(),
+                  update: (context, user, parliamentManager, interactionProvider) {
+                    interactionProvider!.updateDependencies(user?.uid, parliamentManager.activeServiceId);
+                    return interactionProvider;
+                  },
+                ),
         Provider<RemoteConfigService>.value(value: remoteConfigService),
         ChangeNotifierProxyProvider<ParliamentManager, ParliamentServiceInterface>(
           create: (context) => context.read<ParliamentManager>().activeService,
@@ -156,6 +165,13 @@ class MyApp extends StatelessWidget {
 
 final List<String> _svgAssetsToPrecache = [
   'assets/logo_full.svg',
+  'assets/flags/us.svg',
+  'assets/flags/pl.svg',
+  'assets/flags/gb.svg',
+  'assets/flags/eu.svg',
+  'assets/flags/fr.svg',
+  'assets/flags/de.svg',
+  'assets/flags/be.svg',
 ];
 
 Future<void> precacheSvgAssets() async {

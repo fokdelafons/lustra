@@ -42,12 +42,8 @@ module.exports = {
     
     // --- SEO CONTROL TOWER ---
     SITEMAP_POLICY: {
-        // Tylko te kadencje (Świeżość)
-        allowedTerms: ['119', 'civic'], 
-        
-        // Tylko te języki (Koncentracja Rynku)
-        // Reszta (DE, FR...) będzie miała pliki HTML, ale nie trafi do XML.
-        allowedLanguages: ['en'] 
+        allowedTerms: ['117', '118', '119', 'civic'], 
+        allowedLanguages: ['en', 'de', 'fr', 'es', 'it', 'nl', 'pt', 'pl'] 
     },
 
     // URL: /{lang}/us-congress/{term}/legislations/{id}

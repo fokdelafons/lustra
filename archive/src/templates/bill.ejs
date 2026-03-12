@@ -30,7 +30,7 @@
     <meta property="og:site_name" content="Lustra.news" />
     <meta property="og:title" content="<%= content.ai_title %> (<%= doc.id %>)" />
     <meta property="og:description" content="<%= content.summary %>" />
-    <meta property="og:image" content="https://lustra.news/assets/og_preview.png" />
+    <meta property="og:image" content="<%= ogImageUrl %>" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:url" content="<%= hreflangs[lang] %>" />
@@ -39,7 +39,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="<%= content.ai_title %> (<%= doc.id %>)">
     <meta name="twitter:description" content="<%= content.summary %>">
-    <meta name="twitter:image" content="https://lustra.news/assets/og_preview.png">
+    <meta name="twitter:image" content="<%= ogImageUrl %>">
 
     <!-- FONTS (Icons Only + Swap Policy) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -48,6 +48,8 @@
     <noscript>
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined&display=swap" rel="stylesheet">
     </noscript>
+    <link rel="icon" type="image/png" href="https://lustra.news/favicon.png">
+    <meta name="apple-mobile-web-app-title" content="Lustra">
 
 <!-- === SCHEMA.ORG (Dynamic Construction) === -->
     <% 
@@ -141,6 +143,12 @@
             });
         }
 
+        faqItems.push({
+            "@type": "Question",
+            "name": labels.faq_impact,
+            "acceptedAnswer": { "@type": "Answer", "text": labels.ans_impact }
+        });
+
         let legislativeBodyName = "United States Congress";
         if (doc.id && doc.id.includes("_H")) legislativeBodyName = "United States House of Representatives";
         else if (doc.id && doc.id.includes("_S")) legislativeBodyName = "United States Senate";
@@ -174,7 +182,6 @@
                 "name": content.ai_title,
                 "alternateName": doc.titleOfficial,
                 "legislationIdentifier": doc.id,
-                "legislationJurisdiction": geoRegion,
                 "datePublished": meta.processStartDate,
                 "dateModified": meta.lastUpdated,
                 "description": content.summary,
@@ -300,6 +307,19 @@
         .nav-item.right { justify-self: end; }
         .nav-item.right .material-icons { margin-right: 0; margin-left: 8px; }
 
+        .track-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            background-color: var(--primary); color: white;
+            border-radius: 999px; padding: 6px 16px; font-size: 13px; font-weight: 500;
+            text-decoration: none; transition: opacity 0.2s;
+        }
+        .track-btn:hover { opacity: 0.9; }
+        .track-btn .material-icons-outlined { font-size: 16px; margin-right: 6px; }
+        .status-wrapper { 
+            display: flex; align-items: center; justify-content: center; 
+            gap: 12px; flex-wrap: wrap; 
+        }
+
         .scaffold-body {
             width: 100%;
             max-width: 750px;
@@ -354,9 +374,13 @@
             line-height: 1.4;
         }
 
-        .button-row { display: flex; gap: 12px; margin: 24px 0 32px 0; }
+        .button-row { 
+            display: flex; gap: 12px; margin: 24px 0 24px 0; 
+            flex-wrap: wrap;
+        }
         .outlined-btn {
-            flex: 1; display: flex; align-items: center; justify-content: center;
+            flex: 1 1 auto;
+            display: flex; align-items: center; justify-content: center;
             height: 40px; padding: 0 16px;
             border: 1px solid rgba(0,0,0,0.12); border-radius: 999px;
             background: transparent; color: var(--primary);
@@ -604,7 +628,7 @@
     -->
     <header>
         <div class="app-bar-content">
-            <a href="https://lustra.news/#/<%= lang %>/<%= institutionSlug %>/<%= term %>/<%= typeSlug %>/<%= doc.id %>/" class="nav-item">
+            <a href="https://lustra.news/" class="nav-item">
                 <span class="material-icons">arrow_back</span>
                 <%= labels.back_to_app %>
             </a>
@@ -618,6 +642,10 @@
     <path d="M0 0 C-0.66 3.63 -1.32 7.26 -2 11 C-3.093125 11.0825 -4.18625 11.165 -5.3125 11.25 C-8.98960131 11.64460943 -8.98960131 11.64460943 -10.875 13.875 C-12.63273302 17.19516236 -13.15151515 19.96969702 -13.31640625 23.66796875 C-13.35830078 24.56064453 -13.40019531 25.45332031 -13.44335938 26.37304688 C-13.50233398 27.76620117 -13.50233398 27.76620117 -13.5625 29.1875 C-13.60568359 30.12787109 -13.64886719 31.06824219 -13.69335938 32.03710938 C-13.79938543 34.35790188 -13.90019194 36.67893177 -14 39 C-17.63 39 -21.26 39 -25 39 C-25 26.46 -25 13.92 -25 1 C-21.7 1 -18.4 1 -15 1 C-14.67 1.99 -14.34 2.98 -14 4 C-13.54625 3.34 -13.0925 2.68 -12.625 2 C-8.54860457 -1.10582509 -5.03648067 -0.26507793 0 0 Z" transform="translate(297,43)"/>
 </svg>
             </div>
+            <a href="https://lustra.news/#/<%= lang %>/<%= institutionSlug %>/<%= term %>/<%= typeSlug %>/<%= doc.id %>?action=share" class="nav-item right">
+                <%= labels.share_awareness %>
+                <span class="material-icons">share</span>
+            </a>
         </div>
     </header>
 
@@ -647,6 +675,10 @@
                 <%= labels.process_page %>
             </a>
         <% } %>
+            <a href="https://lustra.news/#/<%= lang %>/<%= institutionSlug %>/<%= term %>/<%= typeSlug %>/<%= doc.id %>?action=track" class="outlined-btn">
+                <span class="material-icons-outlined">notifications_active</span>
+                <%= labels.track_status %>
+            </a>
         </div>
 
         <% if (doc.votesFor !== undefined && doc.votesFor !== null) { %>
@@ -655,7 +687,6 @@
             <div class="voting-date"><%= meta.votingDate %></div>
             
         <div id="hemicycle-container">
-                <!-- LOGIKA OBLICZANIA PROCENTÓW (SERVER-SIDE) -->
                 <% 
                     const vFor = doc.votesFor || 0;
                     const vAgainst = doc.votesAgainst || 0;
@@ -678,7 +709,6 @@
                     }
                 %>
 
-                <!-- WSTRZYKNIĘCIE OBLICZONEJ WARTOŚCI -->
                 <div class="percentage-badge" id="percent-badge" style="color: <%= badgeColor %>">
                     <%= badgePercent %>
                 </div>
@@ -708,12 +738,13 @@
         </a>
         <% } %>
 
-        <div class="status-container">
+        <div class="status-container" style="display: flex; flex-direction: column; align-items: center; text-align: center; margin: 0 0 24px 0;">
             <% 
                 const statusKey = doc.status;
                 const translatedStatus = (labels.status && labels.status[statusKey]) ? labels.status[statusKey] : statusKey;
             %>
-            <span class="status-text"><%= translatedStatus %></span>
+            <span style="font-size: 14px; color: var(--text-med); margin-bottom: 4px;"><%= labels.current_status %></span>
+            <span style="font-size: 22px; font-weight: 600; color: #000000;"><%= translatedStatus %></span>
         </div>
 
         <div class="citizen-poll">
@@ -730,27 +761,51 @@
                     const cLikePct = Math.round((cLikes / cTotal) * 100);
                     const cDislikePct = 100 - cLikePct; 
                 %>
-                    <!-- STAN AKTYWNY (KOLORY) -->
                     <div class="poll-segment" style="width: <%= cLikePct %>%; background-color: var(--vote-for);">
-                        <%= cLikePct > 0 ? cLikePct + '%' : '' %>
+                        <%= cLikePct >= cDislikePct ? cLikePct + '% ' + labels.supported : '' %>
                     </div>
                     <div class="poll-segment" style="width: <%= cDislikePct %>%; background-color: var(--vote-against);">
-                        <%= cDislikePct > 0 ? cDislikePct + '%' : '' %>
+                        <%= cDislikePct > cLikePct ? cDislikePct + '% ' + labels.opposed : '' %>
                     </div>
                 <% } else { %>
-                    <!-- STAN PUSTY (High Contrast / No Border Artifacts) -->
                     <div class="poll-segment" style="width: 100%; background-color: #EEEEEE; color: #212121; font-weight: 500;">
                         <%= labels.no_votes_cast %>
                     </div>
                 <% } %>
             </div>
 
-            <div class="poll-login-container">
-                <!-- DEEP LINK: Otwiera tę konkretną ustawę w aplikacji -->
+            <div style="display: flex; justify-content: center; align-items: center; gap: 16px; margin: 16px 0;">
+                
+                <div style="display: flex; flex-direction: column; align-items: center; color: #616161;">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="28" viewBox="0 -960 960 960" width="28" fill="currentColor"><path d="M720-120H280v-520l280-280 50 50q7 7 11.5 19t4.5 23v14l-44 174h258q32 0 56 24t24 56v80q0 7-2 15t-4 15L794-168q-9 20-30 34t-44 14Zm-360-80h360l120-280v-80H480l54-220-174 174v406Zm0-406v406-406Zm-80-34v80H160v360h120v80H80v-520h200Z"/></svg>
+                    <span style="font-size: 11px; margin-top: 4px; font-weight: 500;"><%= labels.i_support %></span>
+                </div>
+
                 <a href="https://lustra.news/#/login?next=/<%= lang %>/<%= institutionSlug %>/<%= term %>/<%= typeSlug %>/<%= doc.id %>/" class="poll-login-btn">
                     <span class="material-icons-outlined">login</span>
                     <%= labels.login_to_vote %>
                 </a>
+
+                <div style="display: flex; flex-direction: column; align-items: center; color: #616161;">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="28" viewBox="0 -960 960 960" width="28" fill="currentColor"><path d="M240-840h440v520L400-40l-50-50q-7-7-11.5-19t-4.5-23v-14l44-174H120q-32 0-56-24t-24-56v-80q0-7 2-15t4-15l120-280q9-20 30-34t44-14Zm360 80H240L120-480v80h360l-54 220 174-174v-406Zm0 406v-406 406Zm80 34v-80h120v-360H680v-80h200v520H680Z"/></svg>
+                    <span style="font-size: 11px; margin-top: 4px; font-weight: 500;"><%= labels.i_oppose %></span>
+                </div>
+            </div>
+           <div style="height: 1px; background-color: #E0E0E0; margin: 24px 0 16px 0; width: 100%;"></div>
+            <div style="text-align: center; font-size: 13px; color: var(--text-med); line-height: 1.6;">
+                
+                <!-- TYTUŁ -->
+                <div style="font-weight: 600; font-size: 14px; margin-bottom: 8px; color: #212121;">
+                    <%= labels.why_vote_matters %>
+                </div>
+                <div>
+                    <%= labels.proof_text %> 
+                    <a href="https://lustra.news/<%= lang %>/info/blueprint/" target="_blank" style="color: var(--primary); font-weight: 500; text-decoration: none;">
+                        <%= labels.proof_link %>
+                    </a> 
+                    <span style="margin-left: 4px;"><%= labels.proof_cta %></span>
+                </div>
+            </div>
             </div>
         </div>
 
@@ -803,7 +858,7 @@
         <!-- 2. SEMANTIC CONTEXT (Machine Logic) -->
         <div class="legal-context">
             
-            <!-- 1. OFFICIAL TITLE (Bez zmian, prosto) -->
+            <!-- 1. OFFICIAL TITLE -->
             <div class="context-item">
                 <h2><%= labels.official_legal_title %></h2>
                 <p style="font-weight: 500; color: #000; margin-bottom: 0;"><%= doc.titleOfficial %></p>
@@ -915,7 +970,6 @@
                 </details>
                 <% } %>
                 
-
                 <!-- Q: LATEST ACTION (statusText) -->
                 <% if (doc.statusText) { %>
                 <details style="margin-bottom: 12px; cursor: pointer;">
@@ -928,13 +982,21 @@
 
                 <!-- Q: TRUST / JUDGE -->
                 <% if (meta.judgeDate) { %>
-                <details style="margin-bottom: 0; cursor: pointer;">
+                <details style="margin-bottom: 12px; cursor: pointer;">
                     <summary style="font-size: 14px; color: var(--primary); font-weight: 500;"><%= labels.faq_verified %></summary>
                     <p style="margin-top: 6px; font-size: 14px; color: var(--text-med);">
                         <%= labels.faq_verified_answer %> <%= meta.judgeDate %>.
                     </p>
                 </details>
                 <% } %>
+
+                <!-- Q: IMPACT -->
+                <details style="margin-bottom: 0; cursor: pointer;">
+                    <summary style="font-size: 14px; color: var(--primary); font-weight: 500;"><%= labels.faq_impact %></summary>
+                    <p style="margin-top: 6px; font-size: 14px; color: var(--text-med);">
+                        <%= labels.ans_impact %>
+                    </p>
+                </details>
 
             </div>
 
@@ -954,24 +1016,24 @@
             </div>
         </div>
 
-        <footer class="seo-footer" style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #E0E0E0; display: flex; flex-direction: column; align-items: center; text-align: center;">
-            
-            <!-- NAV LINK (Jako część footera) -->
-            <a href="/<%= lang %>/<%= institutionSlug %>/<%= term %>" style="display: inline-flex; align-items: center; text-decoration: none; color: var(--primary); font-size: 13px; font-weight: 500; margin-bottom: 16px;">
+        <footer class="seo-footer" style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #E0E0E0; display: flex; flex-direction: column; align-items: center; text-align: center;">    
+            <a href="/<%= lang %>/<%= institutionSlug %>/<%= term %>/" style="display: inline-flex; align-items: center; text-decoration: none; color: var(--text-med); font-size: 13px; font-weight: 500; margin-bottom: 16px;">
                 <span class="material-icons" style="font-size: 16px; margin-right: 6px;">grid_view</span>
                 <%= term %> <%= labels.nav_index %>
             </a>
-
-            <!-- DISCLAIMER & COPYRIGHT -->
             <p style="font-size: 11px; color: var(--text-low); margin: 0; max-width: 600px; line-height: 1.4;">
                 Lustra.news &copy; 2026. Civic Intelligence Data Node.<br>
-                Generated: <%= meta.generatedAt %> This page summarizes public-domain legislative data to improve civic accessibility. Official texts remain the authoritative source.<br>
-                <br>
+                Generated: <%= meta.generatedAt %>.<br>
             </p>
+            <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 16px; font-size: 13px; font-weight: 500;">
+                <a href="https://lustra.news/<%= lang %>/info/governance/" target="_blank" style="color: var(--primary); text-decoration: none;"><%= labels.nav_governance %></a>
+                <a href="https://lustra.news/<%= lang %>/info/privacy-policy/" target="_blank" style="color: var(--primary); text-decoration: none;"><%= labels.nav_privacy %></a>
+                <a href="https://github.com/fokdelafons/lustra/" target="_blank" style="color: var(--primary); text-decoration: none;"><%= labels.nav_source_code %></a>
+            </div>
         </footer>
     </section>
 
-    <!-- LOGIKA JS (Hemicycle) - Renderujemy tylko jeśli sekcja istnieje -->
+    <!--  JS (Hemicycle)  -->
     <% if (doc.votesFor !== undefined && doc.votesFor !== null) { %>
     <script>
         function drawHemicycle() {

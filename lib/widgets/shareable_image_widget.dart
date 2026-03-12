@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:lustra/models/home_screen_data.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import '../models/mp.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+
+import '../models/mp.dart';
 import 'parliamentary_vote_painter.dart';
+
+// SPAGHETTI CODE - MIGHT CONSIDER REFACTOR
 
 enum ShareableCardType {
   voted,
@@ -12,7 +15,6 @@ enum ShareableCardType {
   inProcess,
 }
 
-// Definiujemy enumy potrzebne dla nowej, elastycznej architektury
 enum LegislationCardType {
   voted,
   scheduled,
@@ -24,8 +26,6 @@ enum ShareableContentType {
   deputy,
 }
 
-
-// Nowa, generyczna klasa, która zastępuje ShareableLegislationImage
 class ShareableImage extends StatelessWidget {
   final HomeScreenLegislationItem? legislation;
   final MP? deputy;
@@ -104,7 +104,6 @@ class ShareableImage extends StatelessWidget {
     );
   }
 
-  // === GŁÓWNA METODA BUILD ===
   @override
   Widget build(BuildContext context) {
     final contentType = legislation != null ? ShareableContentType.legislation : ShareableContentType.deputy;
@@ -142,7 +141,7 @@ class ShareableImage extends StatelessWidget {
   }
 
   // =======================================================================
-  // === BUILDER DLA KARTY LEGISLACJI (nasz stary, dopracowany kod) ===
+  // === BUILDER FOR LEGISLATION CARD ===
   // =======================================================================
   Widget _buildLegislationCard(BuildContext context) {
     LegislationCardType cardType;
@@ -154,7 +153,7 @@ class ShareableImage extends StatelessWidget {
       cardType = LegislationCardType.inProcess;
     }
 
-// === POCZĄTEK PANELU STEROWANIA ===
+    // === CONTROL PANEL ===
     final double aspectRatio = size.width / size.height;
     final bool isSquare = aspectRatio > 0.9 && aspectRatio < 1.1;
     final double padding = isSquare ? 30.0 : 80.0;
@@ -167,11 +166,11 @@ class ShareableImage extends StatelessWidget {
     final double voteCountFontSize = isSquare ? 20 : 32;
     final double statusFontSize = isSquare ? 28 : 60;
     final double footerInfoFontSize = isSquare ? 24 : 28;
-    // === KONIEC PANELU STEROWANIA ===
+    // === END ===
 
-    final votesForSejm = legislation!.votesFor ?? 0;
-    final votesAgainstSejm = legislation!.votesAgainst ?? 0;
-    final votesAbstainSejm = legislation!.votesAbstain ?? 0;
+    final votesFor = legislation!.votesFor ?? 0;
+    final votesAgainst = legislation!.votesAgainst ?? 0;
+    final votesAbstain = legislation!.votesAbstain ?? 0;
 
     String headerLabel = parliamentName;
     if (legislation!.id.toUpperCase().startsWith('CIVIC-')) {
@@ -218,7 +217,6 @@ class ShareableImage extends StatelessWidget {
         Expanded(
                   child: Stack(
                     children: [
-                      // --- WARSTWA 1: TREŚĆ ---
                       Positioned.fill(
                         child: ClipRect(
                           child: Container(
@@ -229,7 +227,6 @@ class ShareableImage extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  // NOWA SEKCJA: OSTRZEŻENIE O BRAKUJĄCYCH DANYCH
                                   if (showMissingDataWarning) ...[
                                     _buildMissingDataWarning(isSquare),
                                     const SizedBox(height: 20),
@@ -253,8 +250,6 @@ class ShareableImage extends StatelessWidget {
                           ),
                         ),
                       ),
-
-// --- WARSTWA 2: STREFA Z INFORMACJĄ (wyrównana do lewej) ---
               Align(
                 alignment: Alignment.bottomCenter,
                 child: Container(
@@ -294,9 +289,9 @@ class ShareableImage extends StatelessWidget {
               return _buildVotedFooter(
                 padding,
                 isSquare,
-                votesForSejm,
-                votesAgainstSejm,
-                votesAbstainSejm,
+                votesFor,
+                votesAgainst,
+                votesAbstain,
                 chartHeightMultiplier,
                 voteCountFontSize,
                 statusFontSize,
@@ -315,11 +310,10 @@ class ShareableImage extends StatelessWidget {
     );
   }
 
-// ===============================================================
-  // === NOWY BUILDER DLA KARTY POSŁA ===
+  // === DEPUTY BUILDER ===
   // ===============================================================
   Widget _buildDeputyCard(BuildContext context) {
-    // === LOKALNY PANEL STEROWANIA ===
+    // === CONTROL PANEL ===
     final double aspectRatio = size.width / size.height;
     final bool isSquare = aspectRatio > 0.9 && aspectRatio < 1.1;
     final double padding = isSquare ? 30.0 : 65.0;
@@ -358,10 +352,8 @@ final attendancePercentage = deputy!.attendancePercentage ?? 0.0;
     if (deputy!.parliamentaryHistory != null && deputy!.parliamentaryHistory!['terms'] is List) {
       termsCount = (deputy!.parliamentaryHistory!['terms'] as List).length;
     }
-    
     return Column(
       children: [
-        // --- SEKCJA 1: NAGŁÓWEK ---
         Padding(
           padding: EdgeInsets.fromLTRB(padding, padding, padding, padding / 2),
           child: Row(
@@ -398,17 +390,14 @@ final attendancePercentage = deputy!.attendancePercentage ?? 0.0;
             ],
           ),
         ),
-        
-// --- SEKCJA 2: AKTYWNOŚĆ (z nową hierarchią) ---
         Expanded(
           child: Padding(
             padding: EdgeInsets.fromLTRB(padding, 0, padding, padding),
             child: Column(
               children: [
-                // === CZĘŚĆ DODATKOWA (GŁOSOWANIA - teraz na górze, tylko dla 16:9) ===
                 if (!isSquare && recentVotings!.isNotEmpty)
                   Expanded(
-                    flex: 2, // Dajemy więcej miejsca na listę głosowań
+                    flex: 2,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.start,
@@ -416,12 +405,10 @@ final attendancePercentage = deputy!.attendancePercentage ?? 0.0;
                         const SizedBox(height: 8),
                         Text(
                           l10n.votingsTab,
-                          // === POKRĘTŁO 1: Rozmiar tytułu "Głosowania" ===
-                          style: TextStyle(fontSize: 55, color: Colors.grey[800]), // Usunięto fontWeight.bold
+                          style: TextStyle(fontSize: 55, color: Colors.grey[800]),
                         ),
                         const Divider(),
                         const SizedBox(height: 8),
-                        // Lista głosowań (zajmie resztę miejsca w tym Expanded)
                         Expanded(
                           child: ListView(
                             padding: EdgeInsets.zero,
@@ -436,14 +423,11 @@ final attendancePercentage = deputy!.attendancePercentage ?? 0.0;
                       ],
                     ),
                   ),
-
-// === CZĘŚĆ WSPÓLNA (STATYSTYKI - teraz warunkowe) ===
                 Expanded(
-                  flex: 1, // Dajemy mniej miejsca na statystyki
+                  flex: 1,
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // Kolumna 1: Frekwencja (zawsze widoczna).
                       Expanded(
                         child: _buildVerticalStatItem(
                           l10n.attendanceLabelShort,
@@ -452,11 +436,9 @@ final attendancePercentage = deputy!.attendancePercentage ?? 0.0;
                           isSquare,
                         ),
                       ),
-                      
-                      // Kolumna 2: Warunkowa.
                       Expanded(
                         child: (parliamentId == 'us')
-                            // Dla USA: Nowy, zwarty layout w jednej kolumnie.
+                            // USA exception?
                             ? Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -496,7 +478,7 @@ final attendancePercentage = deputy!.attendancePercentage ?? 0.0;
                                   ),
                                 ],
                               )
-                            // Dla innych parlamentów: Standardowy widget.
+                            // for the rest
                             : _buildVerticalStatItem(
                                 l10n.interpellationsTab,
                                 interpellationsText,
@@ -512,7 +494,7 @@ final attendancePercentage = deputy!.attendancePercentage ?? 0.0;
           ),
         ),
 
-        // --- SEKCJA 3: SONDAŻ POPARCIA ---
+        // --- POLL ---
         Padding(
           padding: EdgeInsets.fromLTRB(padding, 0, padding, padding),
           child: _buildCitizenVoteSection(
@@ -528,8 +510,6 @@ final attendancePercentage = deputy!.attendancePercentage ?? 0.0;
       ],
     );
   }
-
-  // --- OSTATECZNE WERSJE METOD POMOCNICZYCH ---
 
   Widget _buildDeputyInfoRow(String text, bool isSquare) {
     return Padding(
@@ -652,11 +632,6 @@ Widget _buildParliamentInfo(String parliamentName, String flagAssetPath, bool is
   );
 }
 
-  // ===============================================================
-  // === METODY POMOCNICZE (WSPÓLNE I SPECYFICZNE) ===
-  // ===============================================================
-
-  /// Buduje statyczny, procentowy pasek ankiety na potrzeby obrazka.
   Widget _buildPollBar({required int likes, required int dislikes}) {
     final totalVotes = likes + dislikes;
     final double forPercent = totalVotes > 0 ? (likes / totalVotes * 100) : 0;
@@ -724,7 +699,7 @@ Widget _buildParliamentInfo(String parliamentName, String flagAssetPath, bool is
 
     if (totalVotes == 0) {
       return Container(
-        height: 55, // Dopasowujemy wysokość do aktywnego paska
+        height: 55,
         decoration: BoxDecoration(
           color: Colors.grey[200],
           borderRadius: BorderRadius.circular(18),
@@ -779,29 +754,25 @@ Widget _buildParliamentInfo(String parliamentName, String flagAssetPath, bool is
 
   Widget _buildBrandingFooter({required bool isSquare}) {
     return Container(
-      // ZMIANA 1: Wymuszamy na kontenerze zajęcie całej dostępnej szerokości
       width: double.infinity,
       color: const Color(0xFFF5F5F5),
       padding: EdgeInsets.symmetric(
-        vertical: isSquare ? 16.0 : 20.0, // Możemy lekko zmniejszyć padding pionowy
+        vertical: isSquare ? 16.0 : 20.0,
         horizontal: isSquare ? 30.0 : 50.0,
       ),
-      // ZMIANA 2: Używamy Row zamiast Column, aby ułożyć elementy poziomo
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center, // Wyśrodkowujemy grupę (logo + tekst) w poziomie
-        crossAxisAlignment: CrossAxisAlignment.center, // Wyśrodkowujemy elementy względem siebie w pionie
-        mainAxisSize: MainAxisSize.min, // Powoduje, że Row zajmuje tyle miejsca, ile potrzebuje (a MainAxisAlignment.center go centruje)
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
           SvgPicture.asset(
             'assets/logo_full.svg',
-            // ZMIANA 3: Znacznie zmniejszamy logo, aby pasowało do jednej linii z tekstem
             height: isSquare ? 24 : 28, 
             colorFilter: const ColorFilter.mode(
               Color(0xFF005A9C),
               BlendMode.srcIn,
             ),
           ),
-          // ZMIANA 4: Dodajemy odstęp poziomy
           const SizedBox(width: 12.0), 
           Text(
             l10n.appMotto,
@@ -816,8 +787,7 @@ Widget _buildParliamentInfo(String parliamentName, String flagAssetPath, bool is
   }
 
 
-Widget _buildVotedFooter(double padding, bool isSquare, int votesForSejm, int votesAgainstSejm, int votesAbstainSejm, double chartHeightMultiplier, double voteCountFontSize, double statusFontSize, String status, {required double chartWidth}) {
-  // === GŁÓWNY LAYOUT STOPKI ===
+Widget _buildVotedFooter(double padding, bool isSquare, int votesFor, int votesAgainst, int votesAbstain, double chartHeightMultiplier, double voteCountFontSize, double statusFontSize, String status, {required double chartWidth}) {
   return Padding(
     padding: EdgeInsets.fromLTRB(padding, 0, padding, padding),
     child: Column(
@@ -825,11 +795,8 @@ Widget _buildVotedFooter(double padding, bool isSquare, int votesForSejm, int vo
       children: [
         const Divider(height: 1, thickness: 1, color: Color(0xFFEEEEEE)),
         SizedBox(height: padding / 2),
-        
-        // --- SEKCJA GŁOSOWANIA (zależna od formatu) ---
         Stack(
           children: [
-            // --- WARSTWA 1: WYKRES (z Twoimi proporcjami) ---
             CustomPaint(
               size: Size(chartWidth, chartWidth * (isSquare ? 0.23 : 0.5)),
               painter: ParliamentaryVotePainter(
@@ -842,8 +809,6 @@ Widget _buildVotedFooter(double padding, bool isSquare, int votesForSejm, int vo
                 votesAbstain: legislation!.votesAbstain ?? 0,
               ),
             ),
-
-            // --- WARSTWA 2: PUDEŁKO Z DANYMI (z Twoimi proporcjami) ---
             Positioned(
               top: 0,
               left: padding / 4,
@@ -873,16 +838,15 @@ Widget _buildVotedFooter(double padding, bool isSquare, int votesForSejm, int vo
                       style: TextStyle(fontSize: isSquare ? 16 : 26, color: Colors.grey[700], fontStyle: FontStyle.italic),
                     ),
                     const Divider(height: 20, thickness: 1),
-                    _buildVoteCountRow(l10n.labelFor, votesForSejm, Colors.green, voteCountFontSize),
+                    _buildVoteCountRow(l10n.labelFor, votesFor, Colors.green, voteCountFontSize),
                     const SizedBox(height: 8),
-                    _buildVoteCountRow(l10n.labelAgainst, votesAgainstSejm, Colors.red, voteCountFontSize),
+                    _buildVoteCountRow(l10n.labelAgainst, votesAgainst, Colors.red, voteCountFontSize),
                     const SizedBox(height: 8),
-                    _buildVoteCountRow(l10n.labelAbstained, votesAgainstSejm, Colors.grey, voteCountFontSize),
+                    _buildVoteCountRow(l10n.labelAbstained, votesAbstain, Colors.grey, voteCountFontSize),
                   ],
                 ),
               ),
             ),
-// === NOWA, WARUNKOWA WARSTWA 3: STATUS (tylko dla kwadratu) ===
             if (isSquare)
               Positioned(
                 top: 0,
@@ -913,7 +877,6 @@ Widget _buildVotedFooter(double padding, bool isSquare, int votesForSejm, int vo
               ),
           ],
         ),
-        // === SEKCJA STATUSU (renderowana tylko dla 16:9, zachowuje Twój kod) ===
         if (!isSquare) ...[
           SizedBox(height: isSquare ? 20 : 30),
           const Divider(height: 1, thickness: 1, color: Color(0xFFEEEEEE)),
@@ -926,7 +889,6 @@ Widget _buildVotedFooter(double padding, bool isSquare, int votesForSejm, int vo
 }
 Widget _buildScheduledFooter(BuildContext context, double padding, double fontSize, String status, {required bool isSquare}) {
     final double pollWidthFactor = isSquare ? 0.37 : 0.5; 
-
     return Padding(
       padding: EdgeInsets.fromLTRB(padding, 0, padding, padding),
       child: Column(
@@ -954,8 +916,6 @@ Widget _buildScheduledFooter(BuildContext context, double padding, double fontSi
                   );
                 },
               ),
-              
-// --- WARSTWA 2: TREŚĆ (bez ramek, z pełną kontrolą) ---
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -968,20 +928,16 @@ Widget _buildScheduledFooter(BuildContext context, double padding, double fontSi
                       children: [
                         Text(
                           l10n.consideredOnLabel,
-                          // === POKRĘTŁO 1: Rozmiar tytułu daty ===
                           style: TextStyle(fontSize: isSquare ? 30 : 30, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           _formatDateTime(legislation!.upcomingProceedingDates!.first, l10n),
-                          // === POKRĘTŁO 2: Rozmiar samej daty ===
                           style: TextStyle(fontSize: isSquare ? 24 : 24, color: Colors.grey[700], fontStyle: FontStyle.italic),
                         ),
                       ],
                     ),
                   ),
-
-                  // --- SEKCJA ZE STATUSEM ---
                   Padding(
                     padding: const EdgeInsets.only(top: 4.0),
                     child: Column(
@@ -989,13 +945,11 @@ Widget _buildScheduledFooter(BuildContext context, double padding, double fontSi
                       children: [
                         Text(
                           l10n.filterStatusLabel,
-                          // === POKRĘTŁO 3: Rozmiar etykiety statusu ===
                           style: TextStyle(fontSize: isSquare ? 24 : 24, color: Colors.grey[700]),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           l10n.statusInProgress, 
-                          // === POKRĘTŁO 4: Rozmiar samego statusu ===
                           style: TextStyle(fontSize: isSquare ? 30 : 30, fontWeight: FontWeight.bold, color: Colors.black),
                           textAlign: TextAlign.right,
                         ),
@@ -1278,8 +1232,8 @@ Widget _buildKeyPointsSection(
     return Colors.black;
   }
     Widget _buildMissingDataWarning(bool isSquare) {
-    final double iconSize = isSquare ? 40 : 50; // Zwiększono rozmiar ikonki
-    final double fontSize = isSquare ? 40 : 50; // Zwiększono rozmiar czcionki
+    final double iconSize = isSquare ? 40 : 50;
+    final double fontSize = isSquare ? 40 : 50;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

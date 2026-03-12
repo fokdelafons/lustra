@@ -18,6 +18,7 @@ class HomeSectionCard extends StatelessWidget {
   final String destinationPath;
   final String buttonText;
   final HomeScreenLegislationItem? legislationItem;
+  final bool isHighlighted;
 
   const HomeSectionCard({
     super.key,
@@ -27,24 +28,33 @@ class HomeSectionCard extends StatelessWidget {
     required this.destinationPath,
     required this.buttonText,
     this.legislationItem,
+    this.isHighlighted = false,
   });
 
-  @override
+@override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final primaryColor = Theme.of(context).primaryColor;
+    
+    final Color cardBackground = isHighlighted ? const Color(0xFF1E293B) : Colors.white;
+    final Color textColor = isHighlighted ? Colors.white : Colors.black;
+    final Color iconColor = isHighlighted ? Colors.white70 : primaryColor;
 
     return Card(
-      elevation: 4,
+      elevation: isHighlighted ? 6 : 4,
+      shadowColor: isHighlighted ? primaryColor.withAlpha(150) : null,
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width * 0.02),
+        side: isHighlighted 
+            ? BorderSide(color: primaryColor.withAlpha(50), width: 1.5)
+            : BorderSide.none,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            color: Colors.white,
+            color: cardBackground,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -55,14 +65,15 @@ class HomeSectionCard extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      Icon(icon, color: primaryColor),
+                      Icon(icon, color: iconColor),
                       SizedBox(width: kIsWeb ? 12.0 : MediaQuery.of(context).size.width * 0.02),
                       Expanded(
                         child: Text(
                           title,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
+                            color: textColor,
                           ),
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
@@ -77,9 +88,10 @@ class HomeSectionCard extends StatelessWidget {
                 child,
 
                 // --- ACTION BUTTONS (Details / Share) ---
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4.0),
-                  child: Row(
+                if (legislationItem != null)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                    child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       // Przycisk SZCZEGÓŁY
@@ -153,7 +165,7 @@ class HomeSectionCard extends StatelessWidget {
           
           // --- FOOTER BUTTON (See All) ---
           Container(
-            color: primaryColor.withAlpha((255 * 0.05).round()),
+            color: isHighlighted ? Colors.black26 : primaryColor.withAlpha((255 * 0.05).round()),
             child: InkWell(
               onTap: () {
                 context.smartNavigate(destinationPath);
@@ -168,13 +180,17 @@ class HomeSectionCard extends StatelessWidget {
                     Flexible(
                       child: Text(
                         buttonText,
-                        style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 13),
+                        style: TextStyle(
+                          color: isHighlighted ? Colors.white : primaryColor, 
+                          fontWeight: FontWeight.bold, 
+                          fontSize: 13
+                        ),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       ),
                     ),
                     const SizedBox(width: 4),
-                    Icon(Icons.arrow_forward, size: 16, color: primaryColor),
+                    Icon(Icons.arrow_forward, size: 16, color: isHighlighted ? Colors.white : primaryColor),
                   ],
                 ),
               ),

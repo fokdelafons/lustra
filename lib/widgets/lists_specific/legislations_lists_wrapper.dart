@@ -9,6 +9,8 @@ import '../../screens/lists/voted_legislation_list.dart';
 import '../../screens/lists/process_legislation_list.dart';
 import '../../screens/lists/upcoming_legislation_list.dart';
 import '../../screens/lists/civic_legislation_list.dart';
+import '../../screens/lists/tracked_legislation_list.dart';
+import '../../screens/lists/curated_legislation_list.dart';
 
 /// **LegislationWrapperScreen**
 ///
@@ -36,8 +38,13 @@ import '../../screens/lists/civic_legislation_list.dart';
 
 class LegislationWrapperScreen extends StatefulWidget {
   final String type;
+  final String? listId;
 
-  const LegislationWrapperScreen({super.key, required this.type});
+  const LegislationWrapperScreen({
+    super.key, 
+    required this.type, 
+    this.listId,
+  });
 
   @override
   State<LegislationWrapperScreen> createState() => _LegislationWrapperScreenState();
@@ -50,6 +57,8 @@ class _LegislationWrapperScreenState extends State<LegislationWrapperScreen> {
   final GlobalKey<ProcessLegislationScreenState> _processKey = GlobalKey();
   final GlobalKey<FutureLegislationScreenState> _futureKey = GlobalKey();
   final GlobalKey<CivicLegislationScreenState> _civicKey = GlobalKey();
+  final GlobalKey<TrackedLegislationScreenState> _trackedKey = GlobalKey();
+  final GlobalKey<CuratedLegislationScreenState> _curatedKey = GlobalKey();
 
   /// Triggers the `refreshData()` method on the currently active child widget.
   void _triggerRefresh() {
@@ -62,6 +71,12 @@ class _LegislationWrapperScreenState extends State<LegislationWrapperScreen> {
         break;
       case 'upcoming':
         _futureKey.currentState?.refreshData();
+        break;
+      case 'tracked':
+        _trackedKey.currentState?.refreshData();
+        break;
+      case 'curated':
+        _curatedKey.currentState?.refreshData();
         break;
       case 'voted':
       default:
@@ -76,6 +91,8 @@ class _LegislationWrapperScreenState extends State<LegislationWrapperScreen> {
       case 'process': return l10n.sectionLegislationInProcess;
       case 'upcoming': return l10n.sectionUpcoming;
       case 'civic': return l10n.civicProjectsSectionTitle;
+      case 'tracked': return "Tracked Bills"; // TODO: Dodaj do l10n.trackedBillsTitle
+      case 'curated': return "Public List"; // TODO: Dodaj do l10n.curatedListTitle
       case 'voted':
       default: return l10n.legislationScreenTitle(""); 
     }
@@ -172,12 +189,19 @@ class _LegislationWrapperScreenState extends State<LegislationWrapperScreen> {
       body: Builder(
         builder: (context) {
           switch (widget.type) {
+            case 'tracked':
+              return TrackedLegislationScreen(key: _trackedKey);
             case 'process':
               return ProcessLegislationScreen(key: _processKey);
             case 'upcoming':
               return FutureLegislationScreen(key: _futureKey);
             case 'civic':
               return CivicLegislationScreen(key: _civicKey);
+            case 'curated':
+              if (widget.listId == null) {
+                 return const Center(child: Text("Error: Missing List ID")); // TODO: L10N
+              }
+              return CuratedLegislationScreen(key: _curatedKey, listId: widget.listId!);
             case 'voted':
             default:
               return LegislationScreen(key: _votedKey);

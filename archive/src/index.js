@@ -6,7 +6,6 @@ const firestore = require('./services/firestore');
 const storage = require('./services/storage');
 const generator = require('./services/generator');
 const sitemap = require('./services/sitemap');
-const { buildHubUrl, buildBillUrl, buildTopicUrl } = require('./utils/url-builder');
 
 const DIST_DIR = '/tmp/dist';
 
@@ -105,160 +104,19 @@ async function main() {
         
         catalog.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-        // TARCZA: Deklaracja zmiennych przed blokami if (scope fix)
-        let hubTemplate = null;
-        const filesQueue = []; // ZMIANA NAZWY: To teraz kolejka danych, nie promisów
-        const ITEMS_PER_PAGE = 20;
-
-        // 2. GENEROWANIE HUBÓW (TERMS)
+        // 2 & 3. GENEROWANIE HUBÓW (TERMS & TOPICS)
         if (config.MODE === 'FULL_REBUILD') {
-            console.log('🗂️ [Stream] Generating & Uploading Hub Pages...');
-            const hubTemplateStr = await fs.readFile(path.join(__dirname, 'templates/hub.ejs'), 'utf8');
-            hubTemplate = ejs.compile(hubTemplateStr);
-
-        const billsByTerm = {};
-        catalog.forEach(item => {
-            const t = item.term || config.URL_PREFIX.term || 'unknown';
-            if (!billsByTerm[t]) billsByTerm[t] = [];
-            billsByTerm[t].push(item);
-        });
-
-        for (const [term, termBills] of Object.entries(billsByTerm)) {
-            if (term === 'unknown') continue;
-
-            for (const lang of config.LANGUAGES) {
-                const instName = config.LABELS.INSTITUTION[config.URL_PREFIX.institution][lang];
-                const totalPages = Math.ceil(termBills.length / ITEMS_PER_PAGE);
-                
-                for (let i = 0; i < totalPages; i++) {
-                    const currentPage = i + 1;
-                    const chunk = termBills.slice(i * ITEMS_PER_PAGE, (i + 1) * ITEMS_PER_PAGE);
-                    
-                    const billsForView = chunk.map(item => ({
-                        id: item.id,
-                        title: item.title || item.id,
-                        date: new Date(item.date).toLocaleDateString(lang),
-                        url: buildBillUrl(lang, item.id, item.term || term),
-                    }));
-
-                    const html = hubTemplate({
-                        lang: lang,
-                        term: term,
-                        currentPage: currentPage,
-                        totalPages: totalPages,
-                        bills: billsForView,
-                        pageTitle: `${instName} (${term} Term)`,
-                        subTitle: "Legislative Database",
-                        prevPageUrl: currentPage > 1 ? buildHubUrl(lang, term, currentPage - 1) : null,
-                        nextPageUrl: currentPage < totalPages ? buildHubUrl(lang, term, currentPage + 1) : null,
-                        prevTermUrl: null,
-                        nextTermUrl: null
-                    });
-
-                    let fileName = currentPage === 1 ? 'index.html' : `page-${currentPage}.html`;
-                    let relativePath = `${lang}/${config.URL_PREFIX.institution}/${term}/${fileName}`;
-                    
-                    // 1. TYLKO KOLEJKUJEMY DANE
-                    filesQueue.push({ path: relativePath, content: html });
-                }
-            }
+            console.log('🗂️ [Stream] Generating Hubs (Terms & Topics)...');
             
-            // 2. DOPIERO TERAZ ROBIMY WYKON (Batch Execution)
-            const HUB_UPLOAD_BATCH = 50;
-            console.log(`📦 [Terms] Processing queue of ${filesQueue.length} files...`);
-            
-            for (let i = 0; i < filesQueue.length; i += HUB_UPLOAD_BATCH) {
-                const batch = filesQueue.slice(i, i + HUB_UPLOAD_BATCH);
-                console.log(`📤 [Terms] Uploading batch ${Math.floor(i/HUB_UPLOAD_BATCH)+1}/${Math.ceil(filesQueue.length/HUB_UPLOAD_BATCH)}...`);
-                
-                // TU JEST KLUCZ: processSingleFile wywołujemy dopiero tutaj!
-                await Promise.all(batch.map(f => processSingleFile(f.path, f.content)));
-                
-                if (i + HUB_UPLOAD_BATCH < filesQueue.length) {
-                    await new Promise(r => setTimeout(r, 300)); // Dłuższa przerwa dla bezpieczeństwa
-                }
-            }
-            filesQueue.length = 0;
-        }
+            // TARCZA: Przekazujemy logikę uploadu jako callback (RAM Protection)
+            await generator.generateHubs(catalog, async (batchFiles) => {
+                console.log(`📤 [Hubs] Uploading batch of ${batchFiles.length} files...`);
+                await Promise.all(batchFiles.map(f => processSingleFile(f.path, f.content)));
+                await new Promise(r => setTimeout(r, 300));
+            });
         } else {
-            console.log('⏭️ [Orchestrator] Skipping Term Hubs (BILLS_ONLY mode)');
+            console.log('⏭️ [Orchestrator] Skipping Hubs (BILLS_ONLY mode)');
         }
-        
-        // 3. GENEROWANIE HUBÓW TEMATYCZNYCH (TOPICS)
-        if (config.MODE === 'FULL_REBUILD') {
-            console.log('🗂️ [Stream] Generating & Uploading Topic Hubs...');
-        
-        const billsByTopic = {};
-        catalog.forEach(item => {
-            if (item.categories && Array.isArray(item.categories)) {
-                item.categories.forEach(cat => {
-                    if (!billsByTopic[cat]) billsByTopic[cat] = [];
-                    billsByTopic[cat].push(item);
-                });
-            }
-        });
-
-        for (const [category, topicBills] of Object.entries(billsByTopic)) {
-            topicBills.sort((a, b) => new Date(b.date) - new Date(a.date));
-            const slugify = (text) => text.toString().toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-');
-            const catSlug = slugify(category);
-
-            for (const lang of config.LANGUAGES) {
-                const totalPages = Math.ceil(topicBills.length / ITEMS_PER_PAGE);
-                
-                for (let i = 0; i < totalPages; i++) {
-                    const currentPage = i + 1;
-                    const chunk = topicBills.slice(i * ITEMS_PER_PAGE, (i + 1) * ITEMS_PER_PAGE);
-                    
-                    const billsForView = chunk.map(item => ({
-                        id: item.id,
-                        title: item.title || item.id,
-                        date: new Date(item.date).toLocaleDateString(lang),
-                        url: buildBillUrl(lang, item.id, item.term || config.URL_PREFIX.term),
-                    }));
-
-                    const prevUrl = currentPage > 1 ? buildTopicUrl(lang, category, currentPage - 1) : null;
-                    const nextUrl = currentPage < totalPages ? buildTopicUrl(lang, category, currentPage + 1) : null;
-
-                    const html = hubTemplate({
-                        lang: lang,
-                        currentPage: currentPage,
-                        totalPages: totalPages,
-                        bills: billsForView,
-                        pageTitle: `${category}`,
-                        subTitle: `Topic Archive (${topicBills.length} items)`,
-                        prevPageUrl: prevUrl,
-                        nextPageUrl: nextUrl,
-                        prevTermUrl: null, 
-                        nextTermUrl: null
-                    });
-
-                    let fileName = currentPage === 1 ? 'index.html' : `page-${currentPage}.html`;
-                    let relativePath = `${lang}/${config.URL_PREFIX.institution}/topics/${catSlug}/${fileName}`;
-                    
-                    filesQueue.push({ path: relativePath, content: html });
-                }
-            }
-
-            const TOPIC_UPLOAD_BATCH = 50;
-            console.log(`📦 [Topics] Processing queue of ${filesQueue.length} files...`);
-
-            for (let i = 0; i < filesQueue.length; i += TOPIC_UPLOAD_BATCH) {
-                const batch = filesQueue.slice(i, i + TOPIC_UPLOAD_BATCH);
-                console.log(`📤 [Topics] Uploading batch ${Math.floor(i/TOPIC_UPLOAD_BATCH)+1}/${Math.ceil(filesQueue.length/TOPIC_UPLOAD_BATCH)}...`);
-                
-                await Promise.all(batch.map(f => processSingleFile(f.path, f.content)));
-                
-                if (i + TOPIC_UPLOAD_BATCH < filesQueue.length) {
-                    await new Promise(r => setTimeout(r, 300));
-                }
-            }
-            filesQueue.length = 0;
-        }
-        } else {
-            console.log('⏭️ [Orchestrator] Skipping Topic Hubs (BILLS_ONLY mode)');
-        }
-
         // 4. SITEMAPS
         if (config.MODE === 'FULL_REBUILD') {
             console.log('🗺️ [Stream] Uploading Sitemaps...');

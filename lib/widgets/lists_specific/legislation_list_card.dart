@@ -12,14 +12,15 @@ import '../../providers/translators.dart';
 class LegislationListCard extends StatelessWidget {
   final Legislation bill;
   final VoidCallback onTap;
-  
   final Widget? additionalInfoWidget;
+  final Widget? trailingAction;
 
   const LegislationListCard({
     super.key,
     required this.bill,
     required this.onTap,
     this.additionalInfoWidget,
+    this.trailingAction,
   });
 
   @override
@@ -112,10 +113,21 @@ class LegislationListCard extends StatelessWidget {
               
               const SizedBox(height: 8), 
               
-              // --- TITLE ---
-              Text(
-                bill.title,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              // --- TITLE & TRAILING ACTION ---
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Text(
+                      bill.title,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  if (trailingAction != null) ...[
+                    const SizedBox(width: 8),
+                    trailingAction!,
+                  ]
+                ],
               ),
               
               const SizedBox(height: 12), 

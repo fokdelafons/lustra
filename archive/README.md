@@ -63,8 +63,8 @@ Oznaczenie dokumentów w Firestore flagą htmlGeneratedAt (zapobiega pętlom).
 🌍 Schemat URL
 System wymusza strukturę folderów z ukośnikiem końcowym (Trailing Slash) dla kompatybilności z GCS.
 Ustawa: https://lustra.news/{lang}/{institution}/{term}/{type}/{id}/
-Hub (Index): https://lustra.news/{lang}/{institution}/{term}/index.html
-Deep Link: https://lustra.news/?go=/{lang}/{institution}/{term}/{type}/{id}
+Hub (Index): https://lustra.news/{lang}/{institution}/{term}/
+Deep Link: https://lustra.news/#/{lang}/{institution}/{term}/{type}/{id}
 🛠️ Instrukcja Operacyjna (Deploy & Run)
 1. Wdrożenie zmian (Deploy)
 Buduje kontener w chmurze i aktualizuje definicję Joba. Używać po każdej zmianie w kodzie lub szablonie.

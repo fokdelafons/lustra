@@ -748,99 +748,6 @@ const getCivicProjects = async (req, res) => {
     }
 };
 
-// --- CITIZENVOTE ---
-
-const citizenVote = async (req, res) => {
-    if (req.body.warmup === true) {
-        console.log("us_citizenVote: Otrzymano żądanie rozgrzewające.");
-        return res.status(200).json({ data: { status: 'warmed_up_successfully' } });
-    }
-    const data = req.body.data || req.body;
-    const { targetId, targetType, voteType } = data;
-    const userId = req.user?.uid;
-    if (!userId) {
-        return res.status(401).json({ error: { code: 'unauthenticated', message: 'Funkcja wymaga uwierzytelnienia.' } });
-    }
-    if (req.user.email_verified !== true) {
-        return res.status(403).json({ error: { code: 'permission-denied', message: 'Głosowanie wymaga zweryfikowanego adresu email.' } });
-    }
-
-    try {
-        const userDocRef = db.collection('users').doc(userId);
-        const userDoc = await userDocRef.get();
-        if (!userDoc.exists) {
-            return res.status(404).json({ error: { code: 'not-found', message: 'User profile does not exist.' } });
-        }
-        const userData = userDoc.data();
-        if (userData.primaryParliamentId !== 'United States Congress') {
-            return res.status(403).json({ error: { code: 'permission-denied', message: 'This poll is restricted to users of the US.' } });
-        }
-
-        if (!targetId || !targetType || !voteType || !['like', 'dislike'].includes(voteType)) {
-            return res.status(400).json({ error: { code: 'invalid-argument', message: 'Nieprawidłowe lub brakujące parametry.' } });
-        }
-
-        let collectionName;
-        if (targetType === 'legislation') collectionName = 'us_legislations';
-        else if (targetType === 'deputy') collectionName = 'us_deputies';
-        else if (targetType === 'civic') collectionName = 'us_civic'; 
-        else {
-            return res.status(400).json({ error: { code: 'invalid-argument', message: 'Nieprawidłowy typ celu głosowania (oczekiwano "legislation", "deputy" lub "civic").' } });
-        }
-
-        const targetRef = db.collection(collectionName).doc(targetId);
-        const userVoteRef = targetRef.collection('user_votes').doc(userId);
-
-        const transactionResult = await db.runTransaction(async (transaction) => {
-            const targetDocSnapshot = await transaction.get(targetRef);
-            if (!targetDocSnapshot.exists) {
-                throw { status: 404, code: 'not-found', message: `Cel głosowania (${targetType} o ID: ${targetId}) nie został znaleziony.` };
-            }
-            const userVoteDoc = await transaction.get(userVoteRef);
-            const currentData = targetDocSnapshot.data();
-
-            if (userVoteDoc.exists) {
-                return { status: 'ALREADY_VOTED', counters: { likes: currentData.likes || 0, dislikes: currentData.dislikes || 0, popularity: currentData.popularity || 0 } };
-            }
-
-            const countryPrefix = 'us';
-            const voteKey = `${countryPrefix}_${targetType}_${targetId}`;
-            transaction.update(db.collection('users').doc(userId), { [`votes.${voteKey}`]: true });
-            transaction.set(userVoteRef, { vote: voteType, timestamp: admin.firestore.FieldValue.serverTimestamp() });
-            
-            const updateData = {
-                popularity: admin.firestore.FieldValue.increment(1),
-                [voteType === 'like' ? 'likes' : 'dislikes']: admin.firestore.FieldValue.increment(1)
-            };
-            transaction.update(targetRef, updateData);
-            
-            return {
-                status: 'VOTE_CAST',
-                counters: {
-                    likes: (currentData.likes || 0) + (voteType === 'like' ? 1 : 0),
-                    dislikes: (currentData.dislikes || 0) + (voteType === 'dislike' ? 1 : 0),
-                    popularity: (currentData.popularity || 0) + 1,
-                }
-            };
-        });
-        
-        let responseBody;
-        if (transactionResult.status === 'ALREADY_VOTED') {
-            responseBody = { success: false, message: `Już oddano głos na ten cel (${targetType}).`, alreadyVoted: true, counters: transactionResult.counters };
-        } else {
-            responseBody = { success: true, message: 'Głos został pomyślnie oddany.', votedNow: true, counters: transactionResult.counters };
-        }
-        return res.status(200).json({ data: responseBody });
-
-    } catch (error) {
-        console.error('Błąd podczas głosowania:', { targetId, targetType, userId, voteType, error });
-        if (error.status && error.code) {
-            return res.status(error.status).json({ error: { code: error.code, message: error.message } });
-        }
-        return res.status(500).json({ error: { code: 'internal', message: 'Wystąpił błąd serwera podczas przetwarzania głosu.', details: error.message } });
-    }
-};
-
 module.exports = {
   getMetadata,
   getHomeScreenData,
@@ -848,6 +755,5 @@ module.exports = {
   getDeputies,
   getDeputyDetails,
   getLegislations,
-  getCivicProjects,
-  citizenVote
+  getCivicProjects
 };

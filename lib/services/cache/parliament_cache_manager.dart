@@ -151,4 +151,57 @@ class ParliamentCacheManager {
      final key = '${prefix}_cached_civic_lang_${lang}_lim_${limit}_cursor_${lastVisibleId ?? 'firstPage'}_cat_${category ?? 'none'}_sort_${sortBy ?? 'popularity'}';
      await _storage.save(key, data);
   }
+
+  // --- TRACKED BILLS (USER PRIVATE LIST) ---
+  Future<Map<String, dynamic>?> getTrackedItems(String lang) async {
+     final key = '${prefix}_cached_tracked_items_lang_$lang';
+     return await _storage.get(key);
+  }
+  
+  Future<void> saveTrackedItems(Map<String, dynamic> data, String lang) async {
+     final key = '${prefix}_cached_tracked_items_lang_$lang';
+     await _storage.save(key, data);
+  }
+
+  Future<void> clearTrackedItems() async {
+     await _storage.clearByPrefix('${prefix}_cached_tracked_items');
+  }
+
+  // --- CURATED LISTS CACHE ---
+  
+  Future<Map<String, dynamic>?> getCuratedListFeed(String listId, String lang) async {
+    return await _storage.get('${prefix}_curated_list_${listId}_$lang');
+  }
+  
+  Future<void> saveCuratedListFeed(String listId, Map<String, dynamic> data, String lang) async {
+    await _storage.save('${prefix}_curated_list_${listId}_$lang', data);
+  }
+
+  Future<void> clearCuratedListFeed(String listId) async {
+    await _storage.clearByPrefix('${prefix}_curated_list_$listId');
+  }
+
+  Future<List<dynamic>?> getMyCuratedLists() async {
+    final result = await _storage.get('${prefix}_my_curated_lists');
+    return result?['lists'] as List<dynamic>?;
+  }
+
+  Future<void> saveMyCuratedLists(List<dynamic> data) async {
+    await _storage.save('${prefix}_my_curated_lists', {'lists': data});
+  }
+
+  Future<void> clearMyCuratedLists() async {
+    await _storage.remove('${prefix}_my_curated_lists');
+  }
+    Future<Map<String, dynamic>?> getCuratedListPreview(String listId, String lang) async {
+    return await _storage.get('${prefix}_curated_list_preview_${listId}_$lang');
+  }
+  
+  Future<void> saveCuratedListPreview(String listId, Map<String, dynamic> data, String lang) async {
+    await _storage.save('${prefix}_curated_list_preview_${listId}_$lang', data);
+  }
+
+  Future<void> clearCuratedListPreview(String listId) async {
+    await _storage.clearByPrefix('${prefix}_curated_list_preview_$listId');
+  }
 }

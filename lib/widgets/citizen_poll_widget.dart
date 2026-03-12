@@ -6,7 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:lustra/widgets/verification_guard.dart';
-import 'package:lustra/providers/user_provider.dart';
+import 'package:lustra/providers/interaction_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -82,13 +82,14 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
         if (mounted) setState(() => _isLoading = false);
         return;
       }
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+      final interactionProvider = Provider.of<InteractionProvider>(context, listen: false);
       final parliamentManager = Provider.of<ParliamentManager>(context, listen: false);
+      
       final countryPrefix = parliamentManager.activeServiceId ?? 'unknown';
       final voteKey = '${countryPrefix}_${widget.targetType}_${widget.targetId}';
-      final bool hasVotedInProfile = userProvider.hasVoted(voteKey);
-      final hasVotedOnDevice = await _votingService.hasVotedLocally(widget.targetType, widget.targetId);
-      final bool finalHasVoted = hasVotedInProfile || hasVotedOnDevice;
+      
+      final bool finalHasVoted = interactionProvider.hasVoted(voteKey);
       final persistedCounters = await _votingService.getOptimisticCounters(widget.targetType, widget.targetId);
 
       Map<String, int> finalCounters;
@@ -100,6 +101,7 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
           finalCounters['popularity'] = (finalCounters['popularity'] ?? 0) + 1;
         }
       }
+      
       if (mounted) {
         setState(() {
           _hasVotedLocally = finalHasVoted;
@@ -112,7 +114,6 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
   Future<void> _handleVoteButtonPressed(String voteType) async {
     if (_isVoteProcessing) return;
     final user = Provider.of<User?>(context, listen: false);
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
     final parliamentManager = Provider.of<ParliamentManager>(context, listen: false);
     final parliamentService = Provider.of<ParliamentServiceInterface>(context, listen: false);
     
@@ -138,9 +139,8 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
     final previousHasVoted = _hasVotedLocally;
     final previousCounters = _pollCounters != null ? Map<String, int>.from(_pollCounters!) : null;
 
-    await _votingService.markAsVotedLocally(widget.targetType, widget.targetId);
-    
-    userProvider.markAsVotedLocally(voteKey);
+    final interactionProvider = Provider.of<InteractionProvider>(context, listen: false);
+    interactionProvider.markAsVotedLocally(voteKey);
 
     Map<String, int> currentCounters = _pollCounters ?? _extractCountersFromItemData();
     Map<String, int> optimisticCounters = Map<String, int>.from(currentCounters);
@@ -208,13 +208,13 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final userProvider = context.watch<UserProvider>(); 
+    final interactionProvider = context.watch<InteractionProvider>(); 
     final parliamentManager = context.read<ParliamentManager>();
     final l10n = AppLocalizations.of(context)!;
     final countryPrefix = parliamentManager.activeServiceId ?? 'unknown';
     final voteKey = '${countryPrefix}_${widget.targetType}_${widget.targetId}';
     
-    if (userProvider.hasVoted(voteKey) && !_hasVotedLocally) {
+    if (interactionProvider.hasVoted(voteKey) && !_hasVotedLocally) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
          _initializeVoteStatus();
       });

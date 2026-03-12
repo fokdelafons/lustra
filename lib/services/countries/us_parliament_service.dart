@@ -172,6 +172,12 @@ class USParliamentService with ChangeNotifier implements ParliamentServiceInterf
         backgroundColor: Colors.blue.withAlpha(20),
         textColor: Colors.blue[800]!,
       );
+    } else if (lowerStatus == 'initiative') {
+      return DisplayableStatus(
+        label: translatedLabel,
+        backgroundColor: Colors.teal.withAlpha(20),
+        textColor: Colors.teal[800]!,
+      );
     }
 
     return DisplayableStatus(
@@ -897,7 +903,7 @@ String _getOrdinalSuffix(int n) {
     
     final userMessage = l10n.missingDataSourceUserMessage;
     final buttonText = l10n.missingDataSourceButton;
-    final emailRecipient = "contactcenter@gpo.gov"; 
+    final emailRecipient = "policy@loc.gov";
     final emailSubject = "Inquiry Regarding Missing Legislative Document: ${legislation.id}";
 
     final emailBody = """
@@ -910,6 +916,8 @@ Bill Number/ID: ${legislation.id}
 This omission prevents the public from accessing critical information, hindering the principle of government transparency.
 
 I request that you take action to publish this document on the appropriate official API to ensure it is accessible to all citizens.
+
+If this is not the correct department to address this matter, I kindly ask that you forward this message to the appropriate team.
 
 Thank you for your attention to this matter.
 """;

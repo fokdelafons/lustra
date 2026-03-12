@@ -194,4 +194,33 @@ class ShareService {
       developer.log('Błąd podczas renderowania i udostępniania posła: $e');
     }
   }
+  
+  Future<void> shareCuratedList({
+    required BuildContext context,
+    required String listId,
+    required String listName,
+    required String lang,
+    required String slug,
+    required int term,
+  }) async {
+    try {
+      final deepLink = '$_baseDeepLinkUrl/#/$lang/$slug/$term/legislations?list=curated&listId=$listId';
+      
+      // TODO: Przenieść do AppLocalizations po dodaniu kluczy, ogarnąć sharing pożądny jak jest w reszcie. Przerzucic na ui list. Pozytywnie zaktualizować nazwę listy przy rename i success.
+      final shareText = 'Check out this public list: $listName\n\n$deepLink\n\n#Lustra'; 
+      
+      await Clipboard.setData(ClipboardData(text: shareText));
+      
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Link copied to clipboard!')), // TODO: L10N
+        );
+      }
+
+      // Wywołanie systemowego panelu udostępniania (sam tekst)
+      await SharePlus.instance.share(ShareParams(text: shareText));
+    } catch (e) {
+      developer.log('Błąd podczas udostępniania listy: $e', name: 'ShareService');
+    }
+  }
 }

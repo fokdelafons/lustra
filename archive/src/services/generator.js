@@ -4,11 +4,54 @@ const fs = require('fs-extra');
 const config = require('../config');
 const { format } = require('date-fns');
 const translations = require('../utils/translations');
+const { buildBillUrl, buildHubUrl, buildTopicUrl, buildMainTopicsUrl } = require('../utils/url-builder');
 
 // --- ZMIENNE POMOCNICZE (CACHE) ---
 let billTemplate = null;
 
 // --- FUNKCJE POMOCNICZE ---
+
+// --- OPEN GRAPH DYNAMIC LOGIC ---
+const OG_CATEGORY_MAP = {
+    "Health": "health",
+    "Family": "family",
+    "Taxes": "finance",
+    "Migration": "migration",
+    "Labor": "labor",
+    "Security": "security",
+    "Education": "education",
+    "Environment": "environment",
+    "Courts and Law": "law",
+    "Transport": "transport",
+    "Benefits": "finance",
+    "Real Estate": "infrastructure",
+    "Media and Culture": "culture",
+    "Local Government": "government",
+    "Agriculture": "agriculture",
+    "Public Investments": "infrastructure",
+    "Informatization": "tech",
+    "Economy": "finance",
+    "Other": "default"
+};
+
+function getOgImage(docId, categories) {
+    const baseUrl = 'https://lustra.news/assets/og';
+    let folder = 'default';
+    
+    // Pobranie pierwszego tagu jako wiodącego
+    if (categories && Array.isArray(categories) && categories.length > 0) {
+        folder = OG_CATEGORY_MAP[categories[0]] || 'default';
+    }
+
+    // Pseudo-hash na podstawie liter z docId (zwraca zawsze ten sam index dla danej ustawy)
+    let hash = 0;
+    for (let i = 0; i < docId.length; i++) {
+        hash += docId.charCodeAt(i);
+    }
+    const imageIndex = (hash % 5) + 1; // Wynik: 1, 2, 3, 4 lub 5
+
+    return `${baseUrl}/${folder}/preview${imageIndex}.jpg`;
+}
 
 async function loadTemplate() {
     if (billTemplate) return billTemplate;
@@ -94,6 +137,9 @@ async function generateBills(docs) {
             generatedAt: format(new Date(), 'MMM d, yyyy HH:mm') + ' UTC'
         };
 
+        // 4.5. Open Graph Image
+        const ogImageUrl = getOgImage(doc.id, doc.category);
+
         // 5. Hreflangs
         const hreflangs = {};
         config.LANGUAGES.forEach(lang => {
@@ -135,6 +181,7 @@ async function generateBills(docs) {
                 judgeModel: judgeModel,
                 slugify: slugify,
                 processUrl: processUrl,
+                ogImageUrl: ogImageUrl,
                 prevDoc: null,
                 nextDoc: null
             });
@@ -165,4 +212,203 @@ async function generateBills(docs) {
     return { outputFiles, catalogUpdates };
 }
 
-module.exports = { generateBills };
+async function loadHubTemplate() {
+    const templatePath = path.join(__dirname, '../templates/hub.ejs');
+    const templateStr = await fs.readFile(templatePath, 'utf8');
+    return ejs.compile(templateStr);
+}
+
+async function generateHubs(catalog, uploadBatchCallback) {
+    let filesQueue = [];
+    const template = await loadHubTemplate();
+    const ITEMS_PER_PAGE = 20;
+    const slugify = (text) => text.toString().toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-');
+
+    // 1. TERMS
+    console.log('🗂️ [Generator] Preparing Term Hubs...');
+    const billsByTerm = {};
+    catalog.forEach(item => {
+        const t = item.term || config.URL_PREFIX.term || 'unknown';
+        if (!billsByTerm[t]) billsByTerm[t] = [];
+        billsByTerm[t].push(item);
+    });
+
+    for (const [term, termBills] of Object.entries(billsByTerm)) {
+        if (term === 'unknown') continue;
+        for (const lang of config.LANGUAGES) {
+            const instName = config.LABELS.INSTITUTION[config.URL_PREFIX.institution][lang];
+            const totalPages = Math.ceil(termBills.length / ITEMS_PER_PAGE);
+            
+            for (let i = 0; i < totalPages; i++) {
+                const currentPage = i + 1;
+                const chunk = termBills.slice(i * ITEMS_PER_PAGE, (i + 1) * ITEMS_PER_PAGE);
+                
+                const billsForView = chunk.map(item => ({
+                    id: item.id,
+                    title: item.title || item.id,
+                    date: new Date(item.date).toLocaleDateString(lang),
+                    url: buildBillUrl(lang, item.id, item.term || term),
+                }));
+
+                let fileName = currentPage === 1 ? 'index.html' : `page-${currentPage}.html`;
+                
+                // SEO & I18N
+                const hreflangs = {};
+                config.LANGUAGES.forEach(l => {
+                    hreflangs[l] = buildHubUrl(l, term, currentPage);
+                });
+                const tLabels = translations[lang] || translations['en'];
+
+                const html = template({
+                    lang: lang,
+                    term: term,
+                    currentPage: currentPage,
+                    totalPages: totalPages,
+                    bills: billsForView,
+                    pageTitle: `${instName} (${term} ${tLabels.term_label || 'Term'})`,
+                    subTitle: "Legislative Database",
+                    prevPageUrl: currentPage > 1 ? buildHubUrl(lang, term, currentPage - 1) : null,
+                    nextPageUrl: currentPage < totalPages ? buildHubUrl(lang, term, currentPage + 1) : null,
+                    prevTermUrl: null,
+                    nextTermUrl: null,
+                    canonicalUrl: hreflangs[lang],
+                    hreflangs: hreflangs,
+                    labels: tLabels,
+                    institutionSlug: config.URL_PREFIX.institution,
+                    institutionName: instName,
+                    topicName: null
+                });
+
+                filesQueue.push({ path: `${lang}/${config.URL_PREFIX.institution}/${term}/${fileName}`, content: html });
+                    if (filesQueue.length >= 50) {
+                    await uploadBatchCallback(filesQueue);
+                    filesQueue.length = 0;
+                    if (global.gc) global.gc();
+                }
+            }
+        }
+    }
+
+    // 2. TOPICS
+    console.log('🗂️ [Generator] Preparing Topic Hubs...');
+    const billsByTopic = {};
+    catalog.forEach(item => {
+        if (item.categories && Array.isArray(item.categories)) {
+            item.categories.forEach(cat => {
+                if (!billsByTopic[cat]) billsByTopic[cat] = [];
+                billsByTopic[cat].push(item);
+            });
+        }
+    });
+
+    for (const [category, topicBills] of Object.entries(billsByTopic)) {
+        topicBills.sort((a, b) => new Date(b.date) - new Date(a.date));
+        const catSlug = slugify(category);
+
+        for (const lang of config.LANGUAGES) {
+            const totalPages = Math.ceil(topicBills.length / ITEMS_PER_PAGE);
+            const instName = config.LABELS.INSTITUTION[config.URL_PREFIX.institution][lang];
+            const tLabels = translations[lang] || translations['en'];
+            const translatedCategory = (tLabels.categories && tLabels.categories[category]) ? tLabels.categories[category] : category;
+            
+            for (let i = 0; i < totalPages; i++) {
+                const currentPage = i + 1;
+                const chunk = topicBills.slice(i * ITEMS_PER_PAGE, (i + 1) * ITEMS_PER_PAGE);
+                
+                const billsForView = chunk.map(item => ({
+                    id: item.id,
+                    title: item.title || item.id,
+                    date: new Date(item.date).toLocaleDateString(lang),
+                    url: buildBillUrl(lang, item.id, item.term || config.URL_PREFIX.term),
+                }));
+
+                let fileName = currentPage === 1 ? 'index.html' : `page-${currentPage}.html`;
+                
+                const hreflangs = {};
+                config.LANGUAGES.forEach(l => {
+                    hreflangs[l] = buildTopicUrl(l, category, currentPage);
+                });
+
+                const html = template({
+                    lang: lang,
+                    term: null,
+                    currentPage: currentPage,
+                    totalPages: totalPages,
+                    bills: billsForView,
+                    pageTitle: `${tLabels.topic_label || 'Topic'}: ${translatedCategory}`,
+                    subTitle: `Topic Archive (${topicBills.length} items)`,
+                    prevPageUrl: currentPage > 1 ? buildTopicUrl(lang, category, currentPage - 1) : null,
+                    nextPageUrl: currentPage < totalPages ? buildTopicUrl(lang, category, currentPage + 1) : null,
+                    prevTermUrl: null, 
+                    nextTermUrl: null,
+                    canonicalUrl: hreflangs[lang],
+                    hreflangs: hreflangs,
+                    labels: tLabels,
+                    institutionSlug: config.URL_PREFIX.institution,
+                    institutionName: instName,
+                    topicName: translatedCategory
+                });
+
+                filesQueue.push({ path: `${lang}/${config.URL_PREFIX.institution}/topics/${catSlug}/${fileName}`, content: html });
+                    if (filesQueue.length >= 50) {
+                    await uploadBatchCallback(filesQueue);
+                    filesQueue.length = 0;
+                    if (global.gc) global.gc();
+                }
+            }
+        }
+    }
+
+    // 3. MAIN TOPICS INDEX (ORPHAN FIX)
+    console.log('🗂️ [Generator] Preparing Main Topics Index...');
+    for (const lang of config.LANGUAGES) {
+        const instName = config.LABELS.INSTITUTION[config.URL_PREFIX.institution][lang];
+        const tLabels = translations[lang] || translations['en'];
+
+        const categoriesForView = Object.keys(billsByTopic).map(cat => ({
+            id: 'TOPIC',
+            title: (tLabels.categories && tLabels.categories[cat]) ? tLabels.categories[cat] : cat,
+            date: `${billsByTopic[cat].length} items`,
+            url: buildTopicUrl(lang, cat, 1)
+        })).sort((a, b) => a.title.localeCompare(b.title));
+
+        let fileName = 'index.html';
+        const hreflangs = {};
+        config.LANGUAGES.forEach(l => {
+            hreflangs[l] = buildMainTopicsUrl(l);
+        });
+
+        const html = template({
+            lang: lang,
+            term: null,
+            currentPage: 1,
+            totalPages: 1,
+            bills: categoriesForView,
+            pageTitle: tLabels.topics_index_title || "All Topics",
+            subTitle: instName,
+            prevPageUrl: null,
+            nextPageUrl: null,
+            prevTermUrl: null,
+            nextTermUrl: null,
+            canonicalUrl: hreflangs[lang],
+            hreflangs: hreflangs,
+            labels: tLabels,
+            institutionSlug: config.URL_PREFIX.institution,
+            institutionName: instName,
+            topicName: null
+        });
+        filesQueue.push({ path: `${lang}/${config.URL_PREFIX.institution}/topics/${fileName}`, content: html });
+                if (filesQueue.length >= 50) {
+                    await uploadBatchCallback(filesQueue);
+                    filesQueue.length = 0;
+                    if (global.gc) global.gc();
+                }
+    }
+
+    if (filesQueue.length > 0) {
+        await uploadBatchCallback(filesQueue);
+        filesQueue.length = 0;
+    }
+}
+
+module.exports = { generateBills, generateHubs };
