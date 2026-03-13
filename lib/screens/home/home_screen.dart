@@ -14,6 +14,7 @@ import '../../services/app_router.dart';
 import '../../services/parliament_manager.dart';
 import '../../services/firebase_auth.dart';
 import '../../services/notification_service.dart';
+import '../../widgets/osint_loader.dart';
 import '../../widgets/home_specific/civic_project_card.dart';
 import '../../widgets/home_specific/voted_card.dart';
 import '../../widgets/home_specific/upcoming_card.dart';
@@ -55,7 +56,7 @@ class NewHomeScreenState extends State<NewHomeScreen> {
 
     // LOADING / ERROR STATES
     if (!manager.isInitialized) {
-      return Scaffold(body: const Center(child: CircularProgressIndicator()));
+       return OsintLoader(text: "SYNCING PARLIAMENT DATA...");
     }
     if (manager.error != null) {
       return Scaffold(
@@ -83,16 +84,16 @@ class NewHomeScreenState extends State<NewHomeScreen> {
     return ChangeNotifierProvider.value(
       value: manager.activeService,
       child: 
-        Scaffold(
-          // --- WEB APP BAR --- 
+      Scaffold(
           appBar: useWideLayout ? const WebAppBar() : null,
-          body: useWideLayout 
-            ? widget.child
-            : GestureDetector(
-                onTap: () => FocusScope.of(context).unfocus(),
-                child: widget.child,
-              ),
-          // BOTTOM BAR (mobile)
+          body: Listener(
+            onPointerDown: (_) {
+              FocusManager.instance.primaryFocus?.unfocus();
+            },
+            child: SelectionArea(
+              child: widget.child,
+            ),
+          ),
           bottomNavigationBar: useWideLayout ? null : const MobileNavBar(),
         ),
     );
@@ -287,7 +288,7 @@ Widget _buildBodyContent(BuildContext context) {
     
   final manager = context.watch<ParliamentManager>();
     if (_isLoading || manager.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+       return OsintLoader(text: "FETCHING MIRROR PARLIAMENT DATA..."); //TODO: l10n
     }
     
     return _buildContentList(context);
@@ -396,9 +397,9 @@ Widget _buildContentList(BuildContext context) {
         child: isDesktopWeb
             ? WebSmoothScroll(
                 controller: _scrollController,
-                scrollAnimationLength: 600,
-                scrollSpeed: 2.5,
-                curve: Curves.easeOutQuart,
+                scrollAnimationLength: 450,
+                scrollSpeed: 0.7,
+                curve: Curves.easeOut,
                 child: listView,
               )
             : listView,

@@ -3,14 +3,14 @@ import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../models/home_screen_data.dart';
+import '../../models/mp.dart';
 import '../../services/parliament_manager.dart';
 import '../../providers/language_provider.dart';
 import '../../services/app_router.dart';
 import 'home_deputy_section_card.dart';
 
 class PoliticiansCard extends StatelessWidget {
-  final List<HomeScreenDeputy> deputies;
+  final List<MP> deputies;
 
   const PoliticiansCard({super.key, required this.deputies});
 
@@ -33,7 +33,7 @@ class PoliticiansCard extends StatelessWidget {
 
   Widget _buildDeputiesListContent(
     BuildContext context,
-    List<HomeScreenDeputy> deputies,
+    List<MP> deputies,
   ) {
     final l10n = AppLocalizations.of(context)!;
     return Padding(
@@ -48,7 +48,7 @@ class PoliticiansCard extends StatelessWidget {
               ]
             : deputies.asMap().entries.map((entry) {
                 int index = entry.key;
-                HomeScreenDeputy deputyData = entry.value;
+                MP deputyData = entry.value;
                 return Column(
                   children: [
                     _buildSingleDeputyItem(context, deputyData),
@@ -61,11 +61,11 @@ class PoliticiansCard extends StatelessWidget {
     );
   }
 
-  Widget _buildSingleDeputyItem(BuildContext context, HomeScreenDeputy deputyData) {
+  Widget _buildSingleDeputyItem(BuildContext context, MP deputyData) {
     final l10n = AppLocalizations.of(context)!;
-    final String deputyName = deputyData.fullName;
+    final String deputyName = deputyData.firstLastName;
     final String deputyInfo = '${deputyData.club} • ${deputyData.district}';
-    final String imageUrl = deputyData.imageUrl;
+    final String imageUrl = deputyData.imageUrl ?? '';
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -77,8 +77,10 @@ class PoliticiansCard extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: CachedNetworkImage(
-                  imageUrl: imageUrl,
+                child: Hero(
+                  tag: 'avatar_${deputyData.id}', 
+                  child: CachedNetworkImage(
+                    imageUrl: imageUrl,
                   width: 80,
                   height: 100,
                   fit: BoxFit.cover,
@@ -97,7 +99,7 @@ class PoliticiansCard extends StatelessWidget {
                     child: const Icon(Icons.person, size: 40, color: Colors.grey),
                   ),
                 ),
-              ),
+              )),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
@@ -117,7 +119,7 @@ class PoliticiansCard extends StatelessWidget {
                         final lang = context.read<LanguageProvider>().appLanguageCode;
                         final term = manager.currentTerm;
                         context.smartNavigate(
-                            '/$lang/$slug/$term/members/${deputyData.deputyId}',
+                            '/$lang/$slug/$term/members/${deputyData.id}',
                             extra: deputyData);
                       },
                       icon: const Icon(Icons.person_search, size: 16),

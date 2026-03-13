@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:lustra/models/home_screen_data.dart';
+import 'package:lustra/models/legislation.dart';
 import 'package:lustra/services/app_router.dart';
 import 'package:lustra/services/parliament_manager.dart';
 import 'package:lustra/services/parliament_service_interface.dart';
@@ -12,7 +12,7 @@ import 'package:lustra/providers/language_provider.dart';
 import '../partially_expandable_list_widget.dart';
 
 class CivicProjectCard extends StatelessWidget {
-  final HomeScreenLegislationItem project;
+  final Legislation project;
   final String? title;
   final String? buttonText;
 
@@ -242,7 +242,7 @@ class CivicProjectCard extends StatelessWidget {
   }
 
   Widget _buildLegislationContentReplica(
-      BuildContext context, HomeScreenLegislationItem data, AppLocalizations l10n, Color primaryColor) {
+      BuildContext context, Legislation data, AppLocalizations l10n, Color primaryColor) {
     final List<String> keyPoints = data.keyPoints;
 
     return Padding(
@@ -257,7 +257,7 @@ class CivicProjectCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            data.summary ?? l10n.errorNoSummaryLegislationInProcess,
+            data.description.isNotEmpty ? data.description : l10n.errorNoSummaryLegislationInProcess,
             style: TextStyle(fontSize: 14, color: Colors.grey[800]),
           ),
           const SizedBox(height: 8),

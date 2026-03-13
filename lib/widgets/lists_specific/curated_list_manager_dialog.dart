@@ -10,6 +10,7 @@ import '../../services/cache/parliament_cache_manager.dart';
 import '../../providers/language_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../models/legislation.dart';
+import '../../widgets/osint_loader.dart';
 
 class CuratedListManagerDialog extends StatefulWidget {
   final Legislation bill;
@@ -167,7 +168,7 @@ class _CuratedListManagerDialogState extends State<CuratedListManagerDialog> {
           future: _listsFuture,
           builder: (context, snapshot) {
             if (_listsFuture == null || snapshot.connectionState == ConnectionState.waiting) {
-              return const SizedBox(height: 100, child: Center(child: CircularProgressIndicator()));
+              return const SizedBox(height: 120, child: Center(child: OsintLoader(text: "LOADING LISTS..."))); //TODO
             }
             
             final lists = snapshot.data ?? [];

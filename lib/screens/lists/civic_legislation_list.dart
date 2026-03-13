@@ -16,6 +16,7 @@ import '../../providers/translators.dart';
 import '../../services/app_router.dart';
 import '../../widgets/lists_specific/legislation_control_bar.dart';
 import '../../widgets/lists_specific/legislation_list_card.dart';
+import '../../widgets/osint_loader.dart';
 
   class CivicLegislationScreen extends StatefulWidget {
     const CivicLegislationScreen({super.key});
@@ -241,12 +242,12 @@ import '../../widgets/lists_specific/legislation_list_card.dart';
 			final l10n = AppLocalizations.of(context)!;
       
       if (_isSyncingParliament) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: OsintLoader(text: "ESTABLISHING SECURE CONNECTION...")); //TODO
       }
 
       final manager = Provider.of<ParliamentManager>(context);
       if (manager.isLoading || !manager.isInitialized) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: OsintLoader(text: "LOADING LEGISLATIVE DATA...")); //TODO
       }
       if (manager.error != null) {
       return Center(
@@ -319,7 +320,7 @@ import '../../widgets/lists_specific/legislation_list_card.dart';
 
   Widget _buildListComponent(List<Legislation> processedBills) {
         if (_isLoading && _bills.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: OsintLoader(text: "QUERYING INITIATIVES...")); //TODO
         }
 
         if (_errorMessage != null) {
@@ -339,7 +340,9 @@ import '../../widgets/lists_specific/legislation_list_card.dart';
           itemCount: processedBills.length + (_isLoadingMore ? 1 : 0),
           itemBuilder: (context, index) {
             if (index == processedBills.length) {
-              return _isLoadingMore ? const Center(child: Padding(padding: EdgeInsets.symmetric(vertical: 16.0), child: CircularProgressIndicator())) : const SizedBox.shrink();
+              return _isLoadingMore 
+                  ? const Center(child: Padding(padding: EdgeInsets.symmetric(vertical: 16.0), child: OsintLoader(text: "LOADING MORE INITIATIVES..."))) //TODO
+                  : const SizedBox.shrink();
             }
             final bill = processedBills[index];
             
@@ -368,9 +371,9 @@ import '../../widgets/lists_specific/legislation_list_card.dart';
             child: isDesktopWeb
                 ? WebSmoothScroll(
                 controller: _scrollController,
-                scrollAnimationLength: 600,
-                scrollSpeed: 2.5,
-                curve: Curves.easeOutQuart,
+                scrollAnimationLength: 450,
+                scrollSpeed: 0.7,
+                curve: Curves.easeOut,
                 child: listView,
               )
                 : listView,

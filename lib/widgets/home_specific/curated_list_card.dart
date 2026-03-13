@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../models/home_screen_data.dart';
 import '../../models/legislation.dart';
 import '../../services/parliament_manager.dart';
 import '../../providers/language_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../services/curated_list_service.dart';
+import '../../widgets/osint_loader.dart';
 import 'home_section_card.dart';
 import '../partially_expandable_list_widget.dart';
 import '../citizen_poll_widget.dart';
@@ -23,9 +23,7 @@ class CuratedListCard extends StatefulWidget {
   State<CuratedListCard> createState() => _CuratedListCardState();
 }
 
-class _CuratedListCardState extends State<CuratedListCard> with AutomaticKeepAliveClientMixin {
-  @override
-  bool get wantKeepAlive => true;
+class _CuratedListCardState extends State<CuratedListCard> {
 
   final CuratedListService _service = CuratedListService();
   bool _isLoading = true;
@@ -116,34 +114,11 @@ class _CuratedListCardState extends State<CuratedListCard> with AutomaticKeepAli
     }
   }
 
-  HomeScreenLegislationItem? _getShareableAdapter() {
-    if (_highlightedItem == null) return null;
-    return HomeScreenLegislationItem(
-      id: _highlightedItem!.id,
-      title: _highlightedItem!.title,
-      summary: _highlightedItem!.description,
-      status: _highlightedItem!.status,
-      votingDate: _highlightedItem!.votingDate,
-      votesFor: _highlightedItem!.votesFor,
-      votesAgainst: _highlightedItem!.votesAgainst,
-      votesAbstain: _highlightedItem!.votesAbstain,
-      keyPoints: _highlightedItem!.keyPoints,
-      likes: _highlightedItem!.likes,
-      dislikes: _highlightedItem!.dislikes,
-      popularity: _highlightedItem!.popularity ?? 0,
-      upcomingProceedingDates: _highlightedItem!.upcomingProceedingDates,
-      processStartDate: _highlightedItem!.processStartDate,
-      documentType: _highlightedItem!.documentType ?? 'bill',
-      category: _highlightedItem!.category,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     
     if (_isLoading) {
-      return const Center(child: Padding(padding: EdgeInsets.all(16.0), child: CircularProgressIndicator()));
+      return const Center(child: Padding(padding: EdgeInsets.all(16.0), child: OsintLoader(text: "LOADING CURATED FEED..."))); //TODO
     }
     
     if (_highlightedItem == null) {
@@ -161,7 +136,7 @@ return HomeSectionCard(
       icon: Icons.campaign,
       destinationPath: '/$lang/$slug/$term/legislations?list=curated&listId=${widget.listId}',
       buttonText: "Open Full List", // TODO: L10N
-      legislationItem: _getShareableAdapter(),
+      legislationItem: _highlightedItem,
       isHighlighted: true,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 16.0),
@@ -169,50 +144,28 @@ return HomeSectionCard(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.white.withAlpha(25), 
-                borderRadius: BorderRadius.circular(4)
-              ),
-              child: const Text(
-                "LATEST UPDATE", 
-                style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white70) // TODO: L10N
-              ),
-            ),
-            const SizedBox(height: 8),
             Text(
               _highlightedItem!.title.isNotEmpty ? _highlightedItem!.title : "No title",
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
             ),
             const SizedBox(height: 8),
             Text(
               _highlightedItem!.description.isNotEmpty 
                   ? _highlightedItem!.description 
                   : "No summary available.",
-              style: TextStyle(fontSize: 14, color: Colors.grey[300]),
+              style: TextStyle(fontSize: 14, color: Colors.grey[800]),
             ),
             const SizedBox(height: 12),
-            Theme(
-              data: ThemeData.dark().copyWith(
-                primaryColor: Colors.blueAccent,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  PartiallyExpandableListWidget(
-                    title: _highlightedItem!.keyPoints.isNotEmpty ? l10n.keyPoints : l10n.noKeyPoints,
-                    items: _highlightedItem!.keyPoints,
-                    itemBuilder: (context, item) => bulletPoint(context, item as String),
-                  ),
-                  const SizedBox(height: 20),
-                  CitizenPollWidget(
-                    targetType: _highlightedItem!.documentType == 'civic' ? 'civic' : 'legislation',
-                    targetId: _highlightedItem!.id,
-                    itemData: _highlightedItem!,
-                  ),
-                ],
-              ),
+            if (_highlightedItem!.keyPoints.isNotEmpty) ...[
+              Text(l10n.keyPoints, style: const TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              ..._highlightedItem!.keyPoints.map((kp) => bulletPoint(context, kp)),
+            ],
+            const SizedBox(height: 20),
+            CitizenPollWidget(
+              targetType: _highlightedItem!.documentType == 'civic' ? 'civic' : 'legislation',
+              targetId: _highlightedItem!.id,
+              itemData: _highlightedItem!,
             ),
           ],
         ),

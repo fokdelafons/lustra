@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:lustra/models/home_screen_data.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../models/mp.dart';
+import '../models/legislation.dart';
 import 'parliamentary_vote_painter.dart';
 
 // SPAGHETTI CODE - MIGHT CONSIDER REFACTOR
@@ -27,7 +27,7 @@ enum ShareableContentType {
 }
 
 class ShareableImage extends StatelessWidget {
-  final HomeScreenLegislationItem? legislation;
+  final Legislation? legislation;
   final MP? deputy;
   final String? tenureText;
   final List<ImportantVote>? recentVotings;
@@ -59,7 +59,7 @@ class ShareableImage extends StatelessWidget {
         );
 
   factory ShareableImage.legislation({
-    required HomeScreenLegislationItem legislation,
+    required Legislation legislation,
     required Size size,
     required AppLocalizations l10n,
     required String translatedStatus,
@@ -233,7 +233,7 @@ class ShareableImage extends StatelessWidget {
                                   ],
                                   
                                   Text(
-                                    legislation!.summary ?? l10n.errorNoSummaryLastVote,
+                                    legislation!.description.isNotEmpty ? legislation!.description : l10n.errorNoSummaryLastVote,
                                     style: TextStyle(fontSize: summaryFontSize, color: Colors.grey[800], height: 1.4),
                                   ),
                                   const SizedBox(height: 24),
@@ -909,8 +909,8 @@ Widget _buildScheduledFooter(BuildContext context, double padding, double fontSi
                       child: _buildCitizenVoteSection(
                         context: context,
                         baseFontSize: fontSize,
-                        likes: legislation!.likes ?? 0,
-                        dislikes: legislation!.dislikes ?? 0,
+                        likes: legislation!.likes,
+                        dislikes: legislation!.dislikes,
                       ),
                     ),
                   );
@@ -980,8 +980,8 @@ Widget _buildInProcessFooter(BuildContext context, double padding, double fontSi
                 child: _buildCitizenVoteSection(
                   context: context,
                   baseFontSize: fontSize,
-                  likes: legislation!.likes ?? 0,
-                  dislikes: legislation!.dislikes ?? 0,
+                  likes: legislation!.likes,
+                  dislikes: legislation!.dislikes,
                 ),
               ),
               const SizedBox(width: 16),

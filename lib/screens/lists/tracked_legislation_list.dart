@@ -13,6 +13,7 @@ import '../../services/tracking_service.dart';
 import '../../models/legislation.dart';
 import '../../widgets/lists_specific/legislation_list_card.dart';
 import '../../services/app_router.dart';
+import '../../widgets/osint_loader.dart';
 
 class TrackedLegislationScreen extends StatefulWidget {
   const TrackedLegislationScreen({super.key});
@@ -115,7 +116,7 @@ class TrackedLegislationScreenState extends State<TrackedLegislationScreen> with
     super.build(context);
     
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: OsintLoader(text: "LOADING CUSTOM DOSSIER...")); //TODO
     }
 
     if (_errorMessage != null) {
@@ -186,9 +187,9 @@ class TrackedLegislationScreenState extends State<TrackedLegislationScreen> with
       child: isDesktopWeb
           ? WebSmoothScroll(
               controller: _scrollController,
-              scrollAnimationLength: 600,
-              scrollSpeed: 2.5,
-              curve: Curves.easeOutQuart,
+              scrollAnimationLength: 450,
+              scrollSpeed: 0.7,
+              curve: Curves.easeOut,
               child: listView,
             )
           : listView,

@@ -71,6 +71,7 @@ const functionsMap = {
     'pl_getDeputyDetails': plHandlers.getDeputyDetails,
     'pl_getLegislations': plHandlers.getLegislations,
     'pl_citizenVote': globalHandlers.citizenVote,
+    'pl_getHomeScreenDataV2': plHandlers.getHomeScreenDataV2,
 // --- DE ---
     'de_getMetadata': deHandlers.getMetadata,
     'de_getHomeScreenData': deHandlers.getHomeScreenData,
@@ -104,6 +105,7 @@ const functionsMap = {
     'us_getLegislations': usHandlers.getLegislations,
     'us_getCivicProjects': usHandlers.getCivicProjects,
     'us_citizenVote': globalHandlers.citizenVote,
+    'us_getHomeScreenDataV2': usHandlers.getHomeScreenDataV2,
 // --- UK ---
     'uk_getMetadata': ukHandlers.getMetadata,
     'uk_getHomeScreenData': ukHandlers.getHomeScreenData,

@@ -541,8 +541,9 @@ String _getOrdinalSuffix(int n) {
     }
     
     try {
+      // TARCZA: Przełączenie na zmaterializowany widok (V2)
       final resultData = await _apiService.callFunction(
-        'us_getHomeScreenData',
+        'us_getHomeScreenDataV2', 
         params: {
           'lang': langCode,
           'term': termToUse.toString(),

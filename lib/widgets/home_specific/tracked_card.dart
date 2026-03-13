@@ -9,6 +9,7 @@ import '../../providers/language_provider.dart';
 import '../../models/legislation.dart';
 import '../../services/app_router.dart';
 import 'home_section_card.dart';
+import '../../widgets/osint_loader.dart';
 
 class TrackedCard extends StatefulWidget {
   const TrackedCard({super.key});
@@ -76,7 +77,7 @@ class _TrackedCardState extends State<TrackedCard> {
     if (_isLoading) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 24.0),
-        child: Center(child: CircularProgressIndicator()),
+        child: Center(child: OsintLoader(text: "LOADING TRACKED BILLS...")), //TODO
       );
     }
 

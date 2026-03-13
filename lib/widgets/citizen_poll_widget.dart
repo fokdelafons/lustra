@@ -9,9 +9,9 @@ import 'package:lustra/widgets/verification_guard.dart';
 import 'package:lustra/providers/interaction_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:lustra/providers/user_provider.dart';
 
 import '../models/legislation.dart';
-import '../models/home_screen_data.dart';
 import '../models/mp.dart';
 import '../services/voting_service.dart';
 import '../services/parliament_service_interface.dart';
@@ -56,16 +56,13 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
     _initializeVoteStatus();
   }
 
+  // --- LOGIKA (Nietknięta przez Tarczę) ---
   Map<String, int> _extractCountersFromItemData() {
     int likes = 0;
     int dislikes = 0;
     int popularity = 0;
 
-    if (widget.itemData is HomeScreenLegislationItem) {
-      likes = widget.itemData.likes ?? 0;
-      dislikes = widget.itemData.dislikes ?? 0;
-      popularity = widget.itemData.popularity;
-    } else if (widget.itemData is Legislation) {
+    if (widget.itemData is Legislation) {
       likes = widget.itemData.likes ?? 0;
       dislikes = widget.itemData.dislikes ?? 0;
       popularity = widget.itemData.popularity ?? 0;
@@ -132,8 +129,8 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
 
     final isVerified = await checkVerificationOrShowDialog(context);
     if (!isVerified) {
-    if (mounted) setState(() => _isVoteProcessing = false);
-    return;
+      if (mounted) setState(() => _isVoteProcessing = false);
+      return;
     }
 
     final previousHasVoted = _hasVotedLocally;
@@ -179,17 +176,13 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
 
         await _votingService.saveOptimisticCounters(widget.targetType, widget.targetId, countersToDisplay);
         
-        if (mounted) { 
-          setState(() { _pollCounters = countersToDisplay; }); 
-        }
+        if (mounted) {  setState(() { _pollCounters = countersToDisplay; });  }
         widget.onVoteSuccess?.call(countersToDisplay);
       } 
     } on FirebaseFunctionsException catch (e) {
       if (mounted) setState(() => _isVoteProcessing = false);
-      developer.log('Błąd Cloud Function (${e.code}): ${e.message}', name: 'CitizenPollWidget');
       _handleError(e.code == 'permission-denied' ? l10n.pollPermissionDeniedError : l10n.authErrorDefault, previousHasVoted, previousCounters, scaffoldMessenger);
     } catch (e) {
-      developer.log('Błąd nie-Firebase: $e', name: 'CitizenPollWidget');
       _handleError(l10n.authErrorDefault, previousHasVoted, previousCounters, scaffoldMessenger);
     }
   }
@@ -206,6 +199,8 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
       }
   }
 
+  // --- NOWY UI (TARCZA REDESIGN) ---
+
   @override
   Widget build(BuildContext context) {
     final interactionProvider = context.watch<InteractionProvider>(); 
@@ -219,56 +214,78 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
          _initializeVoteStatus();
       });
     }
+
     if (widget.targetId.isEmpty || widget.targetId == 'unknown' || _isLoading) {
       return Container(
         padding: const EdgeInsets.all(16),
         height: 120,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: Colors.grey[100],
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey[300] ?? Colors.grey),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.grey[200]!),
         ),
-        child: _isLoading ? const CircularProgressIndicator() : Text(l10n.pollTemporarilyUnavailable, style: TextStyle(color: Colors.grey[600]), textAlign: TextAlign.center),
+        child: _isLoading ? const CircularProgressIndicator() : Text(l10n.pollTemporarilyUnavailable, style: TextStyle(color: Colors.grey[600])),
       );
     }
 
     final counters = _pollCounters ?? _extractCountersFromItemData();
-
     int votesForCitizen = counters['likes'] ?? 0;
     int votesAgainstCitizen = counters['dislikes'] ?? 0;
     int totalCitizenVotes = counters['popularity'] ?? 0;
 
     final double forCitizenPercent = totalCitizenVotes > 0 ? (votesForCitizen / totalCitizenVotes * 100) : 0;
     final double againstCitizenPercent = totalCitizenVotes > 0 ? (votesAgainstCitizen / totalCitizenVotes * 100) : 0;
-    final primaryColor = Theme.of(context).primaryColor;
 
-        final Widget resultsWidget;
-    if (widget.targetType == 'deputy') {
-      resultsWidget = _buildDeputyResultsView(votesForCitizen, votesAgainstCitizen, totalCitizenVotes);
-    } else {
-      resultsWidget = _buildResultsBar(forCitizenPercent, againstCitizenPercent, votesForCitizen, votesAgainstCitizen, totalCitizenVotes);
-    }
+    final Widget resultsWidget = widget.targetType == 'deputy' 
+        ? _buildDeputyResultsView(votesForCitizen, votesAgainstCitizen, totalCitizenVotes)
+        : _buildModernResultsBar(forCitizenPercent, againstCitizenPercent, votesForCitizen, votesAgainstCitizen, totalCitizenVotes);
 
     final Widget actionWidget;
     if (_hasVotedLocally) {
-      actionWidget = _buildVoteCountDisplay(totalCitizenVotes);
+      actionWidget = _buildOfficialReceipt(totalCitizenVotes);
     } else {
       final firebaseUser = context.watch<User?>();
-      actionWidget = firebaseUser != null
-          ? _buildVotingButtons(key: ValueKey('voting_buttons_${widget.targetId}'))
-          : _buildLoginToVoteButton(key: ValueKey('login_button_${widget.targetId}'));
+      if (firebaseUser == null) {
+        actionWidget = _buildLoginToVoteButton(key: ValueKey('login_button_${widget.targetId}'));
+      } else {
+        final userProvider = context.watch<UserProvider>();
+        final parliamentService = context.read<ParliamentServiceInterface>();
+        final canVote = userProvider.primaryParliamentId == parliamentService.name;
+
+        if (!canVote) {
+          actionWidget = _buildRestrictedView(parliamentService.name);
+        } else {
+          actionWidget = _buildVotingButtons(key: ValueKey('voting_buttons_${widget.targetId}'));
+        }
+      }
     }
 
     final contentColumn = Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (widget.showContainer) ...[
-          Center(child: Text(l10n.citizenPollTitle, style: TextStyle(fontSize: 15, color: primaryColor, fontWeight: FontWeight.bold))),
-          const SizedBox(height: 16),
+        // TARCZA: Ukrywamy nagłówek, pasek i divider, jeśli nikt jeszcze nie zagłosował.
+        if (totalCitizenVotes > 0) ...[
+          if (widget.showContainer) ...[
+            // Terminalowy header
+            Row(
+              children: [
+                Container(width: 6, height: 6, decoration: BoxDecoration(color: Theme.of(context).primaryColor, shape: BoxShape.circle)),
+                const SizedBox(width: 8),
+                Text(
+                  "CIVIC WILL RECORD", // TODO: L10N
+                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: Theme.of(context).primaryColor),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+          ],
+          resultsWidget,
+          const SizedBox(height: 24),
+          const Divider(height: 1, thickness: 1),
+          const SizedBox(height: 20),
         ],
-        resultsWidget,
-        const SizedBox(height: 16),
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
           child: actionWidget,
@@ -276,243 +293,283 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
       ],
     );
 
-    if (!widget.showContainer) {
-      return contentColumn;
-    }
-
+// TARCZA: Celowo zbudowane klamry (Brackets) po prawej + lewy pasek. Stabilne 60fps.
     return Container(
+      margin: const EdgeInsets.symmetric(vertical: 16.0),
+      // Podstawa z tłem i lewym paskiem
       decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border(
+          left: BorderSide(color: Theme.of(context).primaryColor, width: 4.0),
+        ),
+        gradient: LinearGradient(
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          colors: [
+            Theme.of(context).primaryColor.withAlpha((255 * 0.08).round()), 
+            Theme.of(context).primaryColor.withAlpha((255 * 0.02).round()), 
+          ],
+        ),
       ),
-      padding: const EdgeInsets.all(16),
-      child: contentColumn,
+      child: CustomPaint(
+        painter: TargetingBracketsPainter(
+          color: Theme.of(context).primaryColor.withAlpha(80),
+          strokeWidth: 1.0,
+          length: 12.0,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.only(left: 16.0, top: 16.0, bottom: 16.0, right: 16.0),
+          child: contentColumn,
+        ),
+      ),
     );
   }
 
-  Widget _buildVoteCountDisplay(int totalVotes) {
-      final l10n = AppLocalizations.of(context)!;
-      final primaryColor = Theme.of(context).primaryColor;
+  Widget _buildModernResultsBar(double forPercent, double againstPercent, int forVotes, int againstVotes, int totalVotes) {
+    if (totalVotes == 0) {
+      return Container(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        alignment: Alignment.center,
+        child: Text(
+          AppLocalizations.of(context)!.pollNoVotesCast, 
+          style: TextStyle(color: Colors.grey[500], fontStyle: FontStyle.italic, letterSpacing: 0.5)
+        ),
+      );
+    }
 
-      if (!widget.enablePostVoteAction) {
-        return Center(
-          key: ValueKey('voted_info_compact_${widget.targetId}'),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
+    int knownVotes = forVotes + againstVotes;
+    int flexPending = (totalVotes - knownVotes).clamp(0, totalVotes);
+    
+    int flexFor = forVotes > 0 ? forVotes : 0;
+    int flexAgainst = againstVotes > 0 ? againstVotes : 0;
+    if (flexFor == 0 && flexAgainst == 0 && flexPending == 0) flexPending = 1;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text("SUPPORT ${forPercent.round()}%", style: TextStyle(color: Colors.green[700], fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1)),
+            if (flexPending > 0) const Text("SYNCING...", style: TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
+            Text("OPPOSE ${againstPercent.round()}%", style: TextStyle(color: Colors.red[700], fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1)),
+          ],
+        ),
+        const SizedBox(height: 8),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: SizedBox(
+            height: 8,
             child: Row(
-              mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.verified, size: 20, color: primaryColor), 
-                const SizedBox(width: 6),
-                TweenAnimationBuilder<int>(
-                  tween: IntTween(begin: 0, end: totalVotes),
-                  duration: const Duration(milliseconds: 1500),
-                  curve: Curves.easeOutExpo,
-                  builder: (context, value, child) {
-                    return Text(
-                      l10n.pollTotalVotesLabel(value),
-                      style: TextStyle(
-                        fontSize: 14.5,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.grey[800],
-                      ),
-                    );
-                  },
-                ),
+                if (flexFor > 0) Expanded(flex: flexFor, child: Container(color: Colors.green[600])),
+                if (flexPending > 0) Expanded(flex: flexPending, child: Container(color: Colors.grey[300])),
+                if (flexAgainst > 0) Expanded(flex: flexAgainst, child: Container(color: Colors.red[600])),
               ],
             ),
           ),
-        );
-      }
-      return Container(
-        key: ValueKey('voted_info_expanded_${widget.targetId}'),
-        margin: const EdgeInsets.only(top: 12),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-        color: primaryColor.withAlpha(13),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: primaryColor.withAlpha(26)),
         ),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.verified, size: 24, color: primaryColor),
-                const SizedBox(width: 8),
-              
-                TweenAnimationBuilder<int>(
-                  tween: IntTween(begin: 0, end: totalVotes),
-                  duration: const Duration(milliseconds: 1500),
-                  curve: Curves.easeOutExpo,
-                  builder: (context, value, child) {
-                    return Text(
-                      l10n.pollTotalVotesLabel(value),
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.grey[800],
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-            
-          const SizedBox(height: 12),
-            Divider(height: 1, color: primaryColor.withAlpha(26)),
-            const SizedBox(height: 12),
+        const SizedBox(height: 8),
+        // Licznik
+        Text(
+          "$totalVotes RECORDED VOTES", // TODO: L10N
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 10, color: Colors.grey[500], fontWeight: FontWeight.bold, letterSpacing: 1),
+        ),
+      ],
+    );
+  }
 
-            Text(
-              l10n.pollVoteSignificance, 
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              l10n.pollShareImpact,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[700],
-                height: 1.4,
+// --- NOWE PRZYCISKI GŁOSOWANIA ---
+  Widget _buildVotingButtons({Key? key}) {
+    final l10n = AppLocalizations.of(context)!;
+    return Column(
+      key: key,
+      children: [
+        Text(
+          "Record your position on this legislation", // TODO: l10n
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 12, color: Colors.grey[600], fontWeight: FontWeight.w600, letterSpacing: 0.5),
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: () => _handleVoteButtonPressed('like'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: Colors.green.withAlpha((255 * 0.06).round()), // TARCZA: Subtelne pastelowe tło
+                  side: BorderSide(color: Colors.green.withAlpha(60), width: 1), // TARCZA: Cienka, ledwie widoczna ramka
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                  foregroundColor: Colors.green[800], // TARCZA: Ciemniejszy, elegancki tekst
+                  elevation: 0,
+                ),
+                child: Column(
+                  children: [
+                    const Icon(Icons.check_circle_outline, size: 24),
+                    const SizedBox(height: 4),
+                    Text(l10n.pollSupport.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, letterSpacing: 1)),
+                  ],
+                ),
               ),
             ),
-
-            const SizedBox(height: 16),
-
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: widget.onShare,
-                icon: const Icon(Icons.ios_share, size: 18),
-                label: Text(
-                  l10n.pollShareAction, 
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryColor,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+            const SizedBox(width: 12),
+            Expanded(
+              child: OutlinedButton(
+                onPressed: () => _handleVoteButtonPressed('dislike'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: Colors.red.withAlpha((255 * 0.06).round()), // TARCZA: Subtelne pastelowe tło
+                  side: BorderSide(color: Colors.red.withAlpha(60), width: 1), // TARCZA: Cienka, ledwie widoczna ramka
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                  foregroundColor: Colors.red[800], // TARCZA: Ciemniejszy, elegancki tekst
                   elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                ),
+                child: Column(
+                  children: [
+                    const Icon(Icons.cancel_outlined, size: 24),
+                    const SizedBox(height: 4),
+                    Text(l10n.pollDontSupport.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, letterSpacing: 1)),
+                  ],
                 ),
               ),
             ),
           ],
         ),
-      );
-    }
+      ],
+    );
+  }
 
-  Widget _buildResultsBar(double forPercent, double againstPercent, int forVotes, int againstVotes, int totalVotes) {
-      if (totalVotes == 0) {
-        return Container(
-          height: 36,
-          decoration: BoxDecoration(
-            color: Colors.grey[200],
-            borderRadius: BorderRadius.circular(18),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            AppLocalizations.of(context)!.pollNoVotesCast, 
-            style: TextStyle(color: Colors.grey[700], fontStyle: FontStyle.italic)
-          ),
-        );
-      }
-      int knownVotes = forVotes + againstVotes;
-      int pendingVotes = totalVotes - knownVotes;
-      if (pendingVotes < 0) pendingVotes = 0;
-      int flexFor = forVotes;
-      int flexAgainst = againstVotes;
-      int flexPending = pendingVotes;
-      if (flexFor == 0 && flexAgainst == 0 && flexPending == 0) {
-        flexPending = 1; 
-      }
-      bool showForText = (totalVotes > 0) && ((forVotes / totalVotes) > 0.10);
-      bool showAgainstText = (totalVotes > 0) && ((againstVotes / totalVotes) > 0.10);
-      bool showPendingText = (totalVotes > 0) && ((pendingVotes / totalVotes) > 0.05);
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(18),
-        child: Container(
-          height: 36,
-          color: Colors.grey[200],
-          child: Row(
+// --- STAN PO GŁOSOWANIU (OFFICIAL RECEIPT) ---
+  Widget _buildOfficialReceipt(int totalVotes) {
+    final primaryColor = Theme.of(context).primaryColor;
+    final l10n = AppLocalizations.of(context)!; // TARCZA: Dodano obsługę języków
+
+    return Container(
+      key: ValueKey('voted_receipt_${widget.targetId}'),
+      padding: const EdgeInsets.symmetric(vertical: 12.0),
+      decoration: BoxDecoration(
+        color: primaryColor.withAlpha((255 * 0.08).round()), 
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (flexFor > 0) Expanded(
-                flex: flexFor,
-                child: Container(
-                  color: Colors.green.withAlpha(220),
-                  alignment: Alignment.center,
-                  child: showForText 
-                    ? Text('${forPercent.round()}%', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)) 
-                    : null,
-                ),
-              ),
-              if (flexPending > 0) Expanded(
-                flex: flexPending,
-                child: Container(
-                  color: Colors.grey[400],
-                  alignment: Alignment.center,
-                  child: showPendingText
-                    ? const Icon(Icons.hourglass_empty, size: 16, color: Colors.white70)
-                    : null,
-                ),
-              ),
-              if (flexAgainst > 0) Expanded(
-                flex: flexAgainst,
-                child: Container(
-                  color: Colors.red.withAlpha(220),
-                  alignment: Alignment.center,
-                  child: showAgainstText 
-                    ? Text('${againstPercent.round()}%', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)) 
-                    : null,
+              Icon(Icons.verified_user, size: 20, color: primaryColor), 
+              const SizedBox(width: 8),
+              Text(
+                "POSITION RECORDED", // Zostawiamy jako twardy, analityczny stempel
+                style: TextStyle(
+                  fontSize: 14, 
+                  fontWeight: FontWeight.w900, 
+                  color: primaryColor,
+                  letterSpacing: 1.5,
                 ),
               ),
             ],
           ),
-        ),
-      );
-    }
-  
-  Widget _buildVotingButtons({Key? key}) {
-    final l10n = AppLocalizations.of(context)!;
-    return Row(
-      key: key,
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        Column(children: [
-          IconButton(icon: const Icon(Icons.thumb_up_outlined), onPressed: () => _handleVoteButtonPressed('like'), color: Colors.green, iconSize: 32),
-          Text(l10n.pollSupport, style: const TextStyle(fontSize: 12))
-        ]),
-        Column(children: [
-          IconButton(icon: const Icon(Icons.thumb_down_outlined), onPressed: () => _handleVoteButtonPressed('dislike'), color: Colors.red, iconSize: 32),
-          Text(l10n.pollDontSupport, style: const TextStyle(fontSize: 12))
-        ]),
-      ],
+          
+          if (widget.enablePostVoteAction) ...[
+            const SizedBox(height: 16),
+            // TARCZA: Przywrócono Twoje oryginalne, dwuzdaniowe copy L10N
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                children: [
+                  Text(
+                    l10n.pollVoteSignificance, 
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    l10n.pollShareImpact,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.grey[700],
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: widget.onShare,
+                  icon: const Icon(Icons.share, size: 16),
+                  label: Text(l10n.pollShareAction, style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryColor,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+            ),
+          ]
+        ],
+      ),
+    );
+  }
+
+Widget _buildRestrictedView(String parliamentName) {
+    final primaryColor = Theme.of(context).primaryColor;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12.0),
+      decoration: BoxDecoration(
+        color: primaryColor.withAlpha((255 * 0.08).round()), 
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.security, size: 20, color: primaryColor),
+          const SizedBox(width: 8),
+          Text(
+            "RESTRICTED TO CITIZENS OF COUNTRY", 
+            style: TextStyle(
+              fontSize: 14, 
+              fontWeight: FontWeight.w900, 
+              color: primaryColor,
+              letterSpacing: 1.5,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildLoginToVoteButton({Key? key}) {
     return Center(
       key: key,
-      child: ElevatedButton.icon(
+      child: OutlinedButton.icon(
         icon: const Icon(Icons.login, size: 18),
-        label: Text(AppLocalizations.of(context)!.loginToVote),
+        label: Text(AppLocalizations.of(context)!.loginToVote, style: const TextStyle(fontWeight: FontWeight.bold)),
         onPressed: () {
           final currentPath = GoRouterState.of(context).uri.toString();
           context.push(Uri(path: '/login', queryParameters: {'next': currentPath}).toString());
         },
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        style: OutlinedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          side: BorderSide(color: Theme.of(context).primaryColor, width: 2),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
         ),
       ),
     );
   }
 
   Widget _buildDeputyResultsView(int upVotes, int downVotes, int totalVotes) {
+    // TARCZA: Dla posłów zostawiam stary kod, zgodnie z poleceniem, ale można go też kiedyś zmodernizować.
     final l10n = AppLocalizations.of(context)!;
     final double supportPercentage = totalVotes > 0 ? upVotes / totalVotes : 0.0;
     final String supportPercentageFormatted = NumberFormat.percentPattern(l10n.localeName).format(supportPercentage);
@@ -566,11 +623,11 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
                 if (totalVotes > 0) ...[
                   Expanded(
                     flex: upVotes,
-                    child: Container(color: Colors.green.shade300),
+                    child: Container(color: Colors.green.shade500),
                   ),
                   Expanded(
                     flex: downVotes,
-                    child: Container(color: Colors.red.shade300),
+                    child: Container(color: Colors.red.shade500),
                   ),
                 ] else
                   Expanded(
@@ -584,4 +641,46 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
       ],
     );
   }
+}
+
+// TARCZA: Świadomy malarz klamer. Rysuje perfekcyjne i stabilne "celowniki" (Targeting Brackets)
+class TargetingBracketsPainter extends CustomPainter {
+  final Color color;
+  final double length;
+  final double strokeWidth;
+
+  TargetingBracketsPainter({
+    required this.color,
+    this.length = 16.0, // Długość kresek klamry
+    this.strokeWidth = 2.0, // Grubość linii klamry
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke;
+
+    // Prawy Górny Narożnik (Klamra górna)
+    canvas.drawPath(
+      Path()
+        ..moveTo(size.width - length, 0)
+        ..lineTo(size.width, 0)
+        ..lineTo(size.width, length),
+      paint,
+    );
+
+    // Prawy Dolny Narożnik (Klamra dolna)
+    canvas.drawPath(
+      Path()
+        ..moveTo(size.width - length, size.height)
+        ..lineTo(size.width, size.height)
+        ..lineTo(size.width, size.height - length),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

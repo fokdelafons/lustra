@@ -229,6 +229,92 @@ async function getUsHomeScreenDoc(docId, langCode, collectionName, topDeputiesDo
     }
 }
 
+// ============================================================================
+// TARCZA: GETTER V2 - BEZ FLICKERINGU, JEDEN ODCZYT BAZY
+// ============================================================================
+
+const getHomeScreenDataV2 = async (req, res) => {
+    if (req.body.warmup === true) {
+        return res.status(200).json({ data: { status: 'warmed_up_successfully' } });
+    }
+    try {
+        const data = req.body.data || req.body;
+        const { lang: requestedLang, term: requestedTerm } = data;
+        if (!requestedTerm) {
+            return res.status(400).json({ error: { code: 'invalid-argument', message: "Brak parametru 'term'." } });
+        }
+
+        const lang = normalizeLang(requestedLang, 'eng'); // Założenie, że masz tę funkcję wyżej w pliku
+        const cacheKey = `us-homescreen-v2-${requestedTerm}-${lang}`;
+        
+        if (cache.has(cacheKey)) {
+            const cachedEntry = cache.get(cacheKey);
+            const ageSeconds = (Date.now() - cachedEntry.timestamp) / 1000;
+            if (ageSeconds < CACHE_TTL_SECONDS) {
+                console.log(`[Cache HIT V2] Returning data for: ${cacheKey}`);
+                const result = await cachedEntry.promise;
+                return res.status(200).json({ data: result });
+            }
+        }
+
+        const fetchPromise = (async () => {
+            const HOME_SCREEN_COLLECTION = 'us_home_screen';
+            // Pobieramy JEDEN zmaterializowany dokument
+            const docSnap = await db.collection(HOME_SCREEN_COLLECTION).doc(`${requestedTerm}_dashboard_v2`).get();
+            
+            if (!docSnap.exists) {
+                console.warn(`[getHomeScreenDataV2] Document ${requestedTerm}_dashboard_v2 not found!`);
+                return null;
+            }
+
+            const rawData = docSnap.data();
+
+            return {
+                popularVoted: localizeFullLegislation(rawData.popularVoted, lang),
+                upcomingVote: localizeFullLegislation(rawData.upcomingVote, lang),
+                popularInProcess: localizeFullLegislation(rawData.popularInProcess, lang),
+                civicProject: localizeFullLegislation(rawData.civicProject, lang),
+                topDeputies: {
+                    deputies: rawData.topDeputies?.deputies || [], // Posłowie nie wymagają AI tłumaczeń na Home Screen
+                    lastUpdated: rawData.topDeputies?.lastUpdated || null
+                }
+            };
+        })();
+
+        cache.set(cacheKey, { promise: fetchPromise, timestamp: Date.now() });
+        const result = await fetchPromise;
+        return res.status(200).json({ data: result });
+
+    } catch (error) {
+        console.error("KRYTYCZNY BŁĄD V2: Nie udało się pobrać danych:", error);
+        return res.status(500).json({ error: { code: 'internal', message: 'Wystąpił wewnętrzny błąd serwera.' } });
+    }
+};
+
+// Pomocnicza funkcja mapująca dane pod pełny model Legislation we Flutterze
+function localizeFullLegislation(data, langCode) {
+    if (!data || !data.id) return null;
+    const localizedData = { ...data };
+    
+    // Model w Flutterze używa zmiennej "title"
+    localizedData.title = data[`${langCode}_ai_title`] || data.titleOfficial || data.title || 'No title';
+    localizedData.description = data[`${langCode}_summary`] || data.description || 'We are sorry! No summary available at the moment.';
+    
+    // Model w Flutterze oczekuje "key_Points" (duże P)
+    const keyPoints = data[`${langCode}_key_points`] || data['eng_key_points'] || [];
+    localizedData.key_Points = Array.isArray(keyPoints) ? keyPoints : [];
+
+    // Oszczędzamy transfer ucinając wszystkie stringi z innych języków
+    Object.keys(localizedData).forEach(key => {
+        if (key.includes('_summary') || key.includes('_key_points') || key.includes('_ai_title')) {
+            delete localizedData[key];
+        }
+    });
+    
+    return localizedData;
+}
+// ============================================================================
+
 // --- GETDETAILS ---
 
 const getDetails = async (req, res) => {
@@ -751,6 +837,7 @@ const getCivicProjects = async (req, res) => {
 module.exports = {
   getMetadata,
   getHomeScreenData,
+  getHomeScreenDataV2,
   getDetails,
   getDeputies,
   getDeputyDetails,

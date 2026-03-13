@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
-import '../../models/home_screen_data.dart';
+import '../../models/legislation.dart';
 import '../../services/parliament_manager.dart';
 import '../../providers/language_provider.dart';
 import 'home_section_card.dart';
@@ -11,7 +11,7 @@ import '../partially_expandable_list_widget.dart';
 import '../citizen_poll_widget.dart';
 
 class ProcessCard extends StatelessWidget {
-  final HomeScreenLegislationItem item;
+  final Legislation item;
 
   const ProcessCard({super.key, required this.item});
 
@@ -53,7 +53,7 @@ class ProcessCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              (item.summary != null && item.summary!.isNotEmpty) ? item.summary! : l10n.errorNoSummaryLegislationInProcess,
+              item.description.isNotEmpty ? item.description : l10n.errorNoSummaryLegislationInProcess,
               style: TextStyle(fontSize: 14, color: Colors.grey[800]),
             ),
             const SizedBox(height: 8),

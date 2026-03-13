@@ -528,7 +528,7 @@ class PLParliamentService with ChangeNotifier implements ParliamentServiceInterf
     
     try {
       final resultData = await _apiService.callFunction(
-        'pl_getHomeScreenData',
+        'pl_getHomeScreenDataV2', 
         params: {
           'lang': langCode,
           'term': termToUse.toString(),

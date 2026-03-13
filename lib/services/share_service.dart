@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 
-import '../models/home_screen_data.dart';
+import '../models/legislation.dart';
 import '../models/mp.dart'; 
 import '../widgets/shareable_image_widget.dart';
 import '../services/image_renderer.dart';
@@ -49,7 +49,7 @@ class ShareService {
 
   Future<void> shareLegislation({
     required BuildContext context,
-    required HomeScreenLegislationItem legislation,
+    required Legislation legislation,
     required Size imageSize,
     required AppLocalizations l10n,
     required String translatedStatus,
@@ -94,8 +94,8 @@ class ShareService {
         
         final countryTag = _getParliamentHashtag(parliamentId);
         final translatedLawHash = _sanitizeHashtag(l10n.hashtagLaw);
-        final catTag = legislation.category != null && legislation.category!.isNotEmpty 
-            ? _sanitizeHashtag(legislation.category!) 
+        final catTag = legislation.category.isNotEmpty
+            ? _sanitizeHashtag(legislation.category) 
             : translatedLawHash;
 
         final typeTag = catTag == translatedLawHash ? '' : ' $translatedLawHash';

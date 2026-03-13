@@ -46,14 +46,14 @@ class ParliamentCacheManager {
 
   // --- HOME SCREEN ---
 
-  Future<HomeScreenData?> getHomeScreenData(String lang, int term, {bool ignoreTimestamp = false}) async {
-    final key = '${prefix}_cached_homescreen_term_${term}_lang_$lang';
+Future<HomeScreenData?> getHomeScreenData(String lang, int term, {bool ignoreTimestamp = false}) async {
+    final key = '${prefix}_cached_homescreen_v2_term_${term}_lang_$lang';
     final jsonMap = await _storage.get(key, validationKey: ignoreTimestamp ? null : _globalUpdateKey);
     return jsonMap != null ? HomeScreenData.fromJson(jsonMap) : null;
   }
 
   Future<void> saveHomeScreenData(HomeScreenData data, String lang, int term) async {
-    final key = '${prefix}_cached_homescreen_term_${term}_lang_$lang';
+    final key = '${prefix}_cached_homescreen_v2_term_${term}_lang_$lang';
     await _storage.save(key, data.toJson());
   }
 
@@ -203,5 +203,19 @@ class ParliamentCacheManager {
 
   Future<void> clearCuratedListPreview(String listId) async {
     await _storage.clearByPrefix('${prefix}_curated_list_preview_$listId');
+  }
+
+  // --- BATCH CURATED LISTS PREVIEWS (HOME SCREEN) ---
+  
+  Future<Map<String, dynamic>?> getBatchCuratedPreviews(String lang) async {
+    return await _storage.get('${prefix}_batch_curated_previews_$lang');
+  }
+  
+  Future<void> saveBatchCuratedPreviews(Map<String, dynamic> data, String lang) async {
+    await _storage.save('${prefix}_batch_curated_previews_$lang', data);
+  }
+
+  Future<void> clearBatchCuratedPreviews() async {
+    await _storage.clearByPrefix('${prefix}_batch_curated_previews');
   }
 }

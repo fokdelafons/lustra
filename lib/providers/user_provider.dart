@@ -10,10 +10,12 @@ class UserProvider with ChangeNotifier {
   bool _marketingConsent = false;
   bool _notificationsEnabled = false;
   String? _notificationParliamentId;
+  String? _primaryParliamentId;
 
   List<String> _subscribedLists = [];
   List<String> _createdLists = [];
   bool _isCurator = false;
+  
   
   bool _isInitialized = false;
   bool _profileExists = true;
@@ -29,6 +31,7 @@ class UserProvider with ChangeNotifier {
   bool get marketingConsent => _marketingConsent;
   bool get notificationsEnabled => _notificationsEnabled;
   String? get notificationParliamentId => _notificationParliamentId;
+  String? get primaryParliamentId => _primaryParliamentId;
 
   List<String> get subscribedLists => _subscribedLists;
   List<String> get createdLists => _createdLists;
@@ -88,6 +91,7 @@ class UserProvider with ChangeNotifier {
         _marketingConsent = profile['marketingConsent'] ?? false;
         _notificationsEnabled = profile['notificationsEnabled'] ?? false;
         _notificationParliamentId = profile['notificationParliamentId'];
+        _primaryParliamentId = profile['primaryParliamentId'];
 
         if (profile.containsKey('votes')) {
           _votes = Map<String, dynamic>.from(profile['votes']);
@@ -129,6 +133,7 @@ class UserProvider with ChangeNotifier {
     _marketingConsent = false;
     _notificationsEnabled = false;
     _notificationParliamentId = null;
+    _primaryParliamentId = null;
     _subscribedLists = [];
     _createdLists = [];
     _isCurator = false;

@@ -10,7 +10,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:lustra/providers/language_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:url_launcher/link.dart';
-import 'package:web_smooth_scroll/web_smooth_scroll.dart';
 
 import '../models/mp.dart';
 import '../services/parliament_service_interface.dart';
@@ -19,6 +18,7 @@ import '../services/parliament_manager.dart';
 import '../widgets/details_app_bar.dart';
 import '../widgets/error_report_dialog.dart';
 import '../widgets/citizen_poll_widget.dart';
+import '../../widgets/osint_loader.dart';
 
 // --- LEGACY CODE --- 
 // potential for some rework
@@ -50,12 +50,12 @@ class MPDetailsScreenState extends State<MPDetailsScreen> with SingleTickerProvi
   bool _isLoadingInterpellations = false;
   String? _interpellationsError;
   bool _interpellationsLoaded = false;
-  static const int _initialVotingsLimit = 4;
+  static const int _initialVotingsLimit = 6;
   static const int _moreVotingsLimit = 20;
   String? _lastVoteId;
   bool _hasMoreVotings = true;
   bool _isLoadingMoreVotings = false;
-  static const int _initialInterpellationsLimit = 3;
+  static const int _initialInterpellationsLimit = 6;
   static const int _moreInterpellationsLimit = 20;
   String? _lastInterpellationId;
   bool _hasMoreInterpellations = true;
@@ -366,7 +366,7 @@ Widget build(BuildContext context) {
   if (manager.isLoading || !manager.isInitialized) {
     return Scaffold(
       appBar: DetailsAppBar(title: '', onShare: null),
-      body: const Center(child: CircularProgressIndicator()),
+      body: const Center(child: OsintLoader(text: "EXTRACTING DOSSIER...")), //TODO: l10n
     );
   }
   if (manager.error != null) {
@@ -393,7 +393,7 @@ Widget build(BuildContext context) {
   if (_isLoading) {
     return Scaffold(
       appBar: DetailsAppBar(title: '', onShare: null),
-      body: const Center(child: CircularProgressIndicator()),
+      body: const Center(child: OsintLoader(text: "EXTRACTING DOSSIER...")), //TODO
     );
   }
   if (_error != null) {
@@ -412,10 +412,10 @@ Widget build(BuildContext context) {
   final displayMP = _mp!;
 
   final bool isDesktopWeb = kIsWeb && MediaQuery.of(context).size.width > 750;
-    Widget contentBody = kIsWeb
+      Widget contentBody = kIsWeb
         ? SingleChildScrollView(
             controller: _pageScrollController,
-            physics: isDesktopWeb ? const NeverScrollableScrollPhysics() : const AlwaysScrollableScrollPhysics(),
+            physics: const AlwaysScrollableScrollPhysics(), // TARCZA: Pełne odblokowanie scrolla
             child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 750),
@@ -444,15 +444,12 @@ return Scaffold(
         onShare: _shareMPDetails,
         isShareEnabled: !(_isLoadingVotings),
       ),
-      body: isDesktopWeb
-          ? WebSmoothScroll(
-              controller: _pageScrollController,
-              scrollAnimationLength: 600,
-              scrollSpeed: 2.5,
-              curve: Curves.easeOutCubic,
-              child: contentBody,
-            )
-          : contentBody,
+      body: Listener(
+        onPointerDown: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+        child: SelectionArea(
+          child: contentBody, // TARCZA: Usunięto zacinającego się WebSmoothScrolla
+        ),
+      ),
     );
   }
   Widget _buildContent(ThemeData theme, TextTheme textTheme, TextStyle? sectionTitleStyle, TextStyle? subSectionTitleStyle) {
@@ -560,7 +557,7 @@ return Scaffold(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Hero(
-          tag: 'mp-photo-${currentMP.id}',
+          tag: 'avatar_${currentMP.id}',
           child: currentMP.imageUrl != null
               ? Container(
                   width: 120,
@@ -809,7 +806,7 @@ return Scaffold(
     final bool attendanceAvailable = _mp!.attendancePercentage != null;
     if (!attendanceAvailable) {
       if (_isLoadingVotings && votes.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return const OsintLoader(text: "RETRIEVING VOTE LOGS..."); //TODO: l10n
     }
       if (_votingsError != null && votes.isEmpty) {
       return Center(
@@ -978,7 +975,7 @@ return Scaffold(
         const Center(
           child: Padding(
             padding: EdgeInsets.symmetric(vertical: 32.0),
-            child: CircularProgressIndicator(),
+            child: OsintLoader(text: "RETRIEVING VOTE LOGS..."), // TODO: l10n
           ),
         )
       );
@@ -1010,33 +1007,30 @@ return Scaffold(
       );
     }
     if (_isLoadingMoreVotings) {
-      listChildren.add(const Center(child: Padding(padding: EdgeInsets.all(16.0), child: CircularProgressIndicator())));
-    } else if (_hasMoreVotings && !_isLoadingVotings && _votingsError == null) { 
-      listChildren.add(
-        Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: ElevatedButton(
-              onPressed: () => _fetchVotings(isRefresh: false), 
-              child: Text(votes.isEmpty && !_isLoadingVotings && _votingsError == null
-                  ? l10n.loadVotingsButton : l10n.loadMoreButton),
-            ),
-          ),
-        )
-      );
+      listChildren.add(const Center(child: Padding(padding: EdgeInsets.all(16.0), child: OsintLoader(text: "LOADING RECENT VOTES...")))); //TODO
     }
+    
     if (listChildren.isEmpty) {
       if (_isLoadingVotings && !attendanceAvailable) {
-        return const Center(child: CircularProgressIndicator());
+        return const Center(child: OsintLoader(text: "RETRIEVING VOTE LOGS...")); //TODO
       }
       return Padding(
         padding: const EdgeInsets.all(16.0),
         child: Center(child: Text(l10n.noData, style: TextStyle(color: Colors.grey[600]))),
       );
     }
-    return ListView(
-      padding: const EdgeInsets.symmetric(vertical: 16.0),
-      children: listChildren,
+    
+    return NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification scrollInfo) {
+        if (!_isLoadingVotings && _hasMoreVotings && scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 50) {
+          _fetchVotings(isRefresh: false);
+        }
+        return false;
+      },
+      child: ListView(
+        padding: const EdgeInsets.symmetric(vertical: 16.0),
+        children: listChildren,
+      ),
     );
   }
 
@@ -1044,7 +1038,7 @@ return Scaffold(
     final l10n = AppLocalizations.of(context)!;
     developer.log('MPDetailsScreen: _buildInterpellationsTabContent - _isLoadingInterpellations: $_isLoadingInterpellations, _interpellationsError: $_interpellationsError, _interpellationsLoaded: $_interpellationsLoaded, interpellations.isEmpty: ${interpellations.isEmpty}');
     if (_isLoadingInterpellations && interpellations.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: OsintLoader(text: "FETCHING INQUIRIES...")); // TODO
     }
     if (_interpellationsError != null && interpellations.isEmpty) {
       return Center(
@@ -1070,26 +1064,24 @@ return Scaffold(
         child: Center(child: Text(l10n.noInterpellationsData, style: TextStyle(color: Colors.grey[600]))),
       );
     }
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 16.0),
-      itemCount: interpellations.length + ((_hasMoreInterpellations || _isLoadingMoreInterpellations) ? 1 : 0), 
-      itemBuilder: (context, index) {
-        if (index == interpellations.length) {
-          if (_isLoadingMoreInterpellations) {
-            return const Center(child: Padding(padding: EdgeInsets.all(16.0), child: CircularProgressIndicator()));
-          } else if (_hasMoreInterpellations && !_isLoadingInterpellations) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: ElevatedButton(
-                  onPressed: () => _fetchInterpellations(isRefresh: false), 
-                  child: Text(l10n.loadMoreButton),
-                ),
-              ),
-            );
-          }
-          return const SizedBox.shrink();
+    // TARCZA: Prawdziwy, bezpieczny nasłuch przewijania
+    return NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification scrollInfo) {
+        if (!_isLoadingInterpellations && _hasMoreInterpellations && scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 50) {
+          _fetchInterpellations(isRefresh: false);
         }
+        return false;
+      },
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(vertical: 16.0),
+        itemCount: interpellations.length + ((_hasMoreInterpellations || _isLoadingMoreInterpellations) ? 1 : 0), 
+        itemBuilder: (context, index) {
+          if (index == interpellations.length) {
+            if (_isLoadingMoreInterpellations) {
+              return const Center(child: Padding(padding: EdgeInsets.all(16.0), child: OsintLoader(text: "FETCHING ARCHIVED DATA..."))); //TODO
+            }
+            return const SizedBox.shrink();
+          }
         final interp = interpellations[index];
         return Card(
           margin: const EdgeInsets.only(bottom: 12.0),
@@ -1172,7 +1164,7 @@ return Scaffold(
                 ),
               );
             },
-          );
+          ));
         }
 
 

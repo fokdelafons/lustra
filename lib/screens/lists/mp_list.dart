@@ -12,6 +12,7 @@ import 'package:lustra/providers/language_provider.dart';
 import 'package:flutter/foundation.dart';
 import '../../services/app_router.dart';
 import 'package:web_smooth_scroll/web_smooth_scroll.dart';
+import '../../widgets/osint_loader.dart';
 
 // --- LEGACY CODE --- 
 // potential for some rework
@@ -304,7 +305,7 @@ Widget _buildFilterChips() {
   final manager = Provider.of<ParliamentManager>(context);
 
   if (manager.isLoading || !manager.isInitialized) {
-    return const Center(child: CircularProgressIndicator());
+    return const Center(child: OsintLoader(text: "RETRIEVING DOSSIERS...")); //TODO
   }
 
   if (manager.error != null) {
@@ -463,7 +464,7 @@ Widget _buildFilterChips() {
   Widget _buildMPList(List<MP> filteredMPs) {
       final l10n = AppLocalizations.of(context)!;
       if (_isLoading && _mps.isEmpty) {
-        return const Center(child: CircularProgressIndicator());
+        return const Center(child: OsintLoader(text: "RETRIEVING DOSSIERS...")); //TODO
       }
       if (_errorMessage != null && _mps.isEmpty) {
         return Center(
@@ -520,7 +521,7 @@ Widget _buildFilterChips() {
           if (index == filteredMPs.length) {
             return const Padding(
               padding: EdgeInsets.symmetric(vertical: 16.0),
-              child: Center(child: CircularProgressIndicator()),
+              child: Center(child: OsintLoader(text: "RETRIEVING MORE DOSSIERS...")), //TODO
             );
           }
           final mp = filteredMPs[index];
@@ -531,9 +532,9 @@ Widget _buildFilterChips() {
       return isDesktopWeb
           ? WebSmoothScroll(
                 controller: _scrollController,
-                scrollAnimationLength: 600,
-                scrollSpeed: 2.5,
-                curve: Curves.easeOutQuart,
+                scrollAnimationLength: 450,
+                scrollSpeed: 0.7,
+                curve: Curves.easeOut,
                 child: listView,
               )
           : listView;
@@ -635,18 +636,21 @@ Widget _buildFilterChips() {
               children: [
                 Row(
                   children: [
-                    mp.imageUrl != null
-                        ? CircleAvatar(
-                            radius: 30,
-                            backgroundImage: CachedNetworkImageProvider(mp.imageUrl!),
-                            onBackgroundImageError: (exception, stackTrace) {},
-                            backgroundColor: Colors.grey[200],
-                          )
-                        : CircleAvatar(
-                            radius: 30,
-                            backgroundColor: Colors.grey[300],
-                            child: const Icon(Icons.person, size: 35, color: Colors.white),
-                          ),
+                    Hero(
+                      tag: 'avatar_${mp.id}',
+                      child: mp.imageUrl != null
+                          ? CircleAvatar(
+                              radius: 30,
+                              backgroundImage: CachedNetworkImageProvider(mp.imageUrl!),
+                              onBackgroundImageError: (exception, stackTrace) {},
+                              backgroundColor: Colors.grey[200],
+                            )
+                          : CircleAvatar(
+                              radius: 30,
+                              backgroundColor: Colors.grey[300],
+                              child: const Icon(Icons.person, size: 35, color: Colors.white),
+                            ),
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(

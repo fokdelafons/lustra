@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../services/payment_service.dart';
 import '../../services/remote_config_service.dart';
+import '../../widgets/osint_loader.dart';
 
 class SupportProjectScreen extends StatefulWidget {
   const SupportProjectScreen({super.key});
@@ -92,7 +93,12 @@ class _SupportProjectScreenState extends State<SupportProjectScreen> {
                 child: Consumer<PaymentService>(
                   builder: (context, paymentService, child) {
                     if (paymentService.isLoading) {
-                      return const Center(child: CircularProgressIndicator());
+                      return const Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 24.0), 
+                          child: OsintLoader(text: "SECURING SAFE CHANNEL...") //TODO
+                        )
+                      );
                     }
                     if (!paymentService.isAvailable) {
                       return Text(l10n.supportPaymentsUnavailable);

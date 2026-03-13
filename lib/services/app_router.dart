@@ -6,7 +6,6 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 
 import '../models/mp.dart';
 import '../models/legislation.dart';
-import '../models/home_screen_data.dart';
 import '../models/parliament_source.dart';
 import '../providers/language_provider.dart';
 import '../screens/home/home_screen.dart';
@@ -22,6 +21,7 @@ import '../screens/civic_project_rules.dart';
 import '../widgets/lists_specific/legislations_lists_wrapper.dart';
 import '../widgets/lists_specific/mp_list_wrapper.dart';
 import 'parliament_manager.dart';
+import '../../widgets/osint_loader.dart';
 
 final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 final FirebaseAnalyticsObserver observer = FirebaseAnalyticsObserver(analytics: analytics);
@@ -113,35 +113,6 @@ final GoRouter router = GoRouter(
             if (state.extra is MP) {
               child = MPDetailsScreen(mp: state.extra as MP);
             }
-            else if (state.extra is HomeScreenDeputy) {
-               final homeDeputy = state.extra as HomeScreenDeputy;
-               final mp = MP(
-                 id: homeDeputy.deputyId,
-                 firstName: homeDeputy.fullName.split(' ').first,
-                 lastName: homeDeputy.fullName.split(' ').sublist(1).join(' '),
-                 club: homeDeputy.club,
-                 district: homeDeputy.district,
-                 numberOfVotes: homeDeputy.numberOfVotes,
-                 imageUrl: homeDeputy.imageUrl,
-                 secondName: '',
-                 active: true,
-                 districtNum: 0,
-                 memberType: '',
-                 mandateCoverage: 'UNKNOWN',
-                 profession: '',
-                 birthDate: '',
-                 birthLocation: '',
-                 educationLevel: '',
-                 voivodeship: '',
-                 email: '',
-                 attendancePercentage: null,
-                 parliamentaryHistory: {},
-                 likes: null,
-                 dislikes: null,
-                 popularity: null,
-               );
-               child = MPDetailsScreen(mp: mp);
-            }
             else {
               child = MPDetailsScreen(mpId: mpId);
             }
@@ -202,22 +173,6 @@ final GoRouter router = GoRouter(
              if (state.extra is Legislation) {
                 child = LegislationDetailsScreen(
                   bill: state.extra as Legislation,
-                  listType: listType,
-                  initialAction: initialAction,
-                );
-             } else if (state.extra is HomeScreenLegislationItem) {
-                final homeItem = state.extra as HomeScreenLegislationItem;
-                final legislation = Legislation(
-                  id: homeItem.id, title: homeItem.title, description: homeItem.summary ?? '', 
-                  status: homeItem.status, votingDate: homeItem.votingDate, processStartDate: homeItem.processStartDate, 
-                  keyPoints: homeItem.keyPoints, likes: homeItem.likes ?? 0, dislikes: homeItem.dislikes ?? 0, 
-                  popularity: homeItem.popularity, summaryGeneratedBy: homeItem.summaryGeneratedBy, 
-                  upcomingProceedingDates: homeItem.upcomingProceedingDates, documentType: homeItem.documentType, 
-                  votesFor: homeItem.votesFor, votesAgainst: homeItem.votesAgainst, votesAbstain: homeItem.votesAbstain, 
-                  term: 0, number: '', documentDate: null, category: '', points: 0
-                );
-                child = LegislationDetailsScreen(
-                  bill: legislation,
                   listType: listType,
                   initialAction: initialAction,
                 );
@@ -291,7 +246,7 @@ class RouteContextGuard extends StatelessWidget {
     if (!pManager.isReady) {
       return Container(
         color: Theme.of(context).scaffoldBackgroundColor,
-        child: const Center(child: CircularProgressIndicator()),
+        child: const Center(child: OsintLoader(text: "INITIALIZING MIRROR PARLIAMENT...")), //TODO
       );
     }
     bool langMatch = true;
@@ -320,7 +275,7 @@ class RouteContextGuard extends StatelessWidget {
     
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
-      child: const Center(child: CircularProgressIndicator()),
+      child: const Center(child: OsintLoader(text: "SYNCING VECTORS...")), //TODO
     );
   }
 

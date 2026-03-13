@@ -3,14 +3,12 @@ import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:lustra/providers/translators.dart';
 import 'package:lustra/providers/language_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/link.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart' as intl;
-import 'package:lustra/models/home_screen_data.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:web_smooth_scroll/web_smooth_scroll.dart';
 
@@ -27,6 +25,7 @@ import '../widgets/missing_data_widget.dart';
 import '../widgets/details_app_bar.dart';
 import '../widgets/error_report_dialog.dart';
 import '../widgets/lists_specific/curated_list_manager_dialog.dart';
+import '../../widgets/osint_loader.dart';
 
 
 class LegislationDetailsScreen extends StatefulWidget {
@@ -212,7 +211,7 @@ Future<void> _toggleTracking() async {
   }
 
   Widget _buildCitizenPoll(BuildContext context) {
-      final voteTargetType = (widget.listType == 'civic') ? 'civic' : 'legislation';
+      final voteTargetType = (_bill!.documentType == 'civic' || widget.listType == 'civic') ? 'civic' : 'legislation';
       return CitizenPollWidget(
         targetType: voteTargetType,
         targetId: _bill!.id,
@@ -249,26 +248,6 @@ void _shareLegislation() {
     final activeService = context.read<ParliamentServiceInterface>();
     final status = activeService.translateStatus(context, _bill!.status);
     final String dynamicVotingTitle = activeService.getVotingTitle(context, _bill!);
-
-    // 3. Adapter before bottom sheet.
-    final shareableItem = HomeScreenLegislationItem(
-      id: _bill!.id,
-      title: _bill!.title,
-      summary: _bill!.description,
-      status: _bill!.status,
-      votingDate: _bill!.votingDate,
-      votesFor: _bill!.votesFor,
-      votesAgainst: _bill!.votesAgainst,
-      votesAbstain: _bill!.votesAbstain,
-      keyPoints: _bill!.keyPoints,
-      likes: _bill!.likes,
-      dislikes: _bill!.dislikes,
-      popularity: _bill!.popularity ?? 0,
-      upcomingProceedingDates: _bill!.upcomingProceedingDates,
-      category: _bill!.category.isNotEmpty 
-          ? categoryApiKeyToLabel(context, _bill!.category.split(',').first.trim()) 
-          : null,
-    );
     
     showModalBottomSheet(
       context: context,
@@ -283,7 +262,7 @@ void _shareLegislation() {
                   Navigator.of(bottomSheetContext).pop();
                   shareService.shareLegislation(
                     context: context,
-                    legislation: shareableItem,
+                    legislation: _bill!,
                     imageSize: const Size(1080, 1080),
                     l10n: l10n,
                     translatedStatus: status,
@@ -305,7 +284,7 @@ void _shareLegislation() {
                   Navigator.of(bottomSheetContext).pop();
                   shareService.shareLegislation(
                     context: context,
-                    legislation: shareableItem,
+                    legislation: _bill!,
                     imageSize: const Size(1080, 1920),
                     l10n: l10n,
                     translatedStatus: status,
@@ -371,7 +350,7 @@ void _reportError() {
     if (manager.isLoading || !manager.isInitialized) {
       return Scaffold(
         appBar: DetailsAppBar(title: l10n.detailsScreenTitle, onShare: null),
-        body: const Center(child: CircularProgressIndicator())
+        body: const OsintLoader(text: "ANALYZING DOSSIER...")// TODO: l10n
       );
     }
     if (manager.error != null) {
@@ -387,7 +366,7 @@ void _reportError() {
     if (_isLoading) {
       return Scaffold(
         appBar: DetailsAppBar(title: l10n.detailsScreenTitle, onShare: null),
-        body: const Center(child: CircularProgressIndicator())
+        body: const OsintLoader(text: "ANALYZING DOSSIER...")// TODO: l10n
       );
     }
     if (_error != null) {
@@ -747,15 +726,20 @@ void _reportError() {
         onShare: _shareLegislation,
         isShareEnabled: !_isFetchingDetails,
       ),
-      body: isDesktopWeb
-          ? WebSmoothScroll(
-              controller: _pageScrollController,
-              scrollAnimationLength: 600,
-              scrollSpeed: 2.5,
-              curve: Curves.easeOutCubic,
-              child: contentBody,
-            )
-          : contentBody,
+      body: Listener(
+        onPointerDown: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+        child: SelectionArea(
+          child: isDesktopWeb
+              ? WebSmoothScroll(
+                  controller: _pageScrollController,
+                  scrollAnimationLength: 450,
+                  scrollSpeed: 0.7,
+                  curve: Curves.easeOut,
+                  child: contentBody,
+                )
+              : contentBody,
+        ),
+      ),
     );
   }
 }

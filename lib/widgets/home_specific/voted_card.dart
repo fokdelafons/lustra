@@ -4,7 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 import 'dart:math';
 
-import '../../models/home_screen_data.dart';
+import '../../models/legislation.dart';
 import '../../services/parliament_manager.dart';
 import '../../services/parliament_service_interface.dart';
 import '../../providers/language_provider.dart';
@@ -14,7 +14,7 @@ import '../parliamentary_vote_painter.dart';
 import '../citizen_poll_widget.dart';
 
 class VotedCard extends StatelessWidget {
-  final HomeScreenLegislationItem item;
+  final Legislation item;
 
   const VotedCard({super.key, required this.item});
 
@@ -78,7 +78,7 @@ class VotedCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              (item.summary != null && item.summary!.isNotEmpty) ? item.summary! : l10n.errorNoSummaryLastVote,
+              item.description.isNotEmpty ? item.description : l10n.errorNoSummaryLastVote,
               style: TextStyle(fontSize: 14, color: Colors.grey[800]),
             ),
             const SizedBox(height: 16),

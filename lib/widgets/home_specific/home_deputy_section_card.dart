@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import '../../services/app_router.dart'; // Potrzebne do smartNavigate
+import '../../services/app_router.dart';
 
 class HomeDeputySectionCard extends StatelessWidget {
   final String title;
@@ -67,47 +67,42 @@ class HomeDeputySectionCard extends StatelessWidget {
           const Divider(height: 1, thickness: 1, indent: 16, endIndent: 16),
           SizedBox(height: MediaQuery.of(context).size.height * 0.02),
           
-          // --- CONTENT (Lista posłów) ---
+          // --- CONTENT ---
           child,
           
-          // --- FOOTER BUTTON ---
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Expanded(
-                child: InkWell(
-                  onTap: () {
-                    context.smartNavigate(destinationPath);
-                  },
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    decoration: BoxDecoration(
-                      color: lighterPrimaryColor,
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(MediaQuery.of(context).size.width * 0.04), 
-                        bottomRight: Radius.circular(MediaQuery.of(context).size.width * 0.04)
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Flexible(
-                          child: Text(
-                            buttonText,
-                            style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 13),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
+        // --- FOOTER BUTTON ---
+          ClipRRect(
+            borderRadius: BorderRadius.vertical(
+              bottom: Radius.circular(MediaQuery.of(context).size.width * 0.04),
+            ),
+            child: Material(
+              color: lighterPrimaryColor,
+              child: InkWell(
+                onTap: () {
+                  context.smartNavigate(destinationPath);
+                },
+                child: Container(
+                  width: double.infinity,
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          buttonText,
+                          style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 13),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
-                        const SizedBox(width: 4),
-                        Icon(Icons.arrow_forward, size: 16, color: primaryColor),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(Icons.arrow_forward, size: 16, color: primaryColor),
+                    ],
                   ),
                 ),
               ),
-            ],
+            ),
           ),
         ],
       ),

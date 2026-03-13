@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import '../services/parliament_manager.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import '../providers/user_provider.dart';
+import '../widgets/osint_loader.dart';
 import 'dart:developer' as developer;
 
 
@@ -387,6 +388,7 @@ Widget build(BuildContext context) {
                   controller: _emailController,
                   decoration: InputDecoration(labelText: l10n.emailLabel, border: const OutlineInputBorder()),
                   keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.next,
                   autocorrect: false,
                   textCapitalization: TextCapitalization.none,
                   validator: (value) {
@@ -401,6 +403,8 @@ Widget build(BuildContext context) {
                   controller: _passwordController,
                   decoration: InputDecoration(labelText: l10n.passwordLabel, border: const OutlineInputBorder()),
                   obscureText: true,
+                  textInputAction: TextInputAction.done,
+                  onFieldSubmitted: (_) => _submit(),
                   validator: (value) {
                     if (value == null || value.trim().length < 6) {
                       return l10n.validatorPasswordTooShort;
@@ -523,7 +527,7 @@ Widget build(BuildContext context) {
                     child: Text(_errorMessage!, style: TextStyle(color: Theme.of(context).colorScheme.error), textAlign: TextAlign.center),
                   ),
                 if (_isLoading)
-                  const Center(child: CircularProgressIndicator())
+                  const OsintLoader(text: "AUTHORIZING...") //TODO: l10n
                 else
                   ElevatedButton(
                     onPressed: _submit,
@@ -546,7 +550,7 @@ Widget build(BuildContext context) {
                 ),
                 const SizedBox(height: 16),
                 if (_isGoogleLoading)
-                  const Center(child: CircularProgressIndicator())
+                  const OsintLoader(text: "LOADING...") //TODO: l10n
                 else
                   ElevatedButton.icon(
                     icon: SvgPicture.asset('assets/google_logo.svg', height: 22),
@@ -564,13 +568,13 @@ Widget build(BuildContext context) {
                   ),
                 const SizedBox(height: 16),
                 if (_isFacebookLoading)
-                  const Center(child: CircularProgressIndicator())
+                  const OsintLoader(text: "LOADING...") //TODO: l10n
                 else
                   _buildFacebookButton(context),
                   const SizedBox(height: 16),
                   if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) ...[
                     if (_isAppleLoading)
-                      const Center(child: CircularProgressIndicator())
+                      const OsintLoader(text: "LOADING...") //TODO: l10n
                     else
                       ElevatedButton.icon(
                         icon: const Icon(Icons.apple, color: Colors.white),

@@ -149,6 +149,15 @@ class MyApp extends StatelessWidget {
 				primaryColor: const Color(0xFF1565C0),
 				scaffoldBackgroundColor: const Color(0xFFF5F5F5),
 				visualDensity: VisualDensity.adaptivePlatformDensity,
+                pageTransitionsTheme: const PageTransitionsTheme(
+                  builders: {
+                    TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+                    TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+                    TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
+                    TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+                    TargetPlatform.linux: FadeUpwardsPageTransitionsBuilder(),
+                  },
+                ),
 				appBarTheme: const AppBarTheme(
 					elevation: 0,
 				),

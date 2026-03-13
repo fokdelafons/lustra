@@ -17,6 +17,7 @@ import '../../providers/translators.dart';
 import '../../services/app_router.dart';
 import '../../widgets/lists_specific/legislation_control_bar.dart';
 import '../../widgets/lists_specific/legislation_list_card.dart';
+import '../../widgets/osint_loader.dart';
 
   class ProcessLegislationScreen extends StatefulWidget {
     const ProcessLegislationScreen({super.key});
@@ -302,13 +303,13 @@ Future<void> _loadMoreBills() async {
 			final l10n = AppLocalizations.of(context)!;
       
       if (_isSyncingParliament) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: OsintLoader(text: "ESTABLISHING SECURE CONNECTION...")); //TODO
       }
 
       final manager = Provider.of<ParliamentManager>(context);
       if (manager.isLoading || !manager.isInitialized) {
-          return const Center(child: CircularProgressIndicator());
-    }
+      return const Center(child: OsintLoader(text: "LOADING LEGISLATIVE DATA...")); //TODO
+      }
     if (manager.error != null) {
         return Center(
           child: Column(
@@ -392,7 +393,7 @@ Future<void> _loadMoreBills() async {
 
   Widget _buildListComponent(List<Legislation> processedBills) {
         if (_isLoading && _bills.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: OsintLoader(text: "QUERYING THE ARCHIVE...")); //TODO
         }
 
         if (_errorMessage != null) {
@@ -412,7 +413,9 @@ Future<void> _loadMoreBills() async {
           itemCount: processedBills.length + (_isLoadingMore ? 1 : 0),
           itemBuilder: (context, index) {
             if (index == processedBills.length) {
-              return _isLoadingMore ? const Center(child: Padding(padding: EdgeInsets.symmetric(vertical: 16.0), child: CircularProgressIndicator())) : const SizedBox.shrink();
+              return _isLoadingMore 
+                  ? const Center(child: Padding(padding: EdgeInsets.symmetric(vertical: 16.0), child: OsintLoader(text: "LOADING MORE BILLS..."))) //TODO
+                  : const SizedBox.shrink();
             }
             final bill = processedBills[index];
             final l10n = AppLocalizations.of(context)!;
@@ -462,9 +465,9 @@ Future<void> _loadMoreBills() async {
             child: isDesktopWeb
                 ? WebSmoothScroll(
                 controller: _scrollController,
-                scrollAnimationLength: 600,
-                scrollSpeed: 2.5,
-                curve: Curves.easeOutQuart,
+                scrollAnimationLength: 450,
+                scrollSpeed: 0.7,
+                curve: Curves.easeOut,
                 child: listView,
               )
                 : listView,

@@ -14,6 +14,7 @@ import '../../providers/language_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../services/app_router.dart';
 import '../../services/cache/parliament_cache_manager.dart';
+import '../../widgets/osint_loader.dart';
 
 class CuratedLegislationScreen extends StatefulWidget {
   final String listId;
@@ -208,7 +209,7 @@ Future<void> refreshData() async {
   Widget build(BuildContext context) {
     super.build(context);
     
-    if (_isLoading) return const Center(child: CircularProgressIndicator());
+    if (_isLoading) return const Center(child: OsintLoader(text: "SYNCING CURATED FEED...")); //TODO
     
     if (_errorMessage != null) {
       return Center(
@@ -300,7 +301,9 @@ Future<void> refreshData() async {
           child: isDesktopWeb
               ? WebSmoothScroll(
                   controller: _scrollController,
-                  scrollAnimationLength: 600,
+                  scrollAnimationLength: 450,
+                  scrollSpeed: 0.7,
+                  curve: Curves.easeOut,
                   child: listView,
                 )
               : listView,

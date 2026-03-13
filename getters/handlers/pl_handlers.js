@@ -275,6 +275,101 @@ const getHomeScreenData = async (req, res) => {
   }
 };
 
+const getHomeScreenDataV2 = async (req, res) => {
+    if (req.body.warmup === true) {
+      return res.status(200).json({ data: { status: 'warmed_up_successfully' } });
+    }
+  
+    try {
+      const data = req.body.data || req.body;
+      const requestedLang = data.lang ? data.lang.toLowerCase() : null;
+      const requestedTerm = data.term;
+  
+      if (!requestedTerm) {
+        return res.status(400).json({ error: { code: 'invalid-argument', message: "Brak wymaganego parametru 'term'." } });
+      }
+  
+      // Normalizacja języka (skopiowana z Twojego kodu)
+      const internalSupportedLangs = ['pl', 'eng', 'de', 'it', 'pt', 'fr', 'nl', 'es'];
+      const langAliases = {
+        'polish': 'pl', 'pol': 'pl', 'pl': 'pl',
+        'english': 'eng', 'eng': 'eng', 'en': 'eng',
+        'german': 'de', 'ger': 'de', 'deu': 'de', 'de': 'de',
+        'italian': 'it', 'ita': 'it', 'it': 'it',
+        'portuguese': 'pt', 'por': 'pt', 'pt': 'pt',
+        'french': 'fr', 'fre': 'fr', 'fra': 'fr', 'fr': 'fr',
+        'dutch': 'nl', 'dut': 'nl', 'nld': 'nl', 'nl': 'nl',
+        'spanish': 'es', 'spa': 'es', 'es': 'es'
+      };
+      
+      let lang = 'pl'; // Domyślnie
+      if (requestedLang && langAliases[requestedLang] && internalSupportedLangs.includes(langAliases[requestedLang])) {
+        lang = langAliases[requestedLang];
+      }
+  
+      const cacheKey = `pl-homescreen-v2-${requestedTerm}-${lang}`;
+      
+      // CACHE HIT
+      if (cache.has(cacheKey)) {
+        const cachedEntry = cache.get(cacheKey);
+        const ageSeconds = (Date.now() - cachedEntry.timestamp) / 1000;
+        if (ageSeconds < (global.CACHE_TTL_SECONDS || 3600)) { 
+          const result = await cachedEntry.promise;
+          return res.status(200).json({ data: result });
+        }
+      }
+  
+      const fetchPromise = (async () => {
+        const PL_HOME_SCREEN_COLLECTION = 'pl_home_screen';
+        const docSnap = await db.collection(PL_HOME_SCREEN_COLLECTION).doc(`${requestedTerm}_dashboard_v2`).get();
+        
+        if (!docSnap.exists) {
+          console.warn(`[PL getHomeScreenDataV2] Dokument ${requestedTerm}_dashboard_v2 nie istnieje!`);
+          return null;
+        }
+  
+        const rawData = docSnap.data();
+  
+        return {
+          popularVoted: localizeFullLegislation(rawData.popularVoted, lang),
+          upcomingVote: localizeFullLegislation(rawData.upcomingVote, lang),
+          popularInProcess: localizeFullLegislation(rawData.popularInProcess, lang),
+          topDeputies: {
+            deputies: rawData.topDeputies?.deputies || [],
+            lastUpdated: rawData.topDeputies?.lastUpdated || null
+          }
+        };
+      })();
+  
+      cache.set(cacheKey, { promise: fetchPromise, timestamp: Date.now() });
+      const result = await fetchPromise;
+      return res.status(200).json({ data: result });
+  
+    } catch (error) {
+      console.error("KRYTYCZNY BŁĄD V2 (PL): Nie udało się pobrać danych:", error);
+      return res.status(500).json({ error: { code: 'internal', message: 'Wystąpił wewnętrzny błąd serwera.' } });
+    }
+  };
+  
+  function localizeFullLegislation(data, langCode) {
+    if (!data || !data.id) return null;
+    const localizedData = { ...data };
+    
+    localizedData.title = data[`${langCode}_ai_title`] || data.titleOfficial || data.title || 'Brak tytułu';
+    localizedData.description = data[`${langCode}_summary`] || data.description || 'Przepraszamy, brak podsumowania w tym momencie.';
+    
+    const keyPoints = data[`${langCode}_key_points`] || data['eng_key_points'] || [];
+    localizedData.key_Points = Array.isArray(keyPoints) ? keyPoints : [];
+  
+    Object.keys(localizedData).forEach(key => {
+        if (key.includes('_summary') || key.includes('_key_points') || key.includes('_ai_title')) {
+            delete localizedData[key];
+        }
+    });
+    
+    return localizedData;
+  }
+
 // --- GETDETAILS ---
 
 function localizeDocument(docData, langCode, defaultLang) {
@@ -689,6 +784,7 @@ const getLegislations = async (req, res) => {
 module.exports = {
   getMetadata,
   getHomeScreenData,
+  getHomeScreenDataV2,
   getDetails,
   getDeputies,
   getDeputyDetails,

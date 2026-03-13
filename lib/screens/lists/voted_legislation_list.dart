@@ -17,6 +17,7 @@ import '../../providers/translators.dart';
 import '../../services/app_router.dart';
 import '../../widgets/lists_specific/legislation_control_bar.dart';
 import '../../widgets/lists_specific/legislation_list_card.dart';
+import '../../widgets/osint_loader.dart';
 
 class LegislationScreen extends StatefulWidget {
   const LegislationScreen({super.key});
@@ -256,7 +257,7 @@ Widget build(BuildContext context) {
 	final l10n = AppLocalizations.of(context)!;
   final manager = Provider.of<ParliamentManager>(context);
   if (manager.isLoading || !manager.isInitialized) {
-    return const Center(child: CircularProgressIndicator());
+    return const Center(child: OsintLoader(text: "LOADING LEGISLATIVE DATA...")); //TODO
   }
   if (manager.error != null) {
     return Center(
@@ -344,7 +345,7 @@ Widget build(BuildContext context) {
       developer.log('Building list component. isLoading: $_isLoading, errorMessage: $_errorMessage, processed count: ${processedBills.length}', name: 'LegislationScreen.ListComponent');
       
       if (_isLoading && _bills.isEmpty) {
-        return const Center(child: CircularProgressIndicator());
+        return const Center(child: OsintLoader(text: "QUERYING THE ARCHIVE...")); //TODO
       }
       if (_errorMessage != null) {
         return _buildErrorWidget();
@@ -370,7 +371,7 @@ Widget build(BuildContext context) {
                 ? const Center(
                     child: Padding(
                       padding: EdgeInsets.symmetric(vertical: 16.0),
-                      child: CircularProgressIndicator(),
+                      child: Center(child: OsintLoader(text: "LOADING MORE BILLS...")), //TODO
                     ),
                   )
                 : const SizedBox.shrink();
@@ -435,9 +436,9 @@ Widget build(BuildContext context) {
           child: isDesktopWeb
               ? WebSmoothScroll(
                 controller: _scrollController,
-                scrollAnimationLength: 600,
-                scrollSpeed: 2.5,
-                curve: Curves.easeOutQuart,
+                scrollAnimationLength: 450,
+                scrollSpeed: 0.7,
+                curve: Curves.easeOut,
                 child: listView,
               )
               : listView,
