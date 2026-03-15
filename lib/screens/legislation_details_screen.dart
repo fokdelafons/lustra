@@ -193,18 +193,18 @@ Future<void> _toggleTracking() async {
     }
   }
 
-  Widget _buildVoteCountRow(String label, int count, Color color) {
+  Widget _buildVoteCountRow(String label, int count, Color color, {double fontSize = 15.0}) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           label,
-          style: TextStyle(fontSize: 15, color: Colors.grey[700]),
+          style: TextStyle(fontSize: fontSize, color: Colors.grey[700]),
         ),
         const SizedBox(width: 6),
         Text(
           count.toString(),
-          style: TextStyle(fontSize: 15, color: color, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: fontSize, color: color, fontWeight: FontWeight.bold),
         ),
       ],
     );
@@ -395,7 +395,8 @@ void _reportError() {
     final finalSummarizedBy = _bill!.summaryGeneratedBy;
     final int votesForSejm = _bill!.votesFor ?? 0;
     final int votesAgainstSejm = _bill!.votesAgainst ?? 0;
-    final int votesAbstainSejm = _bill!.votesAbstain ?? 0; 
+    final int votesAbstainSejm = _bill!.votesAbstain ?? 0;
+    final int totalSejmVotes = votesForSejm + votesAgainstSejm + votesAbstainSejm;
     final String currentVoteDate = _formatDateTime(context, _bill!.votingDate);
     final String currentProcessStartDate = _formatDateTime(context, _bill!.processStartDate);
     final List<String> currentkeyPoints = _bill!.keyPoints;
@@ -506,23 +507,99 @@ void _reportError() {
         if (showVotingWarning)
           Center(child: MissingDataWidget(action: action!))
         else if (_bill!.votingDate != null) ...[
-          Center(child: Builder(builder: (context) {
-            final activeService = context.read<ParliamentServiceInterface>();
-            return Text(activeService.getVotingTitle(context, _bill!), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold));
-          })),
-          Padding(padding: const EdgeInsets.only(top: 4.0, bottom: 8.0), child: Center(child: Text(_formatDateTime(context, _bill!.votingDate), style: TextStyle(fontSize: 13, color: Colors.grey[700], fontStyle: FontStyle.italic)))),
-          RepaintBoundary(child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-            final double chartFullWidth = max(150.0, constraints.maxWidth);
-            final double calculatedHeightBasedOnWidth = chartFullWidth / 2;
-            final double chartHeight = calculatedHeightBasedOnWidth.clamp(120.0, 220.0); 
-            return SizedBox(width: chartFullWidth, height: chartHeight, child: CustomPaint(painter: ParliamentaryVotePainter(votesFor: votesForSejm, votesAgainst: votesAgainstSejm, votesAbstain: votesAbstainSejm, labelFor: l10n.votingFor, labelAgainst: l10n.votingAgainst, labelAbstain: l10n.votingAbstainShort)));
-          })),
-          const SizedBox(height: 8.0),
-          Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-            _buildVoteCountRow(l10n.labelFor, votesForSejm, Colors.green),
-            _buildVoteCountRow(l10n.labelAgainst, votesAgainstSejm, Colors.red),
-            _buildVoteCountRow(l10n.labelAbstained, votesAbstainSejm, Colors.grey),
-          ]),
+          const SizedBox(height: 24), 
+          RepaintBoundary(
+            child: LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                final double scaleFactor = ((constraints.maxWidth - 320) / 330).clamp(0.0, 1.0);
+                final double fScale = 4.0 * scaleFactor; 
+                final double paddingH = 12.0 + (4.0 * scaleFactor);
+                final double paddingV = 8.0 + (4.0 * scaleFactor);
+                
+                final double chartFullWidth = max(200.0, constraints.maxWidth);
+                final double calculatedHeightBasedOnWidth = chartFullWidth / 2;
+                final double chartHeight = calculatedHeightBasedOnWidth.clamp(140.0, 240.0);
+                
+                return SizedBox(
+                  width: chartFullWidth,
+                  height: chartHeight + 10,
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        right: 0,
+                        left: 0, 
+                        bottom: 10,
+                        top: 0,
+                        child: CustomPaint(
+                          painter: ParliamentaryVotePainter(
+                            labelFor: l10n.votingFor,
+                            labelAgainst: l10n.votingAgainst,
+                            labelAbstain: l10n.votingAbstainShort,
+                            noDataLabel: l10n.errorNoVotingsDetails,
+                            votesFor: votesForSejm,
+                            votesAgainst: votesAgainstSejm,
+                            votesAbstain: votesAbstainSejm,
+                          ),
+                        ),
+                      ),
+                      if (totalSejmVotes > 0)
+                        Positioned(
+                          left: 0,
+                          top: 10,
+                          child: Container(
+                            padding: EdgeInsets.symmetric(horizontal: paddingH, vertical: paddingV),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF5F5F5).withValues(alpha: 0.95),
+                              borderRadius: BorderRadius.circular(8.0),
+                              border: Border.all(color: Colors.white, width: 1.0),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.08),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  l10n.votingResultsTitle.toUpperCase(),
+                                  style: TextStyle(
+                                    fontSize: 12 + fScale,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black87,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 2.0, bottom: 8.0),
+                                  child: Text(
+                                    currentVoteDate,
+                                    style: TextStyle(
+                                      fontSize: 11 + fScale,
+                                      color: Colors.grey[600], 
+                                      fontStyle: FontStyle.italic
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                _buildVoteCountRow(l10n.labelFor, votesForSejm, const Color(0xFF4CAF50), fontSize: 13 + fScale),
+                                const SizedBox(height: 4),
+                                _buildVoteCountRow(l10n.labelAgainst, votesAgainstSejm, const Color(0xFFF44336), fontSize: 13 + fScale),
+                                const SizedBox(height: 4),
+                                _buildVoteCountRow(l10n.labelAbstained, votesAbstainSejm, const Color(0xFF9E9E9E), fontSize: 13 + fScale),
+                              ],
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
           const SizedBox(height: 12),
           Builder(builder: (context) {
             final activeService = Provider.of<ParliamentServiceInterface>(context, listen: false);
@@ -572,11 +649,106 @@ void _reportError() {
           ]),
         ],
         
-        const SizedBox(height: 12),
-        Padding(padding: const EdgeInsets.only(bottom: 24.0), child: Center(child: Builder(builder: (context) {
+        // UI UPDATE: Status Row UI integration
+        const SizedBox(height: 16),
+        const Divider(height: 1, thickness: 1, color: Color(0xFFEEEEEE)),
+        const SizedBox(height: 24),
+        Builder(builder: (context) {
           final activeService = context.read<ParliamentServiceInterface>();
-          return Text(activeService.translateStatus(context, _bill!.status), textAlign: TextAlign.center, style: const TextStyle(fontSize: 20, color: Colors.black87, fontWeight: FontWeight.w500, decoration: TextDecoration.underline, decorationColor: Colors.black87));
-        }))),
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.center, 
+            children: [
+              Expanded(
+                child: _bill!.lastStatus != null
+                    ? Padding(
+                        padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Flexible(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    "Poprzednio:", // TODO: l10n.previousStatusLabel
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: Colors.grey[400],
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    activeService.translateStatus(context, _bill!.lastStatus!),
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey[500],
+                                      fontWeight: FontWeight.w500,
+                                      height: 1.2,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.left,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Icon(Icons.arrow_forward_ios, color: Colors.grey[300], size: 14),
+                          ],
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Icon(
+                    (_bill!.documentType == 'civic' || widget.listType == 'civic')
+                        ? Icons.history_edu 
+                        : Icons.gavel,
+                    size: (_bill!.documentType == 'civic' || widget.listType == 'civic') ? 62.0 : 48.0,
+                    color: Colors.grey[400],
+                  ),
+                  const SizedBox(width: 16),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        "Status:", // TODO: l10n.statusLabel
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[500],
+                          height: 1.0,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        activeService.translateStatus(context, _bill!.status),
+                        style: const TextStyle(
+                          fontSize: 26,
+                          color: Colors.black87,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: -0.5,
+                          decoration: TextDecoration.underline,
+                          decorationColor: Colors.black87,
+                          height: 1.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const Expanded(
+                child: SizedBox.shrink(),
+              ),
+            ],
+          );
+        }),
+        const SizedBox(height: 24),
         
         _buildCitizenPoll(context),
         
@@ -604,9 +776,9 @@ void _reportError() {
               final term = _bill!.term; 
 
               final compositeId = '${_bill!.term}_$sponsorId';
-              final internalPath = '/#/$lang/$slug/$term/members/$compositeId';
+              final internalPath = '/$lang/$slug/$term/members/$compositeId';
               final fullWebUrl = kIsWeb 
-                  ? Uri.parse(Uri.base.origin + internalPath)
+                  ? Uri.parse(Uri.base.origin + '#' + internalPath)
                   : Uri.parse('https://lustra.dev$internalPath');
 
               return Link(

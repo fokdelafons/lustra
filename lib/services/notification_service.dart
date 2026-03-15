@@ -6,6 +6,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/language_provider.dart';
+import '../services/tracking_service.dart';
 import '../models/parliament_source.dart';
 import 'parliament_manager.dart';
 import 'app_router.dart';
@@ -41,6 +42,21 @@ class NotificationService {
   }
 
   void _handleNavigation(BuildContext context, Map<String, dynamic> data) {
+    final lang = Provider.of<LanguageProvider>(context, listen: false).appLanguageCode;
+    if (data['type'] == 'tracked_updates') {
+      final parliamentId = data['parliamentId'];
+      if (parliamentId != null) {
+        final slug = ParliamentSource.getSlugById(parliamentId);
+        final currentTerm = Provider.of<ParliamentManager>(context, listen: false).currentTerm;
+        final trackingService = TrackingService();
+        trackingService.getTrackedItems(parliamentId, lang, forceRefresh: true).then((_) {
+            final location = '/$lang/$slug/$currentTerm/legislations?list=tracked';
+            developer.log("Nawigacja do obserwowanych: $location", name: "NotificationService");
+            router.push(location, extra: {'parliamentId': parliamentId});
+        });
+        return; 
+      }
+    }
     final String? filterTimestamp = data['filterTimestamp'];
     final String? parliamentId = data['parliamentId'];
     final String? termStr = data['term'];

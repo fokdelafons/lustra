@@ -59,14 +59,18 @@ class LegislationScreenState extends State<LegislationScreen> with AutomaticKeep
   
   List<String> _categoryOptions = [];
   late String _selectedCategory;
-  String _selectedStatusKey = 'all';
+  String _sortBy = 'popularity';
+  String _selectedStatusFilter = 'all';
+  Map<String, String> _statusOptions = {};
+  bool _hideNoDocument = false;
   
 
   @override
   void initState() {
     super.initState();
     developer.log('LegislationScreen initState', name: 'LegislationScreen');
-    _selectedStatusKey = 'all'; 
+    _selectedStatusFilter = 'all';
+    _sortBy = 'popularity';
   }
 
   Future<void> refreshData() async {
@@ -113,12 +117,15 @@ Future<void> _loadFilterOptions() async {
   final activeService = Provider.of<ParliamentServiceInterface>(context, listen: false);
   try {
     final documentTypes = await activeService.getLegislationFilterDocumentTypes(context);
+    final statuses = await activeService.getLegislationFilterStatuses(context);
     
     if (!mounted) return;
 
     setState(() {
       _documentTypeOptions = documentTypes;
       _selectedDocumentTypeKey = 'all';
+      _statusOptions = statuses;
+      _selectedStatusFilter = 'all';
     });
   } catch (e) {
     developer.log('Błąd podczas ładowania opcji filtrów: $e', name: 'LegislationScreen');
@@ -140,7 +147,8 @@ Future<void> _loadFilterOptions() async {
       _hasMoreData = true;
       if (newSourceChanged) {
         _searchQuery = '';
-        _selectedStatusKey = 'sort_popularity';
+        _sortBy = 'popularity';
+        _selectedStatusFilter = 'all';
         _selectedCategory = _categoryOptions.first;
         _selectedDocumentTypeKey = 'all';
       }
@@ -159,7 +167,7 @@ Future<void> _loadBills({bool forceRefresh = false}) async {
       final l10n = AppLocalizations.of(context)!;
       final activeService = Provider.of<ParliamentServiceInterface>(context, listen: false);
 
-      final String sortBy = _selectedStatusKey == 'sort_newest' ? 'votingDate_desc' : 'popularity';
+      final String apiSortBy = _sortBy == 'sort_newest' ? 'votingDate_desc' : 'popularity';
 
       final response = await activeService.getLegislations(
        context,
@@ -167,8 +175,8 @@ Future<void> _loadBills({bool forceRefresh = false}) async {
        lastVisibleId: null,
        forceRefresh: forceRefresh,
        searchQuery: _searchQuery,
-       sortBy: sortBy,
-       status: null,
+       sortBy: apiSortBy,
+       status: _selectedStatusFilter == 'all' ? null : 'exact:$_selectedStatusFilter',
        documentType: _selectedDocumentTypeKey == 'all'
          ? null
          : [_selectedDocumentTypeKey],
@@ -211,16 +219,16 @@ Future<void> _loadBills({bool forceRefresh = false}) async {
     setState(() => _isLoadingMore = true);
     try {
       final activeService = Provider.of<ParliamentServiceInterface>(context, listen: false);
-      final String sortBy = _selectedStatusKey == 'sort_newest' ? 'votingDate_desc' : 'popularity';
+      final String apiSortBy = _sortBy == 'sort_newest' ? 'votingDate_desc' : 'popularity';
       final l10n = AppLocalizations.of(context)!;
 
       final response = await activeService.getLegislations(
-        context, 
-        limit: _limit,
-        lastVisibleId: _nextCursor,
-        searchQuery: _searchQuery,
-        sortBy: sortBy,
-        status: null,
+       context,
+       limit: _limit,
+       lastVisibleId: null,
+       searchQuery: _searchQuery,
+       sortBy: apiSortBy,
+       status: _selectedStatusFilter == 'all' ? null : 'exact:$_selectedStatusFilter',
         documentType: _selectedDocumentTypeKey == 'all'
           ? null
           : [_selectedDocumentTypeKey],
@@ -248,6 +256,9 @@ Future<void> _loadBills({bool forceRefresh = false}) async {
   }
   
   List<Legislation> _getProcessedBills() {
+    if (_hideNoDocument) {
+      return _bills.where((bill) => bill.noDocument != true).toList();
+    }
     return _bills;
   }
 
@@ -317,18 +328,30 @@ Widget build(BuildContext context) {
                   _resetAndLoadData(forceRefresh: false);
                 }
               },
+              statusOptions: _statusOptions,
+              selectedStatusKey: _selectedStatusFilter,
+              onStatusChanged: (String? newKey) {
+                if (newKey != null && newKey != _selectedStatusFilter) {
+                  setState(() => _selectedStatusFilter = newKey);
+                  _resetAndLoadData(forceRefresh: false);
+                }
+              },
               sortOptions: {
-                'sort_popularity': l10n.sortByPopularity,
+                'popularity': l10n.sortByPopularity,
                 'sort_newest': l10n.sortByFreshness,
               },
-              selectedSortKey: _selectedStatusKey,
+              selectedSortKey: _sortBy,
               onSortChanged: (String? newValue) {
-                if (newValue != null && newValue != _selectedStatusKey) {
-                  setState(() => _selectedStatusKey = newValue);
+                if (newValue != null && newValue != _sortBy) {
+                  setState(() => _sortBy = newValue);
                   _resetAndLoadData(forceRefresh: false);
                 }
               },
               isSearchActive: _isSearchActive,
+              hideNoDocument: _hideNoDocument,
+              onHideNoDocumentChanged: (bool value) {
+                setState(() => _hideNoDocument = value);
+              },
             ),
               const Divider(height: 8),
               Expanded(
@@ -472,7 +495,7 @@ Widget build(BuildContext context) {
   Widget _buildEmptyListWidget() {
     final l10n = AppLocalizations.of(context)!;
       String message;
-      if (_searchQuery.isNotEmpty || _selectedCategory != l10n.categoryAll || _selectedStatusKey != 'all') {
+      if (_searchQuery.isNotEmpty || _selectedCategory != l10n.categoryAll || _selectedStatusFilter != 'all') {
         message = l10n.emptyListFilterMessage;
       } else {
         message = l10n.emptyListDefaultMessage;

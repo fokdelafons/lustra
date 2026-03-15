@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:web_smooth_scroll/web_smooth_scroll.dart';
+// import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../models/home_screen_data.dart';
 import '../../providers/language_provider.dart';
@@ -15,16 +16,16 @@ import '../../services/parliament_manager.dart';
 import '../../services/firebase_auth.dart';
 import '../../services/notification_service.dart';
 import '../../widgets/osint_loader.dart';
-import '../../widgets/home_specific/civic_project_card.dart';
-import '../../widgets/home_specific/voted_card.dart';
-import '../../widgets/home_specific/upcoming_card.dart';
-import '../../widgets/home_specific/process_card.dart';
-import '../../widgets/home_specific/politicians_card.dart';
-import '../../widgets/home_specific/web_app_bar.dart';
-import '../../widgets/home_specific/mobile_app_bar.dart';
-import '../../widgets/home_specific/mobile_nav_bar.dart';
-import '../../widgets/home_specific/tracked_card.dart';
-import '../../widgets/home_specific/curated_list_card.dart';
+import '../../widgets/home_specific/card_civic.dart';
+import '../../widgets/home_specific/card_voted.dart';
+import '../../widgets/home_specific/card_upcoming.dart';
+import '../../widgets/home_specific/card_process.dart';
+import '../../widgets/home_specific/card_politicians.dart';
+import '../../widgets/home_specific/app_bar_web.dart';
+import '../../widgets/home_specific/app_bar_mobile.dart';
+import '../../widgets/home_specific/app_bar_mobile_bottom.dart';
+import '../../widgets/home_specific/card_tracked.dart';
+import '../../widgets/home_specific/card_curated.dart';
 
 
 
@@ -246,14 +247,21 @@ Widget _buildSearchWidget(BuildContext context) {
 
   @override
   Widget build(BuildContext context) {
-    // If's
     final bool useWideLayout = kIsWeb && MediaQuery.of(context).size.width > 1140;
     
     return Scaffold(
-    appBar: useWideLayout ? null : const MobileAppBar(),
-      body: GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(),
-        child: _buildBodyContent(context), 
+      appBar: useWideLayout ? null : const MobileAppBar(),
+      body: Stack(
+        children: [
+          // GŁÓWNA ZAWARTOŚĆ
+          GestureDetector(
+            onTap: () => FocusScope.of(context).unfocus(),
+            child: _buildBodyContent(context), 
+          ),
+          
+          // // TARCZA: Pływający kod QR
+          // const _StickyWebQrCode(),
+        ],
       ),
     );
   }
@@ -320,7 +328,13 @@ Widget _buildContentList(BuildContext context) {
     }
 
     final userProvider = context.watch<UserProvider>();
-    for (String listId in userProvider.subscribedLists) {
+    
+    final allListIds = {
+      ...userProvider.createdLists,
+      ...userProvider.subscribedLists,
+    }.toList();
+
+    for (String listId in allListIds) {
       sectionWidgets.add(CuratedListCard(listId: listId));
     }
 
@@ -407,3 +421,67 @@ Widget _buildContentList(BuildContext context) {
     );
   }
 }
+
+// // ============================================================================
+// // TARCZA: PŁYWAJĄCY KOD QR DLA WEBA (STICKY PROMO)
+// // ============================================================================
+// class _StickyWebQrCode extends StatefulWidget {
+//   const _StickyWebQrCode();
+
+//   @override
+//   State<_StickyWebQrCode> createState() => _StickyWebQrCodeState();
+// }
+
+// class _StickyWebQrCodeState extends State<_StickyWebQrCode> {
+//   bool _isHovered = false;
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final screenWidth = MediaQuery.of(context).size.width;
+//     // Pokazujemy tylko na Webie i tylko, gdy jest wystarczająco dużo miejsca po bokach (np. > 1140)
+//     if (!kIsWeb || screenWidth < 1140) return const SizedBox.shrink();
+
+//     // Obliczamy pozycję, żeby kod był ładnie wyśrodkowany w prawym marginesie
+//     final rightMargin = (screenWidth - 750) / 2;
+//     final qrSize = (rightMargin * 0.6).clamp(80.0, 360.0);
+//     final widgetWidth = qrSize + 32;
+//     final rightPosition = ((rightMargin - widgetWidth) / 2).clamp(8.0, double.infinity);
+
+//     return Positioned(
+//       bottom: 40, // Przypięte do dołu ekranu
+//       right: rightPosition,
+//       child: MouseRegion(
+//         onEnter: (_) => setState(() => _isHovered = true),
+//         onExit: (_) => setState(() => _isHovered = false),
+//         child: AnimatedOpacity(
+//           duration: const Duration(milliseconds: 250),
+//           opacity: _isHovered ? 1.0 : 0.10, // Subtelne 25% na co dzień, 100% po najechaniu
+//           child: Container(
+//             padding: const EdgeInsets.all(16),
+//             decoration: BoxDecoration(
+//               color: Colors.white,
+//               borderRadius: BorderRadius.circular(16),
+//               boxShadow: _isHovered ? [const BoxShadow(color: Colors.black12, blurRadius: 12, spreadRadius: 2)] : [],
+//               border: Border.all(color: Colors.grey.shade300)
+//             ),
+//             child: Column(
+//               children: [
+//                 QrImageView(
+//                   data: 'https://lustra.news/download',
+//                   version: QrVersions.auto,
+//                   size: qrSize,
+//                   backgroundColor: Colors.white,
+//                 ),
+//                 const SizedBox(height: 8),
+//                 const Text(
+//                   "Get dedicated mobile app for notifications!", // TODO: L10N
+//                   style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.blueGrey),
+//                 )
+//               ],
+//             ),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }

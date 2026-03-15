@@ -19,6 +19,8 @@ class HomeSectionCard extends StatelessWidget {
   final String buttonText;
   final Legislation? legislationItem;
   final bool isHighlighted;
+  final Widget? trailingTitleWidget;
+  final bool showFooter;
 
   const HomeSectionCard({
     super.key,
@@ -29,6 +31,8 @@ class HomeSectionCard extends StatelessWidget {
     required this.buttonText,
     this.legislationItem,
     this.isHighlighted = false,
+    this.trailingTitleWidget,
+    this.showFooter = true,
   });
 
 @override
@@ -54,7 +58,7 @@ return Card(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
+            Material(
               color: cardBackground,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,6 +84,10 @@ return Card(
                             maxLines: 1,
                           ),
                         ),
+                        if (trailingTitleWidget != null) ...[
+                          SizedBox(width: kIsWeb ? 12.0 : MediaQuery.of(context).size.width * 0.02),
+                          trailingTitleWidget!,
+                        ],
                       ],
                     ),
                   ),
@@ -93,78 +101,88 @@ return Card(
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 4.0),
                       child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Expanded(
-                          child: InkWell(
-                            onTap: () {
-                              if (legislationItem != null) {
-                                final manager = context.read<ParliamentManager>();
-                                final slug = manager.activeSlug;
-                                final lang = context.read<LanguageProvider>().appLanguageCode;
-                                final term = manager.currentTerm;
-                                context.smartNavigate('/$lang/$slug/$term/legislations/${legislationItem!.id}', extra: legislationItem);
-                              }
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.article_outlined, size: 18, color: primaryColor),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    l10n.detailsButton,
-                                    style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 14),
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Expanded(
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                hoverColor: Colors.black.withAlpha(15),
+                                onTap: () {
+                                  if (legislationItem != null) {
+                                    final manager = context.read<ParliamentManager>();
+                                    final slug = manager.activeSlug;
+                                    final lang = context.read<LanguageProvider>().appLanguageCode;
+                                    final term = manager.currentTerm;
+                                    context.smartNavigate('/$lang/$slug/$term/legislations/${legislationItem!.id}', extra: legislationItem);
+                                  }
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 10),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.article_outlined, size: 18, color: primaryColor),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        l10n.detailsButton,
+                                        style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 14),
+                                      ),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        Container(height: 24, width: 1, color: Colors.grey[200]),
-                        Expanded(
-                          child: InkWell(
-                            onTap: () => _handleShare(context),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.share, size: 18, color: primaryColor),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    l10n.shareAction,
-                                    style: TextStyle(
-                                      color: primaryColor, 
-                                      fontWeight: FontWeight.bold, 
-                                      fontSize: 14
-                                    ),
-                                  ),
-                                ],
-                              )
-                              .animate(onPlay: (controller) => controller.repeat(reverse: false))
-                              .shimmer(
-                                  delay: 2500.ms, 
-                                  duration: 1200.ms, 
-                                  color: Colors.white.withValues(alpha: 0.8),
-                                  size: 2
-                               )
-                              .then(delay: 2000.ms),
+                          Container(height: 24, width: 1, color: Colors.grey[200]),
+                          Expanded(
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                hoverColor: Colors.black.withAlpha(15),
+                                onTap: () => _handleShare(context),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 10),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.share, size: 18, color: primaryColor),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        l10n.shareAction,
+                                        style: TextStyle(
+                                          color: primaryColor, 
+                                          fontWeight: FontWeight.bold, 
+                                          fontSize: 14
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                  .animate(onPlay: (controller) => controller.repeat(reverse: false))
+                                  .shimmer(
+                                      delay: 2500.ms, 
+                                      duration: 1200.ms, 
+                                      color: Colors.white.withValues(alpha: 0.8),
+                                      size: 2
+                                   )
+                                  .then(delay: 2000.ms),
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),
             
             // --- FOOTER BUTTON (See All) ---
-            Container(
-              color: isHighlighted ? primaryColor.withAlpha((255 * 0.08).round()) : primaryColor.withAlpha((255 * 0.05).round()),
+            if (showFooter)
+              Material(
+                color: isHighlighted ? primaryColor.withAlpha((255 * 0.08).round()) : primaryColor.withAlpha((255 * 0.05).round()),
               child: InkWell(
+                hoverColor: primaryColor.withAlpha((255 * 0.15).round()), // TARCZA: Dynamiczny kolor hover na bazie koloru wiodącego
                 onTap: () {
                   context.smartNavigate(destinationPath);
                 },

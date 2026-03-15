@@ -6,6 +6,8 @@ import '../../widgets/osint_loader.dart';
 import 'package:provider/provider.dart';
 import '../services/parliament_manager.dart';
 import '../providers/language_provider.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:package_info_plus/package_info_plus.dart';
 
 // Helper function to show the dialog
 void showErrorReportDialog({
@@ -28,9 +30,15 @@ void showErrorReportDialog({
       return StatefulBuilder(
         builder: (context, setDialogState) {
           final l10n = AppLocalizations.of(mainContext)!;
-          
           return AlertDialog(
-            title: Text(l10n.reportErrorButton),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: Row(
+              children: [
+                Icon(Icons.bug_report_outlined, color: Theme.of(mainContext).primaryColor),
+                const SizedBox(width: 8),
+                Text(l10n.reportErrorButton, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              ],
+            ),
             content: Form(
               key: formKey,
               child: Column(
@@ -45,7 +53,19 @@ void showErrorReportDialog({
                       maxLength: 400,
                       decoration: InputDecoration(
                         hintText: l10n.reportErrorHint,
-                        border: const OutlineInputBorder(),
+                        filled: true,
+                        fillColor: Theme.of(mainContext).brightness == Brightness.dark 
+                            ? Colors.white.withValues(alpha: 0.05) 
+                            : Colors.grey.withValues(alpha: 0.08),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Theme.of(mainContext).primaryColor, width: 1.5),
+                        ),
+                        contentPadding: const EdgeInsets.all(16),
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
@@ -56,9 +76,11 @@ void showErrorReportDialog({
                     ),
                     const SizedBox(height: 16),
                     CheckboxListTile(
-                      title: const Text("Include system diagnostics", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)), // TODO: l10n
-                      subtitle: Text("Attaches active state (Parliament, Term, Target) to help us patch the issue.", style: TextStyle(fontSize: 12, color: Colors.grey[600])), // TODO: l10n
+                      title: const Text("Include system diagnostics", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)), // TODO: l10n
+                      subtitle: const Text("Attaches active state (Parliament, Term, Target) to help us patch the issue.", style: TextStyle(fontSize: 12, color: Colors.grey)), // TODO: l10n
                       value: includeDiagnostics,
+                      activeColor: Theme.of(mainContext).primaryColor,
+                      visualDensity: VisualDensity.compact,
                       onChanged: (val) {
                         setDialogState(() {
                           includeDiagnostics = val ?? false;
@@ -71,7 +93,6 @@ void showErrorReportDialog({
                     const SizedBox(
                       height: 120,
                       child: Center(
-                        // TARCZA: OSINT Loader w akcji
                         child: OsintLoader(text: "SENDING REPORT..."), //TODO
                       ),
                     ),
@@ -79,13 +100,24 @@ void showErrorReportDialog({
                 ],
               ),
             ),
+            actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             actions: [
               TextButton(
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.grey[600],
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                ),
                 onPressed: isSending ? null : () => Navigator.of(dialogContext).pop(),
-                child: Text(l10n.actionCancel),
+                child: Text(l10n.actionCancel, style: const TextStyle(fontWeight: FontWeight.w600)),
               ),
               if (!isSending)
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    elevation: 0,
+                    backgroundColor: Theme.of(mainContext).primaryColor,
+                    foregroundColor: Colors.white,
+                  ),
                   onPressed: () async {
                     if (!(formKey.currentState?.validate() ?? false)) {
                       return;
@@ -98,20 +130,29 @@ void showErrorReportDialog({
                     final messenger = ScaffoldMessenger.of(mainContext);
 
                     try {
-                      // TARCZA: Zbieranie logów systemu
                       Map<String, dynamic>? diagnostics;
                       if (includeDiagnostics) {
                         try {
                           final manager = Provider.of<ParliamentManager>(mainContext, listen: false);
                           final lang = Provider.of<LanguageProvider>(mainContext, listen: false).appLanguageCode;
+                          final platformName = Theme.of(mainContext).platform.name;
+                          final screenSize = MediaQuery.sizeOf(mainContext);
+                          
+                          final packageInfo = await PackageInfo.fromPlatform();
+                          final appVersion = '${packageInfo.version}+${packageInfo.buildNumber}';
+
                           diagnostics = {
                             'active_parliament': manager.activeServiceId ?? 'UNKNOWN',
                             'term': manager.currentTerm ?? 0,
                             'language': lang,
+                            'app_version': appVersion,
+                            'sys_is_web': kIsWeb,
+                            'sys_ui_platform': platformName,
+                            'sys_screen_resolution': '${screenSize.width.toInt()}x${screenSize.height.toInt()}',
                             'timestamp': DateTime.now().toIso8601String(),
                           };
                         } catch (e) {
-                          diagnostics = {'error': 'Failed to build diagnostics matrix'};
+                          diagnostics = {'error': 'Failed to build diagnostics matrix: ${e.toString()}'};
                         }
                       }
 
@@ -123,16 +164,20 @@ void showErrorReportDialog({
                           'targetType': targetType,
                           'message': reportController.text.trim(),
                           'source': sourceId,
-                          // Jeśli są diagnostyki, backend dostanie dodatkowy klucz z JSON-em
                           if (diagnostics != null) 'diagnostics': diagnostics, 
                         },
                       );
-                      if (navigator.context.mounted) navigator.pop();
+                      
+                      if (!mainContext.mounted) return;
+                      navigator.pop();
+                      
                       messenger.showSnackBar(
                         SnackBar(content: Text(l10n.reportErrorSuccess), backgroundColor: Colors.green),
                       );
                     } on FirebaseFunctionsException catch (e) {
-                      if (navigator.context.mounted) navigator.pop();
+                      if (!mainContext.mounted) return;
+                      navigator.pop();
+                      
                       String errorMessage;
                       if (e.code == 'resource-exhausted') {
                         errorMessage = l10n.reportErrorRateLimitExceeded;
@@ -143,7 +188,9 @@ void showErrorReportDialog({
                         SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
                       );
                     } catch (e) {
-                       if (navigator.context.mounted) navigator.pop();
+                       if (!mainContext.mounted) return;
+                       navigator.pop();
+                       
                        messenger.showSnackBar(
                           SnackBar(content: Text(l10n.errorFailedToLoadData), backgroundColor: Colors.red),
                         );

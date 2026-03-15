@@ -91,6 +91,7 @@ class Legislation {
   final String title;
   final String description;
   final String status;
+  final String? lastStatus;
   final bool? isEU;
   final DateTime? votingDate;
   final DateTime? documentDate;
@@ -127,6 +128,7 @@ class Legislation {
     required this.title,
     required this.description,
     required this.status,
+    this.lastStatus,
     this.votingUrl,
     this.isEU,
     required this.votingDate,
@@ -182,6 +184,7 @@ class Legislation {
       title: _parseDynamicString(json['title'], fieldName: 'title', itemId: itemIdForLog) ?? '',
       description: _parseDynamicString(json['description'], fieldName: 'description', itemId: itemIdForLog) ?? '',
       status: _parseDynamicString(json['status'], fieldName: 'status', itemId: itemIdForLog) ?? '',
+      lastStatus: _parseDynamicString(json['lastStatus'], fieldName: 'lastStatus', itemId: itemIdForLog),
       isEU: json['isEU'] as bool?,
       votingDate: _parseDateTime(json['votingDate']),
       documentDate: _parseDateTime(json['documentDate']),
@@ -224,6 +227,7 @@ class Legislation {
       'title': title,
       'description': description,
       'status': status,
+      'lastStatus': lastStatus,
       'isEU': isEU,
       'votingDate': votingDate?.toIso8601String(),
       'documentDate': documentDate?.toIso8601String(),
@@ -261,6 +265,7 @@ class Legislation {
     String? title,
     String? description,
     String? status,
+    String? lastStatus,
     bool? isEU,
     DateTime? votingDate,
     DateTime? documentDate,
@@ -294,6 +299,7 @@ class Legislation {
       title: title ?? this.title,
       description: description ?? this.description,
       status: status ?? this.status,
+      lastStatus: lastStatus ?? this.lastStatus,
       isEU: isEU ?? this.isEU,
       votingDate: votingDate ?? this.votingDate,
       documentDate: documentDate ?? this.documentDate,
@@ -333,6 +339,7 @@ class Legislation {
           title == other.title &&
           description == other.description &&
           status == other.status &&
+          lastStatus == other.lastStatus &&
           isEU == other.isEU &&
           votingDate == other.votingDate &&
           documentDate == other.documentDate &&
@@ -367,6 +374,7 @@ class Legislation {
         title,
         description,
         status,
+        lastStatus,
         isEU,
         votingDate,
         documentDate,

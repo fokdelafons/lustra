@@ -2,6 +2,7 @@ import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+import '../services/cache/parliament_cache_manager.dart';
 
 class InteractionProvider with ChangeNotifier {
   final ApiService _apiService = ApiService();
@@ -13,6 +14,10 @@ class InteractionProvider with ChangeNotifier {
       _lastUserId = userId;
       _lastPrefix = prefix;
 
+      if (prefix != null) {
+        _loadLocalViewedBills(prefix);
+      }
+
       if (userId != null && prefix != null) {
         fetchInteractions(prefix);
       } else {
@@ -21,9 +26,19 @@ class InteractionProvider with ChangeNotifier {
     }
   }
 
+  Future<void> _loadLocalViewedBills(String prefix) async {
+    final cache = ParliamentCacheManager(prefix);
+    final localViewed = await cache.getLocalViewedBills();
+    _viewedThisSession.addAll(localViewed);
+    notifyListeners();
+  }
+
   Set<String> _trackedBills = {};
   Set<String> _trackedCivic = {};
   Map<String, dynamic> _votes = {};
+  final Set<String> _viewedThisSession = {};
+
+  bool isViewedInSession(String billId) => _viewedThisSession.contains(billId);
   
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -56,7 +71,7 @@ class InteractionProvider with ChangeNotifier {
       _trackedCivic = Set.from(civicList);
       _votes = Map<String, dynamic>.from(response['votes'] ?? {});
 
-      developer.log('Załadowano do RAM: ${_trackedBills.length} śledzonych, ${_votes.length} głosów.', name: 'InteractionProvider');
+      developer.log('Załadowano do RAM z Firebase: ${_trackedBills.length} śledzonych, ${_votes.length} głosów. Przeczytane lokalnie (dysk): ${_viewedThisSession.length}', name: 'InteractionProvider');
     } catch (e) {
       developer.log('Błąd pobierania interakcji: $e', name: 'InteractionProvider');
     } finally {
@@ -78,6 +93,18 @@ class InteractionProvider with ChangeNotifier {
   void markAsVotedLocally(String voteKey) {
     _votes[voteKey] = true;
     notifyListeners();
+  }
+
+  void markAsViewedLocally(String billId) {
+    if (!_viewedThisSession.contains(billId)) {
+      _viewedThisSession.add(billId);
+      notifyListeners(); // Natychmiastowe zgaszenie poświaty w UI
+      
+      // Zapis do lokalnego pliku w tle (Fire & Forget)
+      if (_lastPrefix != null) {
+        ParliamentCacheManager(_lastPrefix!).addLocalViewedBill(billId);
+      }
+    }
   }
 
   void clear() {

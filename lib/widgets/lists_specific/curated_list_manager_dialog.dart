@@ -49,7 +49,7 @@ class _CuratedListManagerDialogState extends State<CuratedListManagerDialog> {
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          title: const Text("Name your Public List"), // TODO: L10N
+          title: const Text("Name your Private List"), // TODO: L10N
           content: TextField(
             controller: nameController,
             maxLength: 40,
@@ -103,7 +103,7 @@ class _CuratedListManagerDialogState extends State<CuratedListManagerDialog> {
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          title: const Text("Rename Public List"), // TODO: L10N
+          title: const Text("Rename Private List"), // TODO: L10N
           content: TextField(
             controller: nameController,
             maxLength: 40, 
@@ -177,7 +177,7 @@ class _CuratedListManagerDialogState extends State<CuratedListManagerDialog> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (lists.isEmpty) 
-                  const Text("You don't have any public lists yet."), // TODO: L10N
+                  const Text("You don't have any private lists yet."), // TODO: L10N
                 
                 ...lists.map((list) {
                   final bool isInBills = (list['bills'] as List?)?.contains(widget.bill.id) ?? false;

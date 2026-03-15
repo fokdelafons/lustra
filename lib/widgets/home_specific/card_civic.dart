@@ -45,7 +45,7 @@ class CivicProjectCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
+          Material(
             color: Colors.white,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -108,8 +108,11 @@ class CivicProjectCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       Expanded(
-                        child: InkWell(
-                          onTap: () {
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            hoverColor: Colors.black.withAlpha(15),
+                            onTap: () {
                             final manager = context.read<ParliamentManager>();
                             final slug = manager.activeSlug;
                             final lang = context.read<LanguageProvider>().appLanguageCode;
@@ -130,12 +133,16 @@ class CivicProjectCard extends StatelessWidget {
                             ),
                           ),
                         ),
+                        ),
                       ),
                       Container(height: 24, width: 1, color: Colors.grey[200]),
                       Expanded(
-                        child: InkWell(
-                          onTap: () {
-                             final shareService = ShareService();
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            hoverColor: Colors.black.withAlpha(15),
+                            onTap: () {
+                               final shareService = ShareService();
                              final manager = context.read<ParliamentManager>();
                              final langProvider = context.read<LanguageProvider>();
                              final pid = manager.activeServiceId!;
@@ -199,15 +206,17 @@ class CivicProjectCard extends StatelessWidget {
                           ),
                         ),
                       ),
+                      ),
                     ],
                   ),
                 ),
               ],
             ),
           ),
-          Container(
+          Material(
             color: lightPrimaryColor,
             child: InkWell(
+              hoverColor: primaryColor.withAlpha((255 * 0.15).round()),
               onTap: () {
                 final manager = context.read<ParliamentManager>();
                 final slug = manager.activeSlug;

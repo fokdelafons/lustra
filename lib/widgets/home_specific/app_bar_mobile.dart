@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'dart:developer' as developer;
 
 import '../../providers/language_provider.dart';
@@ -31,60 +31,43 @@ class _MobileAppBarState extends State<MobileAppBar> {
   Future<void> _handleNotificationsToggle(bool isEnabled) async {
     final authService = context.read<AuthService>();
     final parliamentManager = context.read<ParliamentManager>();
+    final userProvider = context.read<UserProvider>();
     final parliamentId = parliamentManager.activeServiceId;
-    final prefs = await SharedPreferences.getInstance();
 
     if (authService.currentUser == null || parliamentId == null) return;
 
-    final key = 'notifications_enabled_$parliamentId';
-    await prefs.setBool(key, isEnabled);
-
-    if (isEnabled) {
-      await prefs.setString('subscribed_parliament_id', parliamentId);
-    } else {
-      await prefs.remove('subscribed_parliament_id');
+    // Pobierz obecną listę i zaktualizuj ją
+    List<String> updatedList = List.from(userProvider.subscribedParliaments);
+    if (isEnabled && !updatedList.contains(parliamentId)) {
+      updatedList.add(parliamentId);
+    } else if (!isEnabled) {
+      updatedList.remove(parliamentId);
     }
 
-    if (!mounted) return;
-    context.read<UserProvider>().updatePreferences(
-        notifications: isEnabled,
-        parliamentId: isEnabled ? parliamentId : null);
+    // Natychmiastowy update w RAM
+    userProvider.updatePreferences(subscribedParliaments: updatedList);
 
     if (isEnabled) {
       NotificationSettings settings = await _firebaseMessaging.requestPermission(
-        alert: true,
-        badge: true,
-        sound: true,
+        alert: true, badge: true, sound: true,
       );
 
       if (settings.authorizationStatus == AuthorizationStatus.authorized) {
         String? fcmToken = await _firebaseMessaging.getToken();
         if (fcmToken != null) {
-          await authService.updateUserNotificationPrefs({
-            'notificationsEnabled': true,
-            'fcmToken': fcmToken,
-            'notificationParliamentId': parliamentId,
-          });
-          developer.log('Powiadomienia włączone. Token zapisany dla $parliamentId.',
-              name: 'Notifications');
+          await userProvider.updatePreferences(subscribedParliaments: updatedList, fcmToken: fcmToken);
+          developer.log('Powiadomienia włączone dla $parliamentId.', name: 'Notifications');
         }
       } else {
-        await prefs.setBool(key, false);
-        await prefs.remove('subscribed_parliament_id');
-        if (!mounted) return;
-        context
-            .read<UserProvider>()
-            .updatePreferences(notifications: false, parliamentId: null);
-        developer.log('Użytkownik nie wyraził zgody na powiadomienia.',
-            name: 'Notifications');
+        // Użytkownik odmówił – cofamy zmianę w RAM
+        updatedList.remove(parliamentId);
+        userProvider.updatePreferences(subscribedParliaments: updatedList);
+        developer.log('Odmowa powiadomień.', name: 'Notifications');
       }
     } else {
-      await authService.updateUserNotificationPrefs({
-        'notificationsEnabled': false,
-        'fcmToken': null,
-      });
-      developer.log('Powiadomienia wyłączone dla $parliamentId.',
-          name: 'Notifications');
+      // Wyłączono dla tego kraju
+      await userProvider.updatePreferences(subscribedParliaments: updatedList);
+      developer.log('Powiadomienia wyłączone dla $parliamentId.', name: 'Notifications');
     }
   }
 
@@ -242,7 +225,65 @@ class _MobileAppBarState extends State<MobileAppBar> {
       leadingWidth: 80,
       leading: Align(
         alignment: Alignment.centerLeft,
-        child: Consumer<User?>(
+        child: Padding(
+          padding: const EdgeInsets.only(left: 16.0),
+          child: Consumer<ParliamentManager>(
+            builder: (context, manager, child) {
+              if (!manager.isInitialized) return const SizedBox.shrink();
+              return PopupMenuButton<String>(
+                icon: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SvgPicture.asset(
+                      manager.activeService.source.flagIconAsset,
+                      width: 24,
+                      height: 24,
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(Icons.arrow_drop_down, color: Colors.white),
+                  ],
+                ),
+                onSelected: (String sourceId) async {
+                  manager.changeSource(sourceId);
+                },
+                itemBuilder: (BuildContext context) {
+                  return ParliamentSource.availableSources
+                      .map((ParliamentSource source) {
+                    final bool isFullyEnabled =
+                        source.id == 'pl' || source.id == 'us';
+
+                    return PopupMenuItem<String>(
+                      value: source.id,
+                      enabled: true,
+                      child: Row(
+                        children: [
+                          Opacity(
+                            opacity: isFullyEnabled ? 1.0 : 0.5,
+                            child: SvgPicture.asset(
+                              source.flagIconAsset,
+                              width: 24,
+                              height: 24,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            source.name,
+                            style: TextStyle(
+                              color: isFullyEnabled ? null : Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList();
+                },
+              );
+            },
+          ),
+        ),
+      ),
+      actions: [
+        Consumer<User?>(
           builder: (context, user, child) {
             if (user != null) {
               return PopupMenuButton<String>(
@@ -302,93 +343,112 @@ class _MobileAppBarState extends State<MobileAppBar> {
                 itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                   PopupMenuItem<String>(
                     value: 'language',
-                    child: Text(l10n.settingsChangeLanguage),
+                    child: Row(
+                      children: [
+                        Icon(Icons.language, size: 20, color: Colors.grey[700]),
+                        const SizedBox(width: 12),
+                        Text(l10n.settingsChangeLanguage),
+                      ],
+                    ),
                   ),
                   PopupMenuItem<String>(
                     value: 'notifications_new_laws',
                     child: Consumer<UserProvider>(
                       builder: (context, userProvider, _) {
-                        final currentParliamentId =
-                            context.watch<ParliamentManager>().activeServiceId;
-                        final subscribedId = userProvider.notificationParliamentId;
-                        final isAnotherParliamentSubscribed =
-                            subscribedId != null &&
-                                subscribedId != currentParliamentId;
-                        final bool isSwitchEnabled = !isAnotherParliamentSubscribed;
+                        final currentParliamentId = context.watch<ParliamentManager>().activeServiceId;
+                        if (currentParliamentId == null) return const SizedBox.shrink();
+                        
+                        final isSubscribed = userProvider.isParliamentSubscribed(currentParliamentId);
 
-                        return SwitchListTile(
-                          title: Text(l10n.settingsNotificationsNewLaws),
-                          subtitle: isAnotherParliamentSubscribed
-                              ? Text(
-                                  l10n.notificationsEnabledForOtherParliament,
-                                  style: TextStyle(
-                                      fontSize: 12, color: Colors.grey[600]),
-                                )
-                              : null,
-                          value: userProvider.notificationsEnabled,
-                          activeColor: Theme.of(context).primaryColor,
-                          onChanged: isSwitchEnabled
-                              ? (bool value) {
-                                  _handleNotificationsToggle(value);
-                                }
-                              : null,
-                          dense: true,
-                          contentPadding: EdgeInsets.zero,
+                        return Row(
+                          children: [
+                            Icon(Icons.notifications_active_outlined, size: 20, color: Colors.grey[700]),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(l10n.settingsNotificationsNewLaws, style: const TextStyle(fontSize: 14)),
+                            ),
+                            Checkbox(
+                              value: isSubscribed,
+                              onChanged: (bool? value) => _handleNotificationsToggle(value ?? false),
+                              activeColor: Theme.of(context).primaryColor,
+                              visualDensity: VisualDensity.compact,
+                            ),
+                          ],
                         );
                       },
-                    ),
-                  ),
-                  PopupMenuItem<String>(
-                    enabled: false,
-                    value: 'notifications_vote_results',
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(l10n.settingsNotificationsVoteResults),
-                        ),
-                        const SizedBox(width: 16),
-                        Icon(Icons.check_box_outline_blank,
-                            color: Theme.of(context).disabledColor),
-                      ],
                     ),
                   ),
                   PopupMenuItem<String>(
                     enabled: true,
                     value: 'marketing_consent',
                     child: Consumer<UserProvider>(
-                        builder: (context, userProvider, _) {
-                      return SwitchListTile(
-                        title: Text(
-                            AppLocalizations.of(context)!.lustraClubLabel,
-                            style: const TextStyle(fontSize: 14)),
-                        value: userProvider.marketingConsent,
-                        activeColor: Theme.of(context).primaryColor,
-                        onChanged: (bool value) async {
-                          userProvider.updatePreferences(marketing: value);
-
-                          final authService = context.read<AuthService>();
-                          try {
-                            await authService.updateUserNotificationPrefs(
-                                {'marketingConsent': value});
-                          } catch (e) {
-                            developer.log('Błąd zapisu zgody: $e');
-                          }
-                        },
-                        dense: true,
-                        contentPadding: EdgeInsets.zero,
-                      );
-                    }),
-                  ),
-                  PopupMenuItem<String>(
-                    value: 'delete_account',
-                    child: Text(
-                      l10n.settingsDeleteAccount,
-                      style: TextStyle(color: Theme.of(context).colorScheme.error),
+                      builder: (context, userProvider, _) {
+                        return Row(
+                          children: [
+                            Icon(Icons.favorite_outline, size: 20, color: Colors.grey[700]),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(AppLocalizations.of(context)!.lustraClubLabel, style: const TextStyle(fontSize: 14)),
+                            ),
+                            Checkbox(
+                              value: userProvider.marketingConsent,
+                              onChanged: (bool? value) async {
+                                if (value == null) return;
+                                userProvider.updatePreferences(marketing: value);
+                                final authService = context.read<AuthService>();
+                                try {
+                                  await authService.updateUserNotificationPrefs({'marketingConsent': value});
+                                } catch (e) {
+                                  developer.log('Błąd zapisu zgody: $e');
+                                }
+                              },
+                              activeColor: Theme.of(context).primaryColor,
+                              visualDensity: VisualDensity.compact,
+                            ),
+                          ],
+                        );
+                      }
                     ),
                   ),
                   PopupMenuItem<String>(
                     value: 'logout',
-                    child: Text(l10n.settingsLogout),
+                    child: Row(
+                      children: [
+                        Icon(Icons.logout, size: 20, color: Colors.grey[700]),
+                        const SizedBox(width: 12),
+                        Text(l10n.settingsLogout),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem<String>(
+                    value: 'delete_account',
+                    child: Row(
+                      children: [
+                        const Icon(Icons.delete_forever, size: 20, color: Colors.red),
+                        const SizedBox(width: 12),
+                        Text(l10n.settingsDeleteAccount, style: const TextStyle(color: Colors.red)),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuDivider(), // TYLKO JEDEN SEPARATOR NA DOLE
+                  PopupMenuItem<String>(
+                    enabled: false,
+                    value: 'version',
+                    height: 30,
+                    child: FutureBuilder<PackageInfo>(
+                      future: PackageInfo.fromPlatform(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          return Center(
+                            child: Text(
+                              'v${snapshot.data!.version} (Build ${snapshot.data!.buildNumber})',
+                              style: TextStyle(fontSize: 11, color: Colors.grey[400], letterSpacing: 0.5),
+                            ),
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
                   ),
                 ],
                 child: const Padding(
@@ -403,61 +463,6 @@ class _MobileAppBarState extends State<MobileAppBar> {
                     style: const TextStyle(color: Colors.white, fontSize: 15)),
               );
             }
-          },
-        ),
-      ),
-      actions: [
-        Consumer<ParliamentManager>(
-          builder: (context, manager, child) {
-            if (!manager.isInitialized) return const SizedBox.shrink();
-            return PopupMenuButton<String>(
-              icon: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SvgPicture.asset(
-                    manager.activeService.source.flagIconAsset,
-                    width: 24,
-                    height: 24,
-                  ),
-                  const SizedBox(width: 4),
-                  const Icon(Icons.arrow_drop_down),
-                ],
-              ),
-              onSelected: (String sourceId) async {
-                manager.changeSource(sourceId);
-              },
-              itemBuilder: (BuildContext context) {
-                return ParliamentSource.availableSources
-                    .map((ParliamentSource source) {
-                  final bool isFullyEnabled =
-                      source.id == 'pl' || source.id == 'us';
-
-                  return PopupMenuItem<String>(
-                    value: source.id,
-                    enabled: true,
-                    child: Row(
-                      children: [
-                        Opacity(
-                          opacity: isFullyEnabled ? 1.0 : 0.5,
-                          child: SvgPicture.asset(
-                            source.flagIconAsset,
-                            width: 24,
-                            height: 24,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          source.name,
-                          style: TextStyle(
-                            color: isFullyEnabled ? null : Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList();
-              },
-            );
           },
         ),
       ],

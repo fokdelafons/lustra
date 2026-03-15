@@ -9,7 +9,7 @@ import '../../providers/language_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../services/curated_list_service.dart';
 import '../../widgets/osint_loader.dart';
-import 'home_section_card.dart';
+import 'ui_home_card.dart';
 import '../partially_expandable_list_widget.dart';
 import '../citizen_poll_widget.dart';
 
@@ -29,7 +29,7 @@ class _CuratedListCardState extends State<CuratedListCard> {
   bool _isLoading = true;
   
   Legislation? _highlightedItem;
-  String _listName = "Public List";
+  String _listName = "Public List"; //TODO
   int _subscriberCount = 0;
 
   @override
@@ -132,8 +132,19 @@ class _CuratedListCardState extends State<CuratedListCard> {
     final term = manager.currentTerm;
 
 return HomeSectionCard(
-      title: "$_listName 🔥 $_subscriberCount",
-      icon: Icons.campaign,
+      title: _listName,
+      icon: Icons.draw,
+      trailingTitleWidget: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.visibility_outlined, size: 20, color: Colors.grey[600]),
+          const SizedBox(width: 4),
+          Text(
+            '$_subscriberCount',
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.grey[600]),
+          ),
+        ],
+      ),
       destinationPath: '/$lang/$slug/$term/legislations?list=curated&listId=${widget.listId}',
       buttonText: "Open Full List", // TODO: L10N
       legislationItem: _highlightedItem,

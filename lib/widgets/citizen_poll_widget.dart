@@ -386,7 +386,7 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
       key: key,
       children: [
         Text(
-          "Record your position on this legislation", // TODO: l10n
+          "Record your position for audit.", // TODO: l10n
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 12, color: Colors.grey[600], fontWeight: FontWeight.w600, letterSpacing: 0.5),
         ),
@@ -398,10 +398,10 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
                 onPressed: () => _handleVoteButtonPressed('like'),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: Colors.green.withAlpha((255 * 0.06).round()), // TARCZA: Subtelne pastelowe tło
-                  side: BorderSide(color: Colors.green.withAlpha(60), width: 1), // TARCZA: Cienka, ledwie widoczna ramka
+                  backgroundColor: Colors.green.withAlpha((255 * 0.06).round()),
+                  side: BorderSide(color: Colors.green.withAlpha(60), width: 1),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                  foregroundColor: Colors.green[800], // TARCZA: Ciemniejszy, elegancki tekst
+                  foregroundColor: Colors.green[800],
                   elevation: 0,
                 ),
                 child: Column(
@@ -419,10 +419,10 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
                 onPressed: () => _handleVoteButtonPressed('dislike'),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: Colors.red.withAlpha((255 * 0.06).round()), // TARCZA: Subtelne pastelowe tło
-                  side: BorderSide(color: Colors.red.withAlpha(60), width: 1), // TARCZA: Cienka, ledwie widoczna ramka
+                  backgroundColor: Colors.red.withAlpha((255 * 0.06).round()),
+                  side: BorderSide(color: Colors.red.withAlpha(60), width: 1),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                  foregroundColor: Colors.red[800], // TARCZA: Ciemniejszy, elegancki tekst
+                  foregroundColor: Colors.red[800],
                   elevation: 0,
                 ),
                 child: Column(
@@ -443,7 +443,7 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
 // --- STAN PO GŁOSOWANIU (OFFICIAL RECEIPT) ---
   Widget _buildOfficialReceipt(int totalVotes) {
     final primaryColor = Theme.of(context).primaryColor;
-    final l10n = AppLocalizations.of(context)!; // TARCZA: Dodano obsługę języków
+    final l10n = AppLocalizations.of(context)!;
 
     return Container(
       key: ValueKey('voted_receipt_${widget.targetId}'),

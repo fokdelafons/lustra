@@ -170,4 +170,16 @@ Future<bool> renameList(String listId, String newName) async {
       rethrow;
     }
   }
+
+  Future<void> notifySubscribers(String listId, String prefix) async {
+    try {
+      await _apiService.callFunction('sendCuratedListPush', params: {
+        'listId': listId,
+        'prefix': prefix,
+      });
+    } catch (e) {
+      developer.log('Błąd podczas wysyłania powiadomień z listy: $e', name: 'CuratedListService');
+      rethrow;
+    }
+  }
 }

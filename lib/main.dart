@@ -22,7 +22,6 @@ import 'services/remote_config_service.dart';
 import 'services/parliament_service_interface.dart';
 import 'services/notification_service.dart';
 import 'screens/force_update_screen.dart';
-import 'widgets/mobile_app_banner_wrapper.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -139,11 +138,7 @@ class MyApp extends StatelessWidget {
 				GlobalCupertinoLocalizations.delegate,
 			],
 			debugShowCheckedModeBanner: false,
-      builder: (context, child) {
-        return MobileAppBannerWrapper(
-          child: child ?? const SizedBox.shrink(),
-        );
-      },
+
 			theme: ThemeData(
 				primarySwatch: Colors.blue,
 				primaryColor: const Color(0xFF1565C0),
@@ -174,6 +169,7 @@ class MyApp extends StatelessWidget {
 
 final List<String> _svgAssetsToPrecache = [
   'assets/logo_full.svg',
+  'assets/logo_full_white.svg',
   'assets/flags/us.svg',
   'assets/flags/pl.svg',
   'assets/flags/gb.svg',

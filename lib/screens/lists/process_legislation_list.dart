@@ -50,6 +50,9 @@ import '../../widgets/osint_loader.dart';
     late String _selectedCategory;
     Map<String, String> _documentTypeOptions = {};
     String _selectedDocumentTypeKey = 'all';
+    Map<String, String> _statusOptions = {};
+    String _selectedStatusFilter = 'all';
+    bool _hideNoDocument = false;
 
       void _initializeLocalizableLists(AppLocalizations l10n) {
       if (_categoryOptions.isEmpty) {
@@ -159,11 +162,14 @@ import '../../widgets/osint_loader.dart';
       if (!mounted) return;
       final activeService = Provider.of<ParliamentServiceInterface>(context, listen: false);
       final documentTypes = await activeService.getLegislationFilterDocumentTypes(context);
+      final statuses = await activeService.getLegislationFilterStatuses(context);
       
       if (mounted) {
         setState(() {
           _documentTypeOptions = documentTypes;
           _selectedDocumentTypeKey = 'all';
+          _statusOptions = statuses;
+          _selectedStatusFilter = 'all';
         });
       }
     }
@@ -190,6 +196,7 @@ import '../../widgets/osint_loader.dart';
           }
           _selectedCategory = _categoryOptions.first;
           _selectedDocumentTypeKey = 'all';
+          _selectedStatusFilter = 'all';
           _sortBy = 'popularity';
         }
       });
@@ -220,7 +227,7 @@ import '../../widgets/osint_loader.dart';
                 limit: _limit,
                 forceRefresh: forceRefresh || isNotificationLoad,
                 searchQuery: _searchQuery,
-                status: activeService.processStatusId,
+                status: _selectedStatusFilter == 'all' ? activeService.processStatusId : 'exact:$_selectedStatusFilter',
                 documentType: docTypeValue,
                 category: categoryValue,
                 sortBy: sortByValue,
@@ -268,7 +275,7 @@ Future<void> _loadMoreBills() async {
                 lastVisibleId: _nextCursor,
                 limit: _limit,
                 searchQuery: _searchQuery,
-                status: activeService.processStatusId,
+                status: _selectedStatusFilter == 'all' ? activeService.processStatusId : 'exact:$_selectedStatusFilter',
                 documentType: docTypeValue,
                 category: categoryValue,
                 sortBy: sortByValue,
@@ -294,6 +301,9 @@ Future<void> _loadMoreBills() async {
     }
 
     List<Legislation> _getProcessedBills() {
+      if (_hideNoDocument) {
+        return _bills.where((bill) => bill.noDocument != true).toList();
+      }
       return _bills;
     }
 
@@ -367,6 +377,14 @@ Future<void> _loadMoreBills() async {
                         _resetAndLoadData(forceRefresh: false, exitingNotification: true);
                       }
                     },
+                    statusOptions: _statusOptions,
+                    selectedStatusKey: _selectedStatusFilter,
+                    onStatusChanged: (String? newKey) {
+                      if (newKey != null && newKey != _selectedStatusFilter) {
+                        setState(() => _selectedStatusFilter = newKey);
+                        _resetAndLoadData(forceRefresh: false, exitingNotification: true);
+                      }
+                    },
                     sortOptions: {
                       'popularity': l10n.sortByPopularity,
                       'processStartDate': l10n.sortByFreshness,
@@ -379,6 +397,10 @@ Future<void> _loadMoreBills() async {
                       }
                     },
                     isSearchActive: _isSearchActive || _isFromNotification,
+                    hideNoDocument: _hideNoDocument,
+                    onHideNoDocumentChanged: (bool value) {
+                      setState(() => _hideNoDocument = value);
+                    },
                   ),
                   const Divider(height: 8),
                   Expanded(

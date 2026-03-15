@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Download Lustra</title>
+    <script>
+        window.onload = function() {
+            var userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+                window.location.replace("https://apps.apple.com/app/id6751850630");
+            } 
+            else if (/android/i.test(userAgent)) {
+                window.location.replace("https://play.google.com/store/apps/details?id=dev.lustra");
+            } 
+            else {
+                window.location.replace("https://lustra.news");
+            }
+        };
+    </script>
+</head>
+<body>
+    <p>Redirecting to app store...</p>
+</body>
+</html>

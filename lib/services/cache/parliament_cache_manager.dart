@@ -218,4 +218,23 @@ Future<HomeScreenData?> getHomeScreenData(String lang, int term, {bool ignoreTim
   Future<void> clearBatchCuratedPreviews() async {
     await _storage.clearByPrefix('${prefix}_batch_curated_previews');
   }
+
+  // --- LOCAL VIEWED BILLS ---
+  
+  Future<List<String>> getLocalViewedBills() async {
+    final result = await _storage.get('${prefix}_local_viewed_bills');
+    if (result != null && result['ids'] != null) {
+      return List<String>.from(result['ids']);
+    }
+    return [];
+  }
+
+  Future<void> addLocalViewedBill(String billId) async {
+    final current = await getLocalViewedBills();
+    if (!current.contains(billId)) {
+      current.add(billId);
+      if (current.length > 500) current.removeAt(0);
+      await _storage.save('${prefix}_local_viewed_bills', {'ids': current});
+    }
+  }
 }

@@ -25,11 +25,15 @@ class HomeDeputySectionCard extends StatelessWidget {
     final shadowColor = Colors.black.withAlpha((0.08 * 255).round());
     final lightPrimaryColor = primaryColor.withAlpha((255 * 0.1).round());
     final lighterPrimaryColor = primaryColor.withAlpha((255 * 0.05).round());
+    
+    // TARCZA: Zabezpieczenie promienia przed mutacją na wielkich ekranach
+    final double cardRadius = kIsWeb ? 16.0 : (MediaQuery.of(context).size.width * 0.04).clamp(0.0, 16.0);
 
     return Container(
+      clipBehavior: Clip.antiAlias, // TARCZA: Naprawia wylewające się tła i marginesy wewnątrz
       decoration: BoxDecoration(
         color: cardColor,
-        borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width * 0.04),
+        borderRadius: BorderRadius.circular(cardRadius),
         boxShadow: [
           BoxShadow(color: shadowColor, blurRadius: 15, offset: const Offset(0, 5)),
         ],
@@ -64,20 +68,20 @@ class HomeDeputySectionCard extends StatelessWidget {
               ],
             ),
           ),
-          const Divider(height: 1, thickness: 1, indent: 16, endIndent: 16),
-          SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+          const Divider(height: 1, thickness: 1),
           
           // --- CONTENT ---
           child,
           
-        // --- FOOTER BUTTON ---
+          // --- FOOTER BUTTON ---
           ClipRRect(
             borderRadius: BorderRadius.vertical(
-              bottom: Radius.circular(MediaQuery.of(context).size.width * 0.04),
+              bottom: Radius.circular(cardRadius),
             ),
             child: Material(
               color: lighterPrimaryColor,
               child: InkWell(
+                hoverColor: primaryColor.withAlpha((255 * 0.15).round()), // TARCZA: Ożywiamy stopkę
                 onTap: () {
                   context.smartNavigate(destinationPath);
                 },

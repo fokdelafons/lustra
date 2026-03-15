@@ -47,8 +47,10 @@ class FutureLegislationScreenState extends State<FutureLegislationScreen> with A
   late String _selectedCategory;
 
   Map<String, String> _documentTypeOptions = {};
-  String _selectedDocumentTypeKey = 'all';
-
+    String _selectedDocumentTypeKey = 'all';
+    Map<String, String> _statusOptions = {};
+    String _selectedStatusFilter = 'all';
+    bool _hideNoDocument = false;
   void _initializeLocalizableLists(AppLocalizations l10n) {
    if (_categoryOptions.isEmpty) {
      _categoryOptions = [
@@ -114,13 +116,15 @@ Future<void> _loadFilterOptions() async {
   if (!mounted) return;
   final activeService = Provider.of<ParliamentServiceInterface>(context, listen: false);
   final documentTypes = await activeService.getLegislationFilterDocumentTypes(context);
-  
-  if (mounted) {
-    setState(() {
-      _documentTypeOptions = documentTypes;
-      _selectedDocumentTypeKey = 'all';
-    });
-  }
+      final statuses = await activeService.getLegislationFilterStatuses(context);
+      if (mounted) {
+        setState(() {
+          _documentTypeOptions = documentTypes;
+          _selectedDocumentTypeKey = 'all';
+          _statusOptions = statuses;
+          _selectedStatusFilter = 'all';
+        });
+      }
 }
   final ScrollController _scrollController = ScrollController();
   void _resetAndLoadData({bool forceRefresh = false, bool newSourceChanged = false}) {
@@ -136,6 +140,7 @@ Future<void> _loadFilterOptions() async {
 
       if (newSourceChanged) {
         _selectedCategory = _categoryOptions.first;
+        _selectedStatusFilter = 'all';
         _selectedDocumentTypeKey = 'all';
         _searchQuery = '';
         _sortBy = 'popularity';
@@ -161,7 +166,7 @@ Future<void> _loadBills({bool forceRefresh = false}) async {
         limit: _limit,
         forceRefresh: forceRefresh,
         searchQuery: _searchQuery,
-        status: activeService.futureStatusId,
+        status: _selectedStatusFilter == 'all' ? activeService.futureStatusId : 'exact:$_selectedStatusFilter',
         documentType: _selectedDocumentTypeKey == 'all'
           ? activeService.defaultDocumentTypeIds
           : [_selectedDocumentTypeKey],
@@ -214,7 +219,7 @@ Future<void> _loadMoreBills() async {
         context,
         lastVisibleId: _nextCursor,
         limit: _limit,
-        status: activeService.futureStatusId,
+        status: _selectedStatusFilter == 'all' ? activeService.futureStatusId : 'exact:$_selectedStatusFilter',
         documentType: docType,
         category: categoryApiKey,
         searchQuery: _searchQuery,
@@ -240,6 +245,9 @@ Future<void> _loadMoreBills() async {
   }
 
   List<Legislation> _getProcessedBills() {
+    if (_hideNoDocument) {
+      return _bills.where((bill) => bill.noDocument != true).toList();
+    }
     return _bills;
   }
 
@@ -302,13 +310,21 @@ Widget build(BuildContext context) {
               showDocType: true,
               docTypeOptions: _documentTypeOptions,
               selectedDocTypeKey: _selectedDocumentTypeKey,
-              onDocTypeChanged: (String? newKey) {
-                if (newKey != null && newKey != _selectedDocumentTypeKey) {
-                  setState(() => _selectedDocumentTypeKey = newKey);
-                  _resetAndLoadData(forceRefresh: false);
-                }
-              },
-              sortOptions: {
+                    onDocTypeChanged: (String? newKey) {
+                      if (newKey != null && newKey != _selectedDocumentTypeKey) {
+                        setState(() => _selectedDocumentTypeKey = newKey);
+                        _resetAndLoadData(forceRefresh: false);
+                      }
+                    },
+                    statusOptions: _statusOptions,
+                    selectedStatusKey: _selectedStatusFilter,
+                    onStatusChanged: (String? newKey) {
+                      if (newKey != null && newKey != _selectedStatusFilter) {
+                        setState(() => _selectedStatusFilter = newKey);
+                        _resetAndLoadData(forceRefresh: false);
+                      }
+                    },
+                    sortOptions: {
                 'popularity': l10n.sortByPopularity,
                 'processStartDate': l10n.sortByFreshness,
               },
@@ -320,6 +336,10 @@ Widget build(BuildContext context) {
                 }
               },
               isSearchActive: _isSearchActive,
+              hideNoDocument: _hideNoDocument,
+              onHideNoDocumentChanged: (bool value) {
+                setState(() => _hideNoDocument = value);
+              },
             ),
               const Divider(height: 8),
               Expanded(

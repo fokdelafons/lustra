@@ -724,7 +724,9 @@ const getLegislations = async (req, res) => {
         let query = db.collection('pl_legislations').where('term', '==', parseInt(termToUse, 10));
 
         if (statusFilter) {
-            const statusArray = statusFilter.split(',').map(s => s.trim()).filter(Boolean);
+            const cleanStatusFilter = statusFilter.startsWith('exact:') ? statusFilter.replace('exact:', '') : statusFilter;
+            
+            const statusArray = cleanStatusFilter.split(',').map(s => s.trim()).filter(Boolean);
             if (statusArray.length > 0) {
                 const singleStatusLower = statusArray[0].toLowerCase();
                 if (singleStatusLower === 'przyjęte') {

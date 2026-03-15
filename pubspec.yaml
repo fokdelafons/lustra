@@ -43,6 +43,7 @@ dependencies:
   firebase_analytics: ^12.1.1
   flutter_animate: ^4.5.2
   web_smooth_scroll: ^2.0.0
+  qr_flutter: ^4.1.0
 
 
 dev_dependencies:
@@ -60,6 +61,7 @@ flutter:
     - assets/google_logo.svg
     - assets/ja.jpg
     - assets/logo_full.svg
+    - assets/logo_full_white.svg
   
 flutter_launcher_icons:
   android: "launcher_icon"

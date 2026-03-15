@@ -692,9 +692,14 @@ const getLegislations = async (req, res) => {
             let query = db.collection('us_legislations').where('term', '==', parseInt(termToUse, 10));
 
             if (statusFilter) {
-                const statusArray = statusFilter.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
-                if (statusArray.length > 0) {
-                     query = query.where('subStatus', 'in', statusArray);
+                if (statusFilter.startsWith('exact:')) {
+                    const exactStatusRaw = statusFilter.replace('exact:', '').trim();
+                    query = query.where('status', '==', exactStatusRaw);
+                } else {
+                    const statusArray = statusFilter.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+                    if (statusArray.length > 0) {
+                         query = query.where('subStatus', 'in', statusArray);
+                    }
                 }
             } else {
                 query = query.where('subStatus', 'in', ["accepted", "rejected"]);

@@ -8,14 +8,12 @@ class UserProvider with ChangeNotifier {
   
   Map<String, dynamic> _votes = {};
   bool _marketingConsent = false;
-  bool _notificationsEnabled = false;
-  String? _notificationParliamentId;
+  List<String> _subscribedParliaments = [];
   String? _primaryParliamentId;
 
   List<String> _subscribedLists = [];
   List<String> _createdLists = [];
   bool _isCurator = false;
-  
   
   bool _isInitialized = false;
   bool _profileExists = true;
@@ -29,9 +27,11 @@ class UserProvider with ChangeNotifier {
 
   bool get isInitialized => _isInitialized;
   bool get marketingConsent => _marketingConsent;
-  bool get notificationsEnabled => _notificationsEnabled;
-  String? get notificationParliamentId => _notificationParliamentId;
+  List<String> get subscribedParliaments => _subscribedParliaments;
   String? get primaryParliamentId => _primaryParliamentId;
+
+  // Helper method for quick UI checks
+  bool isParliamentSubscribed(String parliamentId) => _subscribedParliaments.contains(parliamentId);
 
   List<String> get subscribedLists => _subscribedLists;
   List<String> get createdLists => _createdLists;
@@ -89,8 +89,7 @@ class UserProvider with ChangeNotifier {
         final profile = result['profile'] as Map<String, dynamic>;
         
         _marketingConsent = profile['marketingConsent'] ?? false;
-        _notificationsEnabled = profile['notificationsEnabled'] ?? false;
-        _notificationParliamentId = profile['notificationParliamentId'];
+        _subscribedParliaments = List<String>.from(profile['subscribedParliaments'] ?? []);
         _primaryParliamentId = profile['primaryParliamentId'];
 
         if (profile.containsKey('votes')) {
@@ -110,19 +109,19 @@ class UserProvider with ChangeNotifier {
     }
   }
 
-  Future<void> updatePreferences({bool? marketing, bool? notifications, String? parliamentId, String? fcmToken}) async {
+  Future<void> updatePreferences({bool? marketing, List<String>? subscribedParliaments, String? fcmToken, String? lang}) async {
     if (marketing != null) _marketingConsent = marketing;
-    if (notifications != null) _notificationsEnabled = notifications;
-    if (parliamentId != null) _notificationParliamentId = parliamentId;
-    
+    if (subscribedParliaments != null) _subscribedParliaments = subscribedParliaments;
     notifyListeners();
-
     try {
       final Map<String, dynamic> data = {};
       if (marketing != null) data['marketingConsent'] = marketing;
-      if (notifications != null) data['notificationsEnabled'] = notifications;
-      if (parliamentId != null) data['notificationParliamentId'] = parliamentId;
+      if (subscribedParliaments != null) data['subscribedParliaments'] = subscribedParliaments;
       if (fcmToken != null) data['fcmToken'] = fcmToken;
+      if (lang != null) data['preferredLanguage'] = lang;
+      if (data.isNotEmpty) {
+        await _apiService.callFunction('updateUserProfile', params: data);
+      }
     } catch (e) {
       developer.log("Błąd aktualizacji preferencji: $e", name: 'UserProvider');
     }
@@ -131,8 +130,7 @@ class UserProvider with ChangeNotifier {
   void _clear() {
     _votes = {};
     _marketingConsent = false;
-    _notificationsEnabled = false;
-    _notificationParliamentId = null;
+    _subscribedParliaments = [];
     _primaryParliamentId = null;
     _subscribedLists = [];
     _createdLists = [];

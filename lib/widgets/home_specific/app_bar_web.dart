@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'dart:developer' as developer;
 
 import '../../providers/language_provider.dart';
@@ -166,11 +167,10 @@ class _WebAppBarState extends State<WebAppBar> {
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Row(
           children: [
-            Text("Lustra",
-                style: TextStyle(
-                    color: Theme.of(context).primaryColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 24)),
+            SvgPicture.asset(
+              'assets/logo_full.svg',
+              height: 36,
+            ),
             const SizedBox(width: 40),
             _buildWebNavItem(l10n.bottomNavHome, 0, Icons.home),
             _buildWebNavItem(l10n.bottomNavInfo, 1, Icons.info_outline),
@@ -295,15 +295,9 @@ class _WebAppBarState extends State<WebAppBar> {
               if (user != null) {
                 return PopupMenuButton<String>(
                   tooltip: l10n.settingsTitle,
-                  child: CircleAvatar(
-                    radius: 16,
-                    backgroundColor: Theme.of(context).primaryColor,
-                    child: Text(
-                      user.email != null && user.email!.isNotEmpty
-                          ? user.email![0].toUpperCase()
-                          : 'U',
-                      style: const TextStyle(color: Colors.white, fontSize: 14),
-                    ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Icon(Icons.settings, color: Colors.grey[800], size: 28),
                   ),
                   onSelected: (String value) async {
                     final authService = context.read<AuthService>();
@@ -363,44 +357,85 @@ class _WebAppBarState extends State<WebAppBar> {
                   itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                     PopupMenuItem<String>(
                       value: 'language',
-                      child: Text(l10n.settingsChangeLanguage),
+                      child: Row(
+                        children: [
+                          Icon(Icons.language, size: 20, color: Colors.grey[700]),
+                          const SizedBox(width: 12),
+                          Text(l10n.settingsChangeLanguage),
+                        ],
+                      ),
                     ),
                     PopupMenuItem<String>(
                       enabled: true,
                       value: 'marketing_consent',
                       child: Consumer<UserProvider>(
-                          builder: (context, userProvider, _) {
-                        return SwitchListTile(
-                          title: Text(AppLocalizations.of(context)!.lustraClubLabel,
-                              style: const TextStyle(fontSize: 14)),
-                          value: userProvider.marketingConsent,
-                          activeColor: Theme.of(context).primaryColor,
-                          onChanged: (bool value) async {
-                            // Aktualizacja lokalna w Providerze
-                            userProvider.updatePreferences(marketing: value);
-
-                            // Zapis do bazy
-                            final authService = context.read<AuthService>();
-                            try {
-                              await authService.updateUserNotificationPrefs(
-                                  {'marketingConsent': value});
-                            } catch (e) {
-                              developer.log('Błąd zapisu zgody: $e');
-                            }
-                          },
-                          dense: true,
-                          contentPadding: EdgeInsets.zero,
-                        );
-                      }),
-                    ),
-                    PopupMenuItem<String>(
-                      value: 'delete_account',
-                      child: Text(l10n.settingsDeleteAccount,
-                          style: TextStyle(color: Colors.red)),
+                        builder: (context, userProvider, _) {
+                          return Row(
+                            children: [
+                              Icon(Icons.favorite_outline, size: 20, color: Colors.grey[700]),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(AppLocalizations.of(context)!.lustraClubLabel, style: const TextStyle(fontSize: 14)),
+                              ),
+                              Checkbox(
+                                value: userProvider.marketingConsent,
+                                onChanged: (bool? value) async {
+                                  if (value == null) return;
+                                  userProvider.updatePreferences(marketing: value);
+                                  final authService = context.read<AuthService>();
+                                  try {
+                                    await authService.updateUserNotificationPrefs({'marketingConsent': value});
+                                  } catch (e) {
+                                    developer.log('Błąd zapisu zgody: $e');
+                                  }
+                                },
+                                activeColor: Theme.of(context).primaryColor,
+                                visualDensity: VisualDensity.compact,
+                              ),
+                            ],
+                          );
+                        }
+                      ),
                     ),
                     PopupMenuItem<String>(
                       value: 'logout',
-                      child: Text(l10n.settingsLogout),
+                      child: Row(
+                        children: [
+                          Icon(Icons.logout, size: 20, color: Colors.grey[700]),
+                          const SizedBox(width: 12),
+                          Text(l10n.settingsLogout),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem<String>(
+                      value: 'delete_account',
+                      child: Row(
+                        children: [
+                          const Icon(Icons.delete_forever, size: 20, color: Colors.red),
+                          const SizedBox(width: 12),
+                          Text(l10n.settingsDeleteAccount, style: const TextStyle(color: Colors.red)),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuDivider(), // TYLKO JEDEN SEPARATOR NA DOLE
+                    PopupMenuItem<String>(
+                      enabled: false,
+                      value: 'version',
+                      height: 30,
+                      child: FutureBuilder<PackageInfo>(
+                        future: PackageInfo.fromPlatform(),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            return Center(
+                              child: Text(
+                                'v${snapshot.data!.version} (Build ${snapshot.data!.buildNumber})',
+                                style: TextStyle(fontSize: 11, color: Colors.grey[400], letterSpacing: 0.5),
+                              ),
+                            );
+                          }
+                          return const SizedBox.shrink();
+                        },
+                      ),
                     ),
                   ],
                 );

@@ -6,7 +6,7 @@ import 'package:intl/intl.dart' as intl;
 import '../../models/legislation.dart';
 import '../../services/parliament_manager.dart';
 import '../../providers/language_provider.dart';
-import 'home_section_card.dart';
+import 'ui_home_card.dart';
 import '../partially_expandable_list_widget.dart';
 import '../citizen_poll_widget.dart';
 

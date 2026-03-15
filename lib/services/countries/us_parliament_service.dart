@@ -101,13 +101,20 @@ class USParliamentService with ChangeNotifier implements ParliamentServiceInterf
   @override
   bool get isLoading => _isLoading;
 
-  @override
+@override
   Future<Map<String, String>> getLegislationFilterStatuses(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
     return {
       'all': l10n.filterStatusAll,
-      'Accepted': l10n.filterStatusPassed,
-      'Rejected': l10n.filterStatusRejected,
+      'Passed House': l10n.statusPassedHouse,
+      'Passed Senate': l10n.statusPassedSenate,
+      'Became Law': l10n.statusBecameLaw,
+      'To President': l10n.statusToPresident,
+      'Adopted': l10n.statusAdopted,
+      'Vetoed': l10n.statusVetoed,
+      'Failed': l10n.statusFailed,
+      'Placed on Calendar': l10n.statusPlacedOnCalendar,
+      'Introduced': l10n.statusIntroduced,
     };
   }
 

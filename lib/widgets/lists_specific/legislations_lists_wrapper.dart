@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../services/parliament_service_interface.dart';
 import '../../screens/lists/voted_legislation_list.dart';
@@ -93,7 +94,7 @@ class _LegislationWrapperScreenState extends State<LegislationWrapperScreen> {
       case 'civic': return l10n.civicProjectsSectionTitle;
       case 'tracked': return "Tracked Bills"; // TODO: Dodaj do l10n.trackedBillsTitle
       case 'curated': return "Public List"; // TODO: Dodaj do l10n.curatedListTitle
-      case 'voted':
+      case 'voted': //gówno?
       default: return l10n.legislationScreenTitle(""); 
     }
   }
@@ -104,53 +105,51 @@ class _LegislationWrapperScreenState extends State<LegislationWrapperScreen> {
     final currentTitle = _getTitle(context, widget.type);
     final bool isWideScreen = kIsWeb && MediaQuery.of(context).size.width > 800;
     final l10n = AppLocalizations.of(context)!;
-    
-    // Logic for appending parliament name (e.g., "Votings (Sejm RP)")
-    final fullTitle = currentTitle.contains(activeService.name) 
-        ? currentTitle 
-        : "$currentTitle (${activeService.name})";
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(fullTitle),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SvgPicture.asset(
+              activeService.source.flagIconAsset,
+              width: 18,
+              height: 18,
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                currentTitle,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
         centerTitle: true,
         backgroundColor: Theme.of(context).primaryColor,
         foregroundColor: Colors.white,
         
-        // --- LEADING (BACK / HOME) ---
+        // --- LEADING (HOME) ---
         leadingWidth: null,
         leading: Builder(
           builder: (context) {
-            final bool canPop = context.canPop();
-            
-            void onNavigation() {
-              if (canPop) {
-                context.pop();
-              } else {
-                context.go('/');
-              }
-            }
+            void goHome() => context.go('/');
 
-            // WEB STYLE (Matching DetailsAppBar)
             if (isWideScreen) {
               return InkWell(
-                onTap: onNavigation,
+                onTap: goHome,
                 borderRadius: BorderRadius.circular(50),
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Icon(
-                    canPop ? Icons.arrow_back : Icons.home, 
-                    color: Colors.white
-                  ),
+                child: const Padding(
+                  padding: EdgeInsets.all(12.0),
+                  child: Icon(Icons.home, color: Colors.white),
                 ),
               );
             }
 
-            // MOBILE STYLE (Standard Icon Button)
             return IconButton(
-              icon: Icon(canPop ? Icons.arrow_back : Icons.home),
-              tooltip: canPop ? l10n.actionBack : l10n.bottomNavHome,
-              onPressed: onNavigation,
+              icon: const Icon(Icons.home),
+              tooltip: l10n.bottomNavHome,
+              onPressed: goHome,
             );
           },
         ),

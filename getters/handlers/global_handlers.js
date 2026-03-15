@@ -266,8 +266,10 @@
                         exists: true, 
                         profile: {
                             marketingConsent: userData.marketingConsent ?? false,
-                            notificationsEnabled: userData.notificationsEnabled ?? false,
-                            notificationParliamentId: userData.notificationParliamentId ?? null,
+                            subscribedParliaments: userData.subscribedParliaments || 
+                                ((userData.notificationsEnabled && userData.notificationParliamentId) 
+                                    ? [userData.notificationParliamentId] 
+                                    : []),
                             primaryParliamentId: userData.primaryParliamentId ?? null,
                             votes: userData.votes || {}, //TODO: remove in future after pushing new vers
                             subscribedLists: userData.subscribedLists || [],
@@ -463,14 +465,16 @@
             return res.status(401).json({ error: { code: 'unauthenticated', message: 'The function must be called while authenticated.' } });
         }
         const data = req.body.data || req.body;
-        const allowedUpdates = ['notificationsEnabled', 'fcmToken', 'notificationParliamentId', 'marketingConsent'];
+        const allowedUpdates = ['fcmToken', 'marketingConsent', 'subscribedParliaments'];
         const updateData = {};
         for (const key of allowedUpdates) {
             if (data[key] !== undefined) {
                 updateData[key] = data[key];
             }
         }
-        if (updateData['notificationsEnabled'] === false) {
+        // Hygiene of database
+        if (data['subscribedParliaments'] !== undefined) {
+            updateData['notificationsEnabled'] = admin.firestore.FieldValue.delete();
             updateData['notificationParliamentId'] = admin.firestore.FieldValue.delete();
         }
 
@@ -494,7 +498,7 @@
 
     const reportError = async (req, res) => {
         const data = req.body.data || req.body || {};
-        const { targetId, targetType, message, source } = data;
+        const { targetId, targetType, message, source, diagnostics } = data;
         const uid = req.user?.uid;
 
         if (!uid) {
@@ -510,12 +514,17 @@
             if (sanitizedMessage.length === 0 || sanitizedMessage.length > 400) {
                 return res.status(400).json({ error: { code: 'invalid-argument', message: 'Bad Request: Message is empty or too long (max 400 chars).' } });
             }
-            if (!['legislation', 'deputy'].includes(targetType)) {
+            if (!['legislation', 'deputy', 'curated_list'].includes(targetType)) {
                 return res.status(400).json({ error: { code: 'invalid-argument', message: 'Bad Request: Invalid targetType.' } });
             }
 
-            const reportRef = db.collection('user_reports').doc();
+            const reportRef = db.collection('user_reports').doc();  
             const reportData = { targetId, targetType, userId: uid, source, message: sanitizedMessage, createdAt: admin.firestore.FieldValue.serverTimestamp() };
+            
+            if (diagnostics && typeof diagnostics === 'object') {
+                reportData.diagnostics = diagnostics;
+            }
+            
             await reportRef.set(reportData);
 
             return res.status(200).json({ data: { success: true, message: 'Report has been sent successfully.' } });
@@ -1042,6 +1051,66 @@ const setHighlightedBill = async (req, res) => {
   }
 };
 
+const sendCuratedListPush = async (req, res) => {
+  try {
+    const payload = req.body.data || {};
+    const { listId, prefix } = payload;
+    const uid = req.user?.uid;
+
+    if (!uid || !listId || !prefix) {
+        return res.status(400).json({ error: { message: 'Missing params', status: 'INVALID_ARGUMENT' } });
+    }
+
+    const listRef = db.collection('curated_lists').doc(listId);
+    const listSnap = await listRef.get();
+
+    if (!listSnap.exists) {
+        return res.status(404).json({ error: { message: 'List not found', status: 'NOT_FOUND' } });
+    }
+    
+    const listData = listSnap.data();
+
+    if (listData.ownerUid !== uid) {
+        return res.status(403).json({ error: { message: 'Not the owner', status: 'PERMISSION_DENIED' } });
+    }
+
+    const now = Date.now();
+    const lastNotified = listData.lastNotifiedAt ? listData.lastNotifiedAt.toMillis() : 0;
+    //COOLDOWN
+    const cooldownMs = 24 * 60 * 60 * 1000; 
+    const timeLeft = cooldownMs - (now - lastNotified);
+
+    if (timeLeft > 0) {
+        const hoursLeft = Math.ceil(timeLeft / (1000 * 60 * 60));
+        return res.status(429).json({ error: { message: `Cooldown active. Try again in ${hoursLeft}h.`, status: 'RESOURCE_EXHAUSTED' } });
+    }
+
+    const topicName = `list_${listId}`;
+    const message = {
+        notification: {
+            title: `Updates in: ${listData.listName || 'Curated List'}`,
+            body: 'The list curator has added new items or changes. Tap to check!'
+        },
+        data: {
+            type: 'curated_list_update',
+            listId: listId,
+            prefix: prefix
+        },
+        topic: topicName
+    };
+
+    await admin.messaging().send(message);
+
+    await listRef.update({ lastNotifiedAt: admin.firestore.FieldValue.serverTimestamp() });
+
+    return res.status(200).json({ data: { success: true } });
+
+  } catch (error) {
+    console.error('Błąd w sendCuratedListPush:', error);
+    return res.status(500).json({ error: { message: 'Internal Server Error', status: 'INTERNAL' } });
+  }
+};
+
     module.exports = {
     search,
     checkUserProfile,
@@ -1060,5 +1129,6 @@ const setHighlightedBill = async (req, res) => {
     getMyCuratedLists,
     deleteCuratedList,
     renameCuratedList,
-    setHighlightedBill
+    setHighlightedBill,
+    sendCuratedListPush
     };

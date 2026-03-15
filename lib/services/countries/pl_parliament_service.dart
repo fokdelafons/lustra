@@ -102,8 +102,19 @@ class PLParliamentService with ChangeNotifier implements ParliamentServiceInterf
     final l10n = AppLocalizations.of(context)!;
     return {
       'all': l10n.filterStatusAll,
-      'Przyjęte': l10n.filterStatusPassed,
-      'Odrzucone': l10n.filterStatusRejected,
+      "W procesie": l10n.statusInProgress,
+      "Uchwalono i przekazano do Senatu": l10n.statusPassedSejmToSenat,
+      "Odrzucono": l10n.statusRejectedSejm,
+      "Odrzucono przez Senat": l10n.statusRejectedBySenate,
+      "Przekazano Prezydentowi": l10n.statusToPresident,
+      "VETO Prezydenta": l10n.statusVetoPresident,
+      "Skierowano do TK": l10n.statusToConstitutionalTribunal,
+      "Podpisano przez Prezydenta": l10n.statusSignedByPresident,
+      "W mocy": l10n.statusEnacted,
+      "Uchwalono": l10n.statusAdoptedResolution,
+      "Natychmiastowe odrzucenie": l10n.statusImmediateRejection,
+      "Wycofano": l10n.statusWithdrawn,
+      "Nadchodzące głosowanie": l10n.statusUpcoming,
     };
   }
 

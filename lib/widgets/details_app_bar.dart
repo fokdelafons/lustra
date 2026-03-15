@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class DetailsAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -24,7 +25,7 @@ class DetailsAppBar extends StatelessWidget implements PreferredSizeWidget {
     final bool isWideScreen = kIsWeb && MediaQuery.of(context).size.width > 800;
 
     return AppBar(
-      title: Text(title),
+      title: SvgPicture.asset('assets/logo_full_white.svg', height: 36),
       centerTitle: true,
       backgroundColor: Theme.of(context).primaryColor,
       foregroundColor: Colors.white,

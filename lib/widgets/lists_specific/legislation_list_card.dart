@@ -7,6 +7,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../models/legislation.dart';
 import '../../services/parliament_service_interface.dart';
 import '../../providers/translators.dart';
+import '../../providers/interaction_provider.dart';
 
 
 class LegislationListCard extends StatelessWidget {
@@ -30,6 +31,16 @@ class LegislationListCard extends StatelessWidget {
     
     final displayInfo = activeService.getDisplayableStatusInfo(context, bill.status);
     
+    /* Zero-cost 'New' Radar (7 days) */
+    final interactionProvider = context.watch<InteractionProvider>();
+    final isViewed = interactionProvider.isViewedInSession(bill.id);
+    
+    // Fallback for nulls
+    final refDate = bill.lastUpdated ?? bill.processStartDate ?? bill.documentDate; 
+    final isNew = !isViewed && 
+                  refDate != null && 
+                  refDate.isAfter(DateTime.now().subtract(const Duration(days: 7)));
+    
     final List<String> keyPoints = bill.keyPoints;
     const int maxVisibleKeyPoints = 3;
     final bool hasMoreKeyPoints = keyPoints.length > maxVisibleKeyPoints;
@@ -46,7 +57,17 @@ class LegislationListCard extends StatelessWidget {
         side: BorderSide(color: Colors.transparent),
       ),
       child: InkWell(
-        onTap: onTap,
+        onTap: () {
+          /* TARCZA: Natychmiastowe zgaszenie poświaty "Nowe" (Mobile & Web Click) */
+          context.read<InteractionProvider>().markAsViewedLocally(bill.id);
+          onTap();
+        },
+        /* TARCZA: Magiczne zgaszenie poświaty przy najechaniu (Web/Desktop) */
+        onHover: (isHovering) {
+          if (isHovering && isNew) {
+            context.read<InteractionProvider>().markAsViewedLocally(bill.id);
+          }
+        },
         hoverColor: Theme.of(context).primaryColor.withValues(alpha: 0.04),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -55,8 +76,20 @@ class LegislationListCard extends StatelessWidget {
             children: [
               // --- HEADER: STATUS & CATEGORIES ---
               Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center, // Wyrównanie do środka dla kropki
                 children: [
+                  /* TARCZA: Subtelny wskaźnik "NOWE" (Kropka) */
+                  if (isNew) ...[
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColor,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
                   if (displayInfo.label.isNotEmpty) 
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

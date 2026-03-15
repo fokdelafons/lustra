@@ -63,6 +63,7 @@ const functionsMap = {
     'deleteCuratedList': globalHandlers.deleteCuratedList,
     'renameCuratedList': globalHandlers.renameCuratedList,
     'setHighlightedBill': globalHandlers.setHighlightedBill,
+    'sendCuratedListPush': globalHandlers.sendCuratedListPush,
 // --- PL ---
     'pl_getMetadata': plHandlers.getMetadata,
     'pl_getHomeScreenData': plHandlers.getHomeScreenData,
