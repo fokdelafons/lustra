@@ -465,7 +465,7 @@
             return res.status(401).json({ error: { code: 'unauthenticated', message: 'The function must be called while authenticated.' } });
         }
         const data = req.body.data || req.body;
-        const allowedUpdates = ['fcmToken', 'marketingConsent', 'subscribedParliaments'];
+        const allowedUpdates = ['fcmToken', 'marketingConsent', 'subscribedParliaments', 'notificationsTrackedBills'];
         const updateData = {};
         for (const key of allowedUpdates) {
             if (data[key] !== undefined) {
@@ -760,7 +760,7 @@ const createCuratedList = async (req, res) => {
 
     if (!uid) return res.status(401).json({ error: { message: 'Brak uwierzytelnienia', status: 'UNAUTHENTICATED' } });
     
-    const { listName, prefix, description = '' } = payload;
+    const { listName, prefix, description = '', tipProvider = null, tipUsername = null } = payload;
     if (!listName || !prefix) return res.status(400).json({ error: { message: 'Missing listName or prefix', status: 'INVALID_ARGUMENT' } });
 
     const userListsSnapshot = await db.collection('curated_lists').where('ownerUid', '==', uid).get();
@@ -777,6 +777,8 @@ const createCuratedList = async (req, res) => {
       ownerUid: uid,
       listName: listName,
       description: description,
+      tipProvider: tipProvider,
+      tipUsername: tipUsername,
       prefix: prefix,
       bills: [],
       civic: [],
@@ -938,10 +940,13 @@ const getCuratedListFeed = async (req, res) => {
     const listMetadata = {
       listId: listDoc.id,
       listName: data.listName,
-      ownerUid: data.ownerUid,
-      subscriberCount: data.subscriberCount,
+      description: data.description || '',
+      tipProvider: data.tipProvider || null,
+      tipUsername: data.tipUsername || null,
+      subscriberCount: data.subscriberCount || 0,
       prefix: data.prefix,
-      highlightedBillId: data.highlightedBillId || null
+      highlightedBillId: data.highlightedBillId || null,
+      lastNotifiedAt: data.lastNotifiedAt ? data.lastNotifiedAt.toDate().toISOString() : null
     };
 
     return res.status(200).json({ data: { metadata: listMetadata, legislations, civic } });
@@ -999,18 +1004,14 @@ const deleteCuratedList = async (req, res) => {
   }
 };
 
-const renameCuratedList = async (req, res) => {
+const updateCuratedListMeta = async (req, res) => {
   try {
     const payload = req.body.data || {};
     const uid = req.user?.uid || payload.userId;
-    const { listId, newName } = payload;
+    const { listId, newName, newDescription, tipProvider, tipUsername } = payload;
 
     if (!uid) return res.status(401).json({ error: { message: 'Brak autoryzacji', status: 'UNAUTHENTICATED' } });
-    if (!listId || !newName || typeof newName !== 'string' || newName.trim().length === 0) {
-      return res.status(400).json({ error: { message: 'Nieprawidłowe parametry', status: 'INVALID_ARGUMENT' } });
-    }
-
-    const trimmedName = newName.trim().substring(0, 40);
+    if (!listId) return res.status(400).json({ error: { message: 'Brak listId', status: 'INVALID_ARGUMENT' } });
 
     const listRef = db.collection('curated_lists').doc(listId);
     const listDoc = await listRef.get();
@@ -1018,11 +1019,22 @@ const renameCuratedList = async (req, res) => {
     if (!listDoc.exists) return res.status(404).json({ error: { message: 'Lista nie istnieje', status: 'NOT_FOUND' } });
     if (listDoc.data().ownerUid !== uid) return res.status(403).json({ error: { message: 'Brak uprawnień', status: 'PERMISSION_DENIED' } });
 
-    await listRef.update({ listName: trimmedName });
+    const updateData = { updatedAt: admin.firestore.FieldValue.serverTimestamp() };
+    
+    if (newName && typeof newName === 'string' && newName.trim().length > 0) {
+      updateData.listName = newName.trim().substring(0, 40);
+    }
+    if (newDescription !== undefined) {
+      updateData.description = newDescription ? newDescription.trim().substring(0, 300) : '';
+    }
+    if (tipProvider !== undefined) updateData.tipProvider = tipProvider;
+    if (tipUsername !== undefined) updateData.tipUsername = tipUsername;
 
-    return res.status(200).json({ data: { success: true, newName: trimmedName } });
+    await listRef.update(updateData);
+
+    return res.status(200).json({ data: { success: true, updatedFields: updateData } });
   } catch (error) {
-    console.error('Błąd w renameCuratedList:', error);
+    console.error('Błąd w updateCuratedListMeta:', error);
     return res.status(500).json({ error: { message: 'Wewnętrzny błąd serwera', status: 'INTERNAL' } });
   }
 };
@@ -1128,7 +1140,7 @@ const sendCuratedListPush = async (req, res) => {
     getCuratedListFeed,
     getMyCuratedLists,
     deleteCuratedList,
-    renameCuratedList,
+    updateCuratedListMeta,
     setHighlightedBill,
     sendCuratedListPush
     };

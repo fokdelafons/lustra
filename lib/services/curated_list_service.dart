@@ -23,14 +23,16 @@ class CuratedListService {
     }
   }
 
-  Future<bool> toggleBillInList(String listId, String billId, {String docType = 'bill'}) async {
+  Future<bool> toggleBillInList(String listId, String billId, String prefix, {String docType = 'bill'}) async {
     try {
       final response = await _apiService.callFunction('toggleBillInCuratedList', params: {
         'listId': listId,
         'billId': billId,
         'docType': docType,
       });
-      await ParliamentCacheManager('us').clearMyCuratedLists();
+      await ParliamentCacheManager(prefix).clearMyCuratedLists();
+      await ParliamentCacheManager(prefix).clearCuratedListFeed(listId);
+      await ParliamentCacheManager(prefix).clearCuratedListPreview(listId);
       return response['isAdded'] as bool? ?? false;
     } catch (e) {
       developer.log('Błąd podczas edycji listy: $e', name: 'CuratedListService');
@@ -133,15 +135,18 @@ Future<List<Map<String, dynamic>>> getMyLists(String prefix, {bool forceRefresh 
     }
   }
 
-Future<bool> renameList(String listId, String newName) async {
+Future<bool> updateListMeta(String listId, String newName, String? newDesc, String? tipProvider, String? tipUsername) async {
     try {
-      final response = await _apiService.callFunction('renameCuratedList', params: {
+      final response = await _apiService.callFunction('updateCuratedListMeta', params: {
         'listId': listId,
         'newName': newName,
+        if (newDesc != null) 'newDescription': newDesc,
+        if (tipProvider != null) 'tipProvider': tipProvider,
+        if (tipUsername != null) 'tipUsername': tipUsername,
       });
       return response['success'] as bool? ?? false;
     } catch (e) {
-      developer.log('Błąd podczas zmiany nazwy listy: $e', name: 'CuratedListService');
+      developer.log('Error updating list meta: $e', name: 'CuratedListService');
       rethrow;
     }
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:lustra/services/api_service.dart';
+import 'package:lustra/services/cache/cache_service.dart';
 import 'dart:developer' as developer;
 
 class UserProvider with ChangeNotifier {
@@ -8,8 +9,11 @@ class UserProvider with ChangeNotifier {
   
   Map<String, dynamic> _votes = {};
   bool _marketingConsent = false;
+  bool _notificationsTrackedBills = true;
   List<String> _subscribedParliaments = [];
   String? _primaryParliamentId;
+
+  bool get notificationsTrackedBills => _notificationsTrackedBills;
 
   List<String> _subscribedLists = [];
   List<String> _createdLists = [];
@@ -89,6 +93,7 @@ class UserProvider with ChangeNotifier {
         final profile = result['profile'] as Map<String, dynamic>;
         
         _marketingConsent = profile['marketingConsent'] ?? false;
+        _notificationsTrackedBills = profile['notificationsTrackedBills'] ?? true;
         _subscribedParliaments = List<String>.from(profile['subscribedParliaments'] ?? []);
         _primaryParliamentId = profile['primaryParliamentId'];
 
@@ -109,13 +114,15 @@ class UserProvider with ChangeNotifier {
     }
   }
 
-  Future<void> updatePreferences({bool? marketing, List<String>? subscribedParliaments, String? fcmToken, String? lang}) async {
+  Future<void> updatePreferences({bool? marketing, bool? notificationsTrackedBills, List<String>? subscribedParliaments, String? fcmToken, String? lang}) async {
     if (marketing != null) _marketingConsent = marketing;
+    if (notificationsTrackedBills != null) _notificationsTrackedBills = notificationsTrackedBills;
     if (subscribedParliaments != null) _subscribedParliaments = subscribedParliaments;
     notifyListeners();
     try {
       final Map<String, dynamic> data = {};
       if (marketing != null) data['marketingConsent'] = marketing;
+      if (notificationsTrackedBills != null) data['notificationsTrackedBills'] = notificationsTrackedBills;
       if (subscribedParliaments != null) data['subscribedParliaments'] = subscribedParliaments;
       if (fcmToken != null) data['fcmToken'] = fcmToken;
       if (lang != null) data['preferredLanguage'] = lang;
@@ -137,6 +144,7 @@ class UserProvider with ChangeNotifier {
     _isCurator = false;
     _currentUserId = null;
     _isInitialized = false;
+    CacheService().clearUserData();
     notifyListeners();
   }
 

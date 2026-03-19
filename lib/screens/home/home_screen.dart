@@ -112,6 +112,7 @@ class HomeContentState extends State<HomeContent> {
   final FocusNode _searchFocusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _searchWidgetKey = GlobalKey();
+  final GlobalKey _trackedCardKey = GlobalKey();
   bool _isInitialScrollPerformed = false;
   HomeScreenData? _data;
   bool _isLoading = true;
@@ -165,17 +166,19 @@ class HomeContentState extends State<HomeContent> {
         });
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted && _scrollController.hasClients && !_isInitialScrollPerformed) {
-            final RenderBox? renderBox = _searchWidgetKey.currentContext?.findRenderObject() as RenderBox?;
-              if (renderBox != null) {
-                if (!kIsWeb) {
-                  final searchBarHeight = renderBox.size.height;
-                  const separatorHeight = 16.0;
-                  _scrollController.jumpTo(searchBarHeight + separatorHeight);
-                }
-                setState(() {
-                  _isInitialScrollPerformed = true;
-                });
+            final RenderBox? searchBox = _searchWidgetKey.currentContext?.findRenderObject() as RenderBox?;
+            
+            if (searchBox != null) {
+              if (!kIsWeb) {
+                final searchHeight = searchBox.size.height;
+                final totalOffset = searchHeight + 16.0; 
+                
+                _scrollController.jumpTo(totalOffset);
               }
+              setState(() {
+                _isInitialScrollPerformed = true;
+              });
+            }
           }
         });
       }
@@ -296,7 +299,7 @@ Widget _buildBodyContent(BuildContext context) {
     
   final manager = context.watch<ParliamentManager>();
     if (_isLoading || manager.isLoading) {
-       return OsintLoader(text: "FETCHING MIRROR PARLIAMENT DATA..."); //TODO: l10n
+       return OsintLoader(text: l10n.loaderFetchingMirrorParliamentData);
     }
     
     return _buildContentList(context);
@@ -314,35 +317,44 @@ Widget _buildContentList(BuildContext context) {
     }
 
     List<Widget> sectionWidgets = [];
-
-    sectionWidgets.add(const TrackedCard());
-
-    if (homeData.popularVoted != null && homeData.popularVoted!.id.isNotEmpty) {
-      sectionWidgets.add(VotedCard(item: homeData.popularVoted!));
-    }
-    if (homeData.upcomingVote != null && homeData.upcomingVote!.id.isNotEmpty) {
-      sectionWidgets.add(UpcomingCard(item: homeData.upcomingVote!));
-    }
-    if (homeData.popularInProcess != null && homeData.popularInProcess!.id.isNotEmpty) {
-      sectionWidgets.add(ProcessCard(item: homeData.popularInProcess!));
-    }
+    sectionWidgets.add(Container(key: _trackedCardKey, child: const TrackedCard()));
 
     final userProvider = context.watch<UserProvider>();
+    const String masterListId = 'wIsxT9kCo0t02927tBIs';
     
-    final allListIds = {
+    final Set<String> uniqueListIds = {
+      masterListId, 
       ...userProvider.createdLists,
       ...userProvider.subscribedLists,
-    }.toList();
+    };
+    final List<String> allListIds = uniqueListIds.toList();
 
-    for (String listId in allListIds) {
-      sectionWidgets.add(CuratedListCard(listId: listId));
+    List<Widget> standardCards = [];
+    if (homeData.popularVoted != null && homeData.popularVoted!.id.isNotEmpty) {
+      standardCards.add(VotedCard(item: homeData.popularVoted!));
     }
-
+    if (homeData.upcomingVote != null && homeData.upcomingVote!.id.isNotEmpty) {
+      standardCards.add(UpcomingCard(item: homeData.upcomingVote!));
+    }
+    if (homeData.popularInProcess != null && homeData.popularInProcess!.id.isNotEmpty) {
+      standardCards.add(ProcessCard(item: homeData.popularInProcess!));
+    }
     if (homeData.civicProject != null) {
-      sectionWidgets.add(CivicProjectCard(project: homeData.civicProject!));
+      standardCards.add(CivicProjectCard(project: homeData.civicProject!));
     }
     if (homeData.topDeputies != null && homeData.topDeputies!.deputies.isNotEmpty) {
-      sectionWidgets.add(PoliticiansCard(deputies: homeData.topDeputies!.deputies));
+      standardCards.add(PoliticiansCard(deputies: homeData.topDeputies!.deputies));
+    }
+
+    int maxLength = standardCards.length > allListIds.length ? standardCards.length : allListIds.length;
+    
+    for (int i = 0; i < maxLength; i++) {
+      if (i < standardCards.length) {
+        sectionWidgets.add(standardCards[i]);
+      }
+      if (i < allListIds.length) {
+        sectionWidgets.add(CuratedListCard(listId: allListIds[i]));
+      }
     }
 
     if (sectionWidgets.isEmpty) {

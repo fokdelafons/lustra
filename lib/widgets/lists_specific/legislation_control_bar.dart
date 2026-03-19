@@ -225,7 +225,6 @@ class _AdvancedFiltersBarState extends State<_AdvancedFiltersBar> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // LEWA STRONA: Sortowanie
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -239,22 +238,21 @@ class _AdvancedFiltersBarState extends State<_AdvancedFiltersBar> {
                         .map((entry) => DropdownMenuItem(value: entry.key, child: Text(entry.value)))
                         .toList(),
                     onChanged: (val) {
-                      FocusManager.instance.primaryFocus?.unfocus(); // ZABIJA BŁĄD FOCUSU
+                      FocusManager.instance.primaryFocus?.unfocus();
                       widget.onSortChanged(val);
                     },
                     isDense: true,
-                    menuMaxHeight: 300, // ZMNIEJSZA ROZMIAR ROZWINIĘTEJ LISTY
+                    menuMaxHeight: 300,
                     underline: const SizedBox.shrink(),
                     icon: const Icon(Icons.keyboard_arrow_down, size: 16),
                   ),
                 ],
               ),
-              // PRAWA STRONA: Przycisk Filtrów
               TextButton.icon(
                 onPressed: () => setState(() => _isExpanded = !_isExpanded),
                 icon: Icon(_isExpanded ? Icons.tune : Icons.tune_outlined, size: 16),
                 label: Text(
-                  "Filters", // TODO: Przenieś do l10n w wolnej chwili
+                  l10n.filtersLabel,
                   style: Theme.of(context).textTheme.bodySmall,
                 ), 
                 style: TextButton.styleFrom(
@@ -267,7 +265,6 @@ class _AdvancedFiltersBarState extends State<_AdvancedFiltersBar> {
             ],
           ),
         ),
-        // ROZWIJANY PANEL
         AnimatedCrossFade(
           firstChild: const SizedBox(width: double.infinity, height: 0),
           secondChild: Container(
@@ -282,10 +279,10 @@ class _AdvancedFiltersBarState extends State<_AdvancedFiltersBar> {
               ),
             ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch, // Rozciąga rzędy, by InkWell działał na całej szerokości
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (widget.showDocType)
-                  Padding( // USUNIĘTO INKWELL
+                  Padding(
                     padding: const EdgeInsets.symmetric(vertical: 6.0),
                     child: Row(
                       children: [
@@ -319,13 +316,12 @@ class _AdvancedFiltersBarState extends State<_AdvancedFiltersBar> {
                     ),
                   ),
 
-                // FILTR: STATUS
                 if (widget.statusOptions.length > 1)
-                  Padding( // USUNIĘTO INKWELL
+                  Padding(
                     padding: const EdgeInsets.symmetric(vertical: 6.0),
                     child: Row(
                       children: [
-                        Text("Status", style: Theme.of(context).textTheme.labelMedium), // TODO: l10n
+                        Text(l10n.statusFilterLabel, style: Theme.of(context).textTheme.labelMedium),
                         const SizedBox(width: 16),
                         Expanded(
                           child: DropdownButtonHideUnderline(
@@ -354,7 +350,6 @@ class _AdvancedFiltersBarState extends State<_AdvancedFiltersBar> {
                     ),
                   ),
 
-                // FILTR: Tylko dokumenty tekstowe
                 InkWell(
                   onTap: () {
                     FocusManager.instance.primaryFocus?.unfocus();
@@ -370,7 +365,7 @@ class _AdvancedFiltersBarState extends State<_AdvancedFiltersBar> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("Only with source text", style: Theme.of(context).textTheme.labelMedium), // TODO: l10n
+                        Text(l10n.onlyWithSourceTextLabel, style: Theme.of(context).textTheme.labelMedium),
                         SizedBox(
                           height: 24,
                           child: Checkbox(

@@ -14,7 +14,7 @@ import '../../models/legislation.dart';
 import '../../models/parliament_source.dart';
 import '../../services/parliament_manager.dart';
 import '../../providers/translators.dart';
-import '../../services/app_router.dart';
+import '../../widgets/web_link.dart';
 import '../../widgets/lists_specific/legislation_control_bar.dart';
 import '../../widgets/lists_specific/legislation_list_card.dart';
 import '../../widgets/osint_loader.dart';
@@ -117,7 +117,8 @@ Future<void> _loadFilterOptions() async {
   final activeService = Provider.of<ParliamentServiceInterface>(context, listen: false);
   try {
     final documentTypes = await activeService.getLegislationFilterDocumentTypes(context);
-    final statuses = await activeService.getLegislationFilterStatuses(context);
+      if (!mounted) return;
+      final statuses = await activeService.getLegislationFilterStatuses(context);
     
     if (!mounted) return;
 
@@ -268,7 +269,7 @@ Widget build(BuildContext context) {
 	final l10n = AppLocalizations.of(context)!;
   final manager = Provider.of<ParliamentManager>(context);
   if (manager.isLoading || !manager.isInitialized) {
-    return const Center(child: OsintLoader(text: "LOADING LEGISLATIVE DATA...")); //TODO
+    return Center(child: OsintLoader(text: l10n.loaderLoadingData));
   }
   if (manager.error != null) {
     return Center(
@@ -365,10 +366,11 @@ Widget build(BuildContext context) {
 }
 
   Widget _buildListComponent(List<Legislation> processedBills) {
+    final l10n = AppLocalizations.of(context)!;
       developer.log('Building list component. isLoading: $_isLoading, errorMessage: $_errorMessage, processed count: ${processedBills.length}', name: 'LegislationScreen.ListComponent');
       
       if (_isLoading && _bills.isEmpty) {
-        return const Center(child: OsintLoader(text: "QUERYING THE ARCHIVE...")); //TODO
+        return Center(child: OsintLoader(text: l10n.loaderLoadingData));
       }
       if (_errorMessage != null) {
         return _buildErrorWidget();
@@ -391,10 +393,10 @@ Widget build(BuildContext context) {
         itemBuilder: (context, index) {
           if (index == processedBills.length) {
             return _isLoadingMore
-                ? const Center(
+                ? Center(
                     child: Padding(
                       padding: EdgeInsets.symmetric(vertical: 16.0),
-                      child: Center(child: OsintLoader(text: "LOADING MORE BILLS...")), //TODO
+                      child: Center(child: OsintLoader(text: l10n.loaderLoadingMore)),
                     ),
                   )
                 : const SizedBox.shrink();
@@ -420,18 +422,20 @@ Widget build(BuildContext context) {
               ],
             );
           }
-          return LegislationListCard(
-            bill: bill,
-            additionalInfoWidget: votingInfoWidget,
-            onTap: () {
-              final manager = context.read<ParliamentManager>();
-              final slug = manager.activeSlug;
-              final lang = context.read<LanguageProvider>().appLanguageCode;
-              final term = manager.currentTerm;
-              context.smartNavigate(
-                  '/$lang/$slug/$term/legislations/${bill.id}?list=voted',
-                  extra: bill);
-            },
+          final manager = context.read<ParliamentManager>();
+          final slug = manager.activeSlug;
+          final lang = context.read<LanguageProvider>().appLanguageCode;
+          final term = manager.currentTerm;
+          final internalPath = '/$lang/$slug/$term/legislations/${bill.id}?list=voted';
+
+          return WebLink(
+            path: internalPath,
+            extra: bill,
+            builder: (context, onTapCallback) => LegislationListCard(
+              bill: bill,
+              additionalInfoWidget: votingInfoWidget,
+              onTap: onTapCallback,
+            ),
           );
         },
       );

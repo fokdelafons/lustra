@@ -13,10 +13,10 @@ import '../../models/legislation.dart';
 import '../../models/parliament_source.dart';
 import '../../services/parliament_manager.dart';
 import '../../providers/translators.dart';
-import '../../services/app_router.dart';
 import '../../widgets/lists_specific/legislation_control_bar.dart';
 import '../../widgets/lists_specific/legislation_list_card.dart';
 import '../../widgets/osint_loader.dart';
+import '../../widgets/web_link.dart';
 
   class CivicLegislationScreen extends StatefulWidget {
     const CivicLegislationScreen({super.key});
@@ -242,12 +242,12 @@ import '../../widgets/osint_loader.dart';
 			final l10n = AppLocalizations.of(context)!;
       
       if (_isSyncingParliament) {
-      return const Center(child: OsintLoader(text: "ESTABLISHING SECURE CONNECTION...")); //TODO
+      return Center(child: OsintLoader(text: l10n.loaderEstablishingConnection));
       }
 
       final manager = Provider.of<ParliamentManager>(context);
       if (manager.isLoading || !manager.isInitialized) {
-      return const Center(child: OsintLoader(text: "LOADING LEGISLATIVE DATA...")); //TODO
+      return Center(child: OsintLoader(text: l10n.loaderLoadingData));
       }
       if (manager.error != null) {
       return Center(
@@ -319,8 +319,9 @@ import '../../widgets/osint_loader.dart';
     }
 
   Widget _buildListComponent(List<Legislation> processedBills) {
+    final l10n = AppLocalizations.of(context)!;
         if (_isLoading && _bills.isEmpty) {
-          return const Center(child: OsintLoader(text: "QUERYING INITIATIVES...")); //TODO
+          return Center(child: OsintLoader(text: l10n.loaderFetchingInitiatives));
         }
 
         if (_errorMessage != null) {
@@ -341,20 +342,24 @@ import '../../widgets/osint_loader.dart';
           itemBuilder: (context, index) {
             if (index == processedBills.length) {
               return _isLoadingMore 
-                  ? const Center(child: Padding(padding: EdgeInsets.symmetric(vertical: 16.0), child: OsintLoader(text: "LOADING MORE INITIATIVES..."))) //TODO
+                  ? Center(child: Padding(padding: const EdgeInsets.symmetric(vertical: 16.0), child: OsintLoader(text: l10n.loaderLoadingMoreInitiatives)))
                   : const SizedBox.shrink();
             }
             final bill = processedBills[index];
             
-            return LegislationListCard(
-              bill: bill,
-              additionalInfoWidget: null,
-              onTap: () {
-                final manager = context.read<ParliamentManager>();
-                final slug = manager.activeSlug;
-                final lang = context.read<LanguageProvider>().appLanguageCode;
-                context.smartNavigate('/$lang/$slug/civic/legislations/${bill.id}?list=civic', extra: bill);
-              },
+            final manager = context.read<ParliamentManager>();
+            final slug = manager.activeSlug;
+            final lang = context.read<LanguageProvider>().appLanguageCode;
+            final internalPath = '/$lang/$slug/civic/legislations/${bill.id}?list=civic';
+
+            return WebLink(
+              path: internalPath,
+              extra: bill,
+              builder: (context, onTapCallback) => LegislationListCard(
+                bill: bill,
+                additionalInfoWidget: null,
+                onTap: onTapCallback,
+              ),
             );
           },
         );

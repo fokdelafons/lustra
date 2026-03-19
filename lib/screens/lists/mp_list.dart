@@ -305,7 +305,7 @@ Widget _buildFilterChips() {
   final manager = Provider.of<ParliamentManager>(context);
 
   if (manager.isLoading || !manager.isInitialized) {
-    return const Center(child: OsintLoader(text: "RETRIEVING DOSSIERS...")); //TODO
+    return Center(child: OsintLoader(text: l10n.loaderLoadingProfiles));
   }
 
   if (manager.error != null) {
@@ -464,7 +464,7 @@ Widget _buildFilterChips() {
   Widget _buildMPList(List<MP> filteredMPs) {
       final l10n = AppLocalizations.of(context)!;
       if (_isLoading && _mps.isEmpty) {
-        return const Center(child: OsintLoader(text: "RETRIEVING DOSSIERS...")); //TODO
+        return Center(child: OsintLoader(text: l10n.loaderLoadingProfiles));
       }
       if (_errorMessage != null && _mps.isEmpty) {
         return Center(
@@ -519,9 +519,9 @@ Widget _buildFilterChips() {
         itemCount: filteredMPs.length + (_isLoadingMore ? 1 : 0),
         itemBuilder: (context, index) {
           if (index == filteredMPs.length) {
-            return const Padding(
+            return Padding(
               padding: EdgeInsets.symmetric(vertical: 16.0),
-              child: Center(child: OsintLoader(text: "RETRIEVING MORE DOSSIERS...")), //TODO
+              child: Center(child: OsintLoader(text: l10n.loaderLoadingMoreProfiles)),
             );
           }
           final mp = filteredMPs[index];

@@ -716,5 +716,237 @@
 "cancel": "Cancel",
 "pollVoteSignificance": "Your vote is just the beginning.",
 "pollShareImpact": "Algorithms often silence us. Your single share reaches an average of 50-300 people. Help us break the social media bubble.",
-"pollShareAction": "Share and amplify the citizens' voice"
+"pollShareAction": "Share and amplify the citizens' voice",
+"listRefreshed": "List refreshed!",
+  "errorNoDataReturned": "No data returned",
+  "errorMustBeLoggedInToSubscribe": "You must be logged in to subscribe.",
+  "subscribedToList": "Subscribed to list!",
+  "unsubscribedFromList": "Unsubscribed from list.",
+  "errorListRemovedByOwner": "List removed by an owner...",
+  "errorFailedToUpdateSubscription": "Failed to update subscription.",
+  "notificationSentCooldownActive": "Notification sent to subscribers!...",
+  "errorCooldownActiveNotification": "Cooldown active. You can send...",
+  "errorFailedToSendNotification": "Failed to send notification.",
+  "nameYourCuratorList": "Name your Curator List",
+  "hintCuratorListExample": "e.g. My Economic Policy",
+  
+  "listCreatedSuccess": "List '{text}' created!",
+  "@listCreatedSuccess": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+
+  "errorFailedToCreateList": "Failed to create list.",
+  "actionCreate": "Create",
+  "unnamedList": "Unnamed List",
+  "tooltipEditList": "Edit List",
+  "addDescriptionHint": "Add a description to tell others...",
+  
+  "subscribersCount": "{subs} subscribers",
+  "@subscribersCount": {
+    "placeholders": {
+      "subs": {
+        "type": "int"
+      }
+    }
+  },
+
+  "actionShareList": "Share List",
+  "actionSupportCreator": "Support Creator",
+  
+  "availableInHours": "Available in {hoursLeft}h",
+  "@availableInHours": {
+    "placeholders": {
+      "hoursLeft": {
+        "type": "int"
+      }
+    }
+  },
+
+  "actionNotifySubscribers": "Notify Subscribers",
+  "actionSubscribed": "Subscribed",
+  "actionSubscribe": "Subscribe",
+  "tooltipReportList": "Report List",
+  "tooltipDeleteList": "Delete List",
+  "draftYourCivicProject": "Draft Your Own Civic Project",
+  "draftCivicProjectDescription": "Turn your ideas into actual...",
+  "createYourOwnList": "Create Your Own List",
+  "createYourOwnListDescription": "Be a curator. Select bills...",
+  "editListDetails": "Edit List Details",
+  "listNameLabel": "List Name",
+  "descriptionOptionalLabel": "Description (Optional)",
+  "supportCreatorOptionalLabel": "Support Creator (Optional)",
+  
+  "providerUsernameLabel": "{provider} Username",
+  "@providerUsernameLabel": {
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+
+  "listUpdatedSuccess": "List updated!",
+  "errorFailedToUpdate": "Failed to update.",
+  "actionSave": "Save",
+  "deleteListDialogTitle": "Delete List?",
+  "deleteListDialogBody": "This action cannot be undone...",
+  "listDeletedSuccess": "List deleted.",
+  "errorFailedToDelete": "Failed to delete.",
+  "actionDelete": "Delete",
+  "syncingCuratedFeed": "SYNCING CURATED FEED...",
+  "actionTryAgain": "Try Again",
+  "tooltipSetAsListCover": "Set as list cover on Home Page",
+  "coverUpdatedSuccess": "Cover updated!",
+  "errorUpdatingCover": "Error updating cover.",
+  "loaderLoadingProfile": "LOADING PROFILE...",
+  "loaderRetrievingVoteLogs": "RETRIEVING VOTE LOGS...",
+  "loaderLoadingRecentVotes": "LOADING RECENT VOTES...",
+  "loaderFetchingData": "FETCHING DATA...",
+  "loaderLoadingTrackedBills": "LOADING TRACKED BILLS...",
+  "emptyTrackedBills": "You are not tracking any bills yet.",
+  "notificationsMobileOnly": "Notifications are available only in mobile app.",
+  "titleYourTrackedBills": "Your Tracked Bills",
+  "buttonSeeAllTracked": "See all tracked",
+  "titleNameYourList": "Name your List",
+  "hintEgMySocialPolicies": "e.g. My Social Policies",
+  
+  "snackbarListCreated": "List '{text}' created!",
+  "@snackbarListCreated": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+
+  "snackbarFailedToCreateList": "Failed to create list.",
+  "buttonCreate": "Create",
+  "titleRenameYourList": "Rename Your List",
+  "snackbarListRenamed": "List renamed!",
+  "snackbarFailedToRenameList": "Failed to rename list.",
+  "buttonSave": "Save",
+  "titleYourLists": "Your Lists",
+  "emptyNoListsYet": "You don't have any lists yet.",
+  "tooltipRename": "Rename",
+  "snackbarErrorUpdatingList": "Error updating list.",
+  "tooltipShareList": "Share List",
+  "tooltipDeleteList": "Delete List",
+  "buttonCreateNewList": "Create New List",
+  "errorLimitOf3ListsReached": "Limit of 3 lists reached.",
+  "snackbarFailedToDelete": "Failed to delete.",
+  "loaderFetchingMirrorParliamentData": "FETCHING MIRROR PARLIAMENT DATA...",
+  "loaderSecuringSafeChannel": "SECURING SAFE CHANNEL...",
+  "snackbarAddedToList": "Added to your list.",
+  "snackbarRemovedFromList": "Removed from your list.",
+  "loaderLoadingData": "LOADING DATA...",
+  "buttonAddToList": "Add to List",
+  "previousStatusLabel": "Previously:",
+  "statusLabel": "Status:",
+  "loaderEstablishingConnection": "ESTABLISHING CONNECTION...",
+  "loaderFetchingInitiatives": "FETCHING INITIATIVES...",
+  "loaderLoadingMoreInitiatives": "LOADING MORE INITIATIVES...",
+  "loaderLoadingMore": "LOADING MORE...",
+  "errorMustBeLoggedInToTrack": "You must be logged in to track bills. Notifications are available only on mobile apps. Create an account.",
+  "loaderLoadingYourTrackedList": "LOADING YOUR TRACKED LIST...",
+  "emptyNotTrackingAnything": "You are not tracking anything yet.",
+  "loaderLoadingLegislativeData": "LOADING LEGISLATIVE DATA...",
+  "loaderAuthorizing": "AUTHORIZING...",
+  "loaderLoading": "LOADING...",
+  "snackbarLinkCopied": "Link copied to clipboard!",
+  "civicWillRecord": "CIVIC WILL RECORD",
+  
+  "totalVotesRecorded": "{totalVotes} RECORDED VOTES",
+  "@totalVotesRecorded": {
+    "placeholders": {
+      "totalVotes": {
+        "type": "String"
+      }
+    }
+  },
+
+  "recordYourPositionForAudit": "Record your position for audit.",
+  "privateList": "Private List",
+  "loaderLoadingCuratedFeed": "LOADING CURATED FEED...",
+  "buttonOpenFullList": "Open Full List",
+  "filtersLabel": "Filters",
+  "statusFilterLabel": "Status",
+  "onlyWithSourceTextLabel": "Only with source text",
+  "trackedBillsTitle": "Tracked Bills",
+  "curatedListTitle": "Private List",
+  "loaderLoadingProfiles": "LOADING PROFILES...",
+  "loaderLoadingMoreProfiles": "LOADING MORE PROFILES...",
+  "loaderInitializingMirrorParliament": "INITIALIZING MIRROR PARLIAMENT...",
+  "loaderSyncingVectors": "SYNCING VECTORS...",
+  "reportIncludeDiagnosticsTitle": "Include system diagnostics",
+  "reportIncludeDiagnosticsSubtitle": "Attaches active state (Parliament, Term, Target) to help us patch the issue.",
+  "loaderSendingReport": "SENDING REPORT...",
+  
+  "primaryParliamentLabel": "Primary: {parliament}",
+  "@primaryParliamentLabel": {
+    "placeholders": {
+      "parliament": {
+        "type": "String"
+      }
+    }
+  },
+
+  "buttonCreateAnotherList": "Create Another List",
+  "buttonCreateTrackingList": "Create Tracking List",
+  "errorMissingListId": "Error: Missing List ID",
+  "actionTracked": "Tracked",
+  "actionTrack": "Track",
+  
+  "pollSupportPercent": "SUPPORT {percent}%",
+  "@pollSupportPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+
+  "pollSyncing": "SYNCING...",
+  
+  "pollOpposePercent": "OPPOSE {percent}%",
+  "@pollOpposePercent": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+
+  "pollPositionRecorded": "POSITION RECORDED",
+  "pollRestrictedToCitizens": "RESTRICTED TO CITIZENS OF COUNTRY",
+  
+  "yourListsForCountry": "Your Lists ({countryName})",
+  "@yourListsForCountry": {
+    "placeholders": {
+      "countryName": {
+        "type": "String"
+      }
+    }
+  },
+  "bottomNavGetInvolved": "Get Involved",
+  "errorLaunchUrl": "Could not launch link",
+  "infoTechTitle": "How Technology Works",
+  "infoTechSubtitle": "Learn about our architecture, data sterilization, and civic tech principles.",
+  "infoGovTitle": "Transparency & Governance",
+  "infoGovSubtitle": "Who builds this, who pays for it, and where we are heading.",
+  "infoPrivacyTitle": "Constitution & Privacy",
+  "infoPrivacySubtitle": "Radical transparency. Exactly what data we collect and why.",
+  "manualTitle": "Open Citizens' Manual",
+  "manualSubtitle": "Learn how to reclaim agency in democracy.",
+  "howToActTitle": "How to act with Lustra",
+  "actAuditTitle": "Civic Audit",
+  "actAuditSubtitle": "Vote on policies and bills to shape the hierarchy of topics in your government and leave solid evidence of Citizens' Will. Don't let media steer off the conversation ever again.",
+  "actWatchlistTitle": "Curated Watchlists",
+  "actWatchlistSubtitle": "Create custom lists of official bills and civic projects to gather subscribers and increase awareness. Use existing social media as lobbying power.",
+  "actDraftTitle": "Draft Civic Bills",
+  "actDraftSubtitle": "Submit your own professional initiatives directly to Lustra. Modern society needs new ideas that are not gatekeeped by capital. Create, share and collect support.",
+  "joinCommunityTitle": "Join the Community"
 }

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:lustra/providers/language_provider.dart';
 import 'package:flutter/foundation.dart';
@@ -19,6 +18,7 @@ import '../widgets/details_app_bar.dart';
 import '../widgets/error_report_dialog.dart';
 import '../widgets/citizen_poll_widget.dart';
 import '../../widgets/osint_loader.dart';
+import '../../widgets/web_link.dart';
 
 // --- LEGACY CODE --- 
 // potential for some rework
@@ -366,7 +366,7 @@ Widget build(BuildContext context) {
   if (manager.isLoading || !manager.isInitialized) {
     return Scaffold(
       appBar: DetailsAppBar(title: '', onShare: null),
-      body: const Center(child: OsintLoader(text: "EXTRACTING DOSSIER...")), //TODO: l10n
+      body: Center(child: OsintLoader(text: l10n.loaderLoadingProfile)),
     );
   }
   if (manager.error != null) {
@@ -393,7 +393,7 @@ Widget build(BuildContext context) {
   if (_isLoading) {
     return Scaffold(
       appBar: DetailsAppBar(title: '', onShare: null),
-      body: const Center(child: OsintLoader(text: "EXTRACTING DOSSIER...")), //TODO
+      body: Center(child: OsintLoader(text: l10n.loaderLoadingProfile)),
     );
   }
   if (_error != null) {
@@ -411,7 +411,6 @@ Widget build(BuildContext context) {
   final TextStyle? subSectionTitleStyle = textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600);
   final displayMP = _mp!;
 
-  final bool isDesktopWeb = kIsWeb && MediaQuery.of(context).size.width > 750;
       Widget contentBody = kIsWeb
         ? SingleChildScrollView(
             controller: _pageScrollController,
@@ -806,7 +805,7 @@ return Scaffold(
     final bool attendanceAvailable = _mp!.attendancePercentage != null;
     if (!attendanceAvailable) {
       if (_isLoadingVotings && votes.isEmpty) {
-      return const OsintLoader(text: "RETRIEVING VOTE LOGS..."); //TODO: l10n
+      return OsintLoader(text: l10n.loaderRetrievingVoteLogs);
     }
       if (_votingsError != null && votes.isEmpty) {
       return Center(
@@ -904,30 +903,17 @@ return Scaffold(
 
                       if (vote.link.isNotEmpty) {
                          final internalPath = '/$lang/$slug/$term/legislations/${vote.link}';
-                         final fullWebUrl = kIsWeb 
-                             ? Uri.parse('${Uri.base.origin}/#$internalPath')
-                             : Uri.parse('https://lustra.dev$internalPath');
-                         
-                         return Link(
-                           uri: fullWebUrl,
-                           target: LinkTarget.blank, 
-                           builder: (context, followLink) {
-                             return InkWell(
-                               onTap: () {
-                                 if (kIsWeb) {
-                                   followLink?.call();
-                                 } else {
-                                   context.push(internalPath);
-                                 }
-                               },
-                               child: Text(
-                                  vote.title,
-                                  style: voteTextStyle.copyWith(
-                                    color: Theme.of(context).primaryColor,
-                                  ),
-                               ),
-                             );
-                           }
+                         return WebLink(
+                           path: internalPath,
+                           builder: (context, onTapCallback) => InkWell(
+                             onTap: onTapCallback,
+                             child: Text(
+                                vote.title,
+                                style: voteTextStyle.copyWith(
+                                  color: Theme.of(context).primaryColor,
+                                ),
+                             ),
+                           ),
                          );
                       } 
                       else if (vote.votingUrl != null && vote.votingUrl!.isNotEmpty) {
@@ -972,10 +958,10 @@ return Scaffold(
       }
     } else if (_isLoadingVotings && votes.isEmpty) {
       listChildren.add(
-        const Center(
+        Center(
           child: Padding(
             padding: EdgeInsets.symmetric(vertical: 32.0),
-            child: OsintLoader(text: "RETRIEVING VOTE LOGS..."), // TODO: l10n
+            child: OsintLoader(text: l10n.loaderRetrievingVoteLogs),
           ),
         )
       );
@@ -1007,12 +993,12 @@ return Scaffold(
       );
     }
     if (_isLoadingMoreVotings) {
-      listChildren.add(const Center(child: Padding(padding: EdgeInsets.all(16.0), child: OsintLoader(text: "LOADING RECENT VOTES...")))); //TODO
+      listChildren.add(Center(child: Padding(padding: const EdgeInsets.all(16.0), child: OsintLoader(text: l10n.loaderLoadingRecentVotes))));
     }
     
     if (listChildren.isEmpty) {
       if (_isLoadingVotings && !attendanceAvailable) {
-        return const Center(child: OsintLoader(text: "RETRIEVING VOTE LOGS...")); //TODO
+        return Center(child: OsintLoader(text: l10n.loaderRetrievingVoteLogs));
       }
       return Padding(
         padding: const EdgeInsets.all(16.0),
@@ -1038,7 +1024,7 @@ return Scaffold(
     final l10n = AppLocalizations.of(context)!;
     developer.log('MPDetailsScreen: _buildInterpellationsTabContent - _isLoadingInterpellations: $_isLoadingInterpellations, _interpellationsError: $_interpellationsError, _interpellationsLoaded: $_interpellationsLoaded, interpellations.isEmpty: ${interpellations.isEmpty}');
     if (_isLoadingInterpellations && interpellations.isEmpty) {
-      return const Center(child: OsintLoader(text: "FETCHING INQUIRIES...")); // TODO
+      return Center(child: OsintLoader(text: l10n.loaderFetchingData));
     }
     if (_interpellationsError != null && interpellations.isEmpty) {
       return Center(
@@ -1064,7 +1050,6 @@ return Scaffold(
         child: Center(child: Text(l10n.noInterpellationsData, style: TextStyle(color: Colors.grey[600]))),
       );
     }
-    // TARCZA: Prawdziwy, bezpieczny nasłuch przewijania
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification scrollInfo) {
         if (!_isLoadingInterpellations && _hasMoreInterpellations && scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 50) {
@@ -1078,7 +1063,7 @@ return Scaffold(
         itemBuilder: (context, index) {
           if (index == interpellations.length) {
             if (_isLoadingMoreInterpellations) {
-              return const Center(child: Padding(padding: EdgeInsets.all(16.0), child: OsintLoader(text: "FETCHING ARCHIVED DATA..."))); //TODO
+              return Center(child: Padding(padding: const EdgeInsets.all(16.0), child: OsintLoader(text: l10n.loaderFetchingData)));
             }
             return const SizedBox.shrink();
           }

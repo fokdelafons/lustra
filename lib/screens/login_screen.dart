@@ -527,7 +527,7 @@ Widget build(BuildContext context) {
                     child: Text(_errorMessage!, style: TextStyle(color: Theme.of(context).colorScheme.error), textAlign: TextAlign.center),
                   ),
                 if (_isLoading)
-                  const OsintLoader(text: "AUTHORIZING...") //TODO: l10n
+                  OsintLoader(text: l10n.loaderAuthorizing)
                 else
                   ElevatedButton(
                     onPressed: _submit,
@@ -550,7 +550,7 @@ Widget build(BuildContext context) {
                 ),
                 const SizedBox(height: 16),
                 if (_isGoogleLoading)
-                  const OsintLoader(text: "LOADING...") //TODO: l10n
+                  OsintLoader(text: l10n.loaderLoading)
                 else
                   ElevatedButton.icon(
                     icon: SvgPicture.asset('assets/google_logo.svg', height: 22),
@@ -568,13 +568,13 @@ Widget build(BuildContext context) {
                   ),
                 const SizedBox(height: 16),
                 if (_isFacebookLoading)
-                  const OsintLoader(text: "LOADING...") //TODO: l10n
+                  OsintLoader(text: l10n.loaderLoading)
                 else
                   _buildFacebookButton(context),
                   const SizedBox(height: 16),
                   if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) ...[
                     if (_isAppleLoading)
-                      const OsintLoader(text: "LOADING...") //TODO: l10n
+                      OsintLoader(text: l10n.loaderLoading)
                     else
                       ElevatedButton.icon(
                         icon: const Icon(Icons.apple, color: Colors.white),

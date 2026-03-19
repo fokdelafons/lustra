@@ -93,10 +93,10 @@ class _SupportProjectScreenState extends State<SupportProjectScreen> {
                 child: Consumer<PaymentService>(
                   builder: (context, paymentService, child) {
                     if (paymentService.isLoading) {
-                      return const Center(
+                      return Center(
                         child: Padding(
                           padding: EdgeInsets.symmetric(vertical: 24.0), 
-                          child: OsintLoader(text: "SECURING SAFE CHANNEL...") //TODO
+                          child: OsintLoader(text: l10n.loaderSecuringSafeChannel)
                         )
                       );
                     }

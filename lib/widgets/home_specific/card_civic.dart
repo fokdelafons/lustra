@@ -10,6 +10,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:lustra/providers/language_provider.dart';
 import '../partially_expandable_list_widget.dart';
+import '../web_link.dart';
 
 class CivicProjectCard extends StatelessWidget {
   final Legislation project;
@@ -70,32 +71,39 @@ class CivicProjectCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      InkWell(
-                        onTap: () {
+                      Builder(
+                        builder: (context) {
                           final manager = context.read<ParliamentManager>();
                           final slug = manager.activeSlug;
                           final lang = context.read<LanguageProvider>().appLanguageCode;
-                          context.smartNavigate('/$lang/$slug/civic-project');
-                        },
-                        borderRadius: BorderRadius.circular(16),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                headerActionText,
-                                style: TextStyle(
-                                  color: primaryColor,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 12
+                          final internalPath = '/$lang/$slug/civic-project';
+                          
+                          return WebLink(
+                            path: internalPath,
+                            builder: (context, onTapCallback) => InkWell(
+                              onTap: onTapCallback,
+                              borderRadius: BorderRadius.circular(16),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      headerActionText,
+                                      style: TextStyle(
+                                        color: primaryColor,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 12
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Icon(Icons.info_outline, size: 16, color: primaryColor),
+                                  ],
                                 ),
                               ),
-                              const SizedBox(width: 4),
-                              Icon(Icons.info_outline, size: 16, color: primaryColor),
-                            ],
-                          ),
-                        ),
+                            ),
+                          );
+                        }
                       ),
                     ],
                   ),
@@ -215,34 +223,41 @@ class CivicProjectCard extends StatelessWidget {
           ),
           Material(
             color: lightPrimaryColor,
-            child: InkWell(
-              hoverColor: primaryColor.withAlpha((255 * 0.15).round()),
-              onTap: () {
+            child: Builder(
+              builder: (context) {
                 final manager = context.read<ParliamentManager>();
                 final slug = manager.activeSlug;
                 final lang = context.read<LanguageProvider>().appLanguageCode;
-                context.smartNavigate('/$lang/$slug/civic/legislations');
-              },
-              child: Container(
-                width: double.infinity,
-                alignment: Alignment.center,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Flexible(
-                      child: Text(
-                        bottomButtonText,
-                        style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 13),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
+                final internalPath = '/$lang/$slug/civic/legislations';
+
+                return WebLink(
+                  path: internalPath,
+                  builder: (context, onTapCallback) => InkWell(
+                    hoverColor: primaryColor.withAlpha((255 * 0.15).round()),
+                    onTap: onTapCallback,
+                    child: Container(
+                      width: double.infinity,
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              bottomButtonText,
+                              style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 13),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(Icons.arrow_forward, size: 16, color: primaryColor),
+                        ],
                       ),
                     ),
-                    const SizedBox(width: 4),
-                    Icon(Icons.arrow_forward, size: 16, color: primaryColor),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              },
             ),
           ),
         ],

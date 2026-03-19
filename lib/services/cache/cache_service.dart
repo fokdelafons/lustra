@@ -73,6 +73,25 @@ class CacheService {
     developer.log('Wyczyszczono cache dla prefixu: $prefix', name: 'CacheService');
   }
 
+  Future<void> clearUserData() async {
+    await init();
+    final keys = _prefs?.getKeys();
+    if (keys == null) return;
+    
+    final userKeys = [
+      '_cached_tracked_items', 
+      '_curated_list', 
+      '_my_curated_lists', 
+      '_local_viewed_bills'
+    ];
+    
+    final toRemove = keys.where((k) => userKeys.any((uk) => k.contains(uk))).toList();
+    for (var key in toRemove) {
+      await _prefs?.remove(key);
+    }
+    developer.log('Garbage Collector: Wyczyszczono wrażliwy cache użytkownika z dysku.', name: 'CacheService');
+  }
+
   DateTime? _parseDate(String? dateString) {
     if (dateString == null) return null;
     final int? timestamp = int.tryParse(dateString);

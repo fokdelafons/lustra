@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart'; 
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../models/mp.dart';
 import '../models/legislation.dart';
@@ -14,7 +15,7 @@ import '../screens/home/info_screen.dart';
 import '../screens/home/terms_screen.dart'; 
 import '../screens/home/tech_screen.dart';
 import '../screens/home/support_project_screen.dart';
-import '../screens/home/future_features_screen.dart';
+import '../screens/home/get_involved_screen.dart';
 import '../screens/mp_details_screen.dart';
 import '../screens/legislation_details_screen.dart';
 import '../screens/civic_project_rules.dart';
@@ -241,12 +242,13 @@ class RouteContextGuard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final pManager = context.watch<ParliamentManager>();
     final lProvider = context.watch<LanguageProvider>();
     if (!pManager.isReady) {
       return Container(
         color: Theme.of(context).scaffoldBackgroundColor,
-        child: const Center(child: OsintLoader(text: "INITIALIZING MIRROR PARLIAMENT...")), //TODO
+        child: Center(child: OsintLoader(text: l10n.loaderInitializingMirrorParliament)),
       );
     }
     bool langMatch = true;
@@ -275,7 +277,7 @@ class RouteContextGuard extends StatelessWidget {
     
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
-      child: const Center(child: OsintLoader(text: "SYNCING VECTORS...")), //TODO
+      child: Center(child: OsintLoader(text: l10n.loaderSyncingVectors)),
     );
   }
 

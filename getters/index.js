@@ -61,7 +61,7 @@ const functionsMap = {
     'getCuratedListFeed': globalHandlers.getCuratedListFeed,
     'getMyCuratedLists': globalHandlers.getMyCuratedLists,
     'deleteCuratedList': globalHandlers.deleteCuratedList,
-    'renameCuratedList': globalHandlers.renameCuratedList,
+    'updateCuratedListMeta': globalHandlers.updateCuratedListMeta,
     'setHighlightedBill': globalHandlers.setHighlightedBill,
     'sendCuratedListPush': globalHandlers.sendCuratedListPush,
 // --- PL ---

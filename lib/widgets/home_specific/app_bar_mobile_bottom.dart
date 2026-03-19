@@ -42,7 +42,7 @@ class MobileNavBar extends StatelessWidget {
         BottomNavigationBarItem(icon: const Icon(Icons.home), label: l10n.bottomNavHome),
         BottomNavigationBarItem(icon: const Icon(Icons.info_outline), label: l10n.bottomNavInfo),
         BottomNavigationBarItem(icon: const Icon(Icons.favorite_outline), label: l10n.bottomNavSupport),
-        BottomNavigationBarItem(icon: const Icon(Icons.lightbulb_outline), label: l10n.bottomNavFutureFeatures),
+        BottomNavigationBarItem(icon: const Icon(Icons.handshake_outlined), label: l10n.bottomNavGetInvolved),
       ],
       currentIndex: currentIndex,
       selectedItemColor: Theme.of(context).primaryColor,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:url_launcher/link.dart';
 import '../../services/app_router.dart';
 
 class InfoScreen extends StatelessWidget {
@@ -56,28 +57,106 @@ class InfoScreen extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.5),
             ),
             SizedBox(height: MediaQuery.of(context).size.height * 0.04),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                TextButton(
-                  onPressed: () {
-                    context.smartNavigate('/info/tech');
-                  },
-                  child: Text(
-                    l10n.linkHowTechnologyWorks,
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold),
+            // Modern CTA Container with hybrid navigation support (External Link OR Internal Routing)
+            Builder(
+              builder: (context) {
+                final lang = Localizations.localeOf(context).languageCode;
+                
+                Widget buildCtaCard(String? urlPath, IconData icon, String title, String subtitle, {VoidCallback? onTapFallback}) {
+                  
+                  Widget content = Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      // If urlPath is null, we rely entirely on onTapFallback
+                      onTap: onTapFallback,
+                      borderRadius: BorderRadius.circular(8),
+                      child: Ink(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(color: Colors.grey[300]!),
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color(0x14000000), // 8% opacity black
+                              blurRadius: 12,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(icon, size: 32, color: Theme.of(context).primaryColor),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    title,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Theme.of(context).primaryColor,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    subtitle,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey[700],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+
+                  // If we have an external URL path, wrap the content in a Link widget for Web support
+                  if (urlPath != null) {
+                    return Link(
+                      uri: Uri.parse('https://lustra.news/$lang$urlPath'),
+                      target: LinkTarget.blank,
+                      builder: (context, followLink) {
+                        return GestureDetector(
+                          onTap: followLink,
+                          child: content,
+                        );
+                      },
+                    );
+                  }
+
+                  return content;
+                }
+
+                return Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFAFAFA),
+                    border: Border.all(color: Colors.grey[300]!),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    context.smartNavigate('/info/terms');
-                  },
-                  child: Text(
-                    l10n.linkTermsAndPrivacy,
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold),
+                  child: Column(
+                    children: [
+                      // INTERNAL ROUTING
+                      buildCtaCard(null, Icons.memory, l10n.infoTechTitle, l10n.infoTechSubtitle, onTapFallback: () {
+                        context.smartNavigate('/info/tech');
+                      }),
+                      const SizedBox(height: 16),
+                      
+                      // EXTERNAL LINKS
+                      buildCtaCard('/info/governance/', Icons.account_balance, l10n.infoGovTitle, l10n.infoGovSubtitle),
+                      const SizedBox(height: 16),
+                      buildCtaCard('/info/privacy-policy/', Icons.policy, l10n.infoPrivacyTitle, l10n.infoPrivacySubtitle),
+                    ],
                   ),
-                ),
-              ],
+                );
+              },
             ),
           ],
         ),

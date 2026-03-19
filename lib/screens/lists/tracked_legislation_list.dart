@@ -12,7 +12,7 @@ import '../../services/parliament_manager.dart';
 import '../../services/tracking_service.dart';
 import '../../models/legislation.dart';
 import '../../widgets/lists_specific/legislation_list_card.dart';
-import '../../services/app_router.dart';
+import '../../widgets/web_link.dart';
 import '../../widgets/osint_loader.dart';
 
 class TrackedLegislationScreen extends StatefulWidget {
@@ -44,11 +44,12 @@ class TrackedLegislationScreenState extends State<TrackedLegislationScreen> with
   }
 
   Future<void> _loadData() async {
+    final l10n = AppLocalizations.of(context)!;
     if (!mounted) return;
     
     if (FirebaseAuth.instance.currentUser == null) {
       setState(() {
-        _errorMessage = "You must be logged in to track bills."; // TODO: L10N
+        _errorMessage = l10n.errorMustBeLoggedInToTrack;
         _isLoading = false;
       });
       return;
@@ -73,7 +74,6 @@ class TrackedLegislationScreenState extends State<TrackedLegislationScreen> with
 
       List<Legislation> combined = [];
       
-      // Parsowanie z Fail-Safe
       for (var json in rawLegislations) {
         try { combined.add(Legislation.fromJson(json as Map<String, dynamic>)); } catch (_) {}
       }
@@ -81,7 +81,6 @@ class TrackedLegislationScreenState extends State<TrackedLegislationScreen> with
         try { combined.add(Legislation.fromJson(json as Map<String, dynamic>)); } catch (_) {}
       }
 
-      // Sortowanie lokalne (najnowsze na górze)
       combined.sort((a, b) {
         final dateA = a.processStartDate ?? a.documentDate ?? DateTime.now();
         final dateB = b.processStartDate ?? b.documentDate ?? DateTime.now();
@@ -113,10 +112,11 @@ class TrackedLegislationScreenState extends State<TrackedLegislationScreen> with
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     super.build(context);
     
     if (_isLoading) {
-      return const Center(child: OsintLoader(text: "LOADING CUSTOM DOSSIER...")); //TODO
+      return Center(child: OsintLoader(text: l10n.loaderLoadingYourTrackedList));
     }
 
     if (_errorMessage != null) {
@@ -146,8 +146,8 @@ class TrackedLegislationScreenState extends State<TrackedLegislationScreen> with
           children: [
             const Icon(Icons.notifications_off_outlined, size: 48, color: Colors.grey),
             const SizedBox(height: 16),
-            const Text(
-              "You are not tracking any bills yet.", // TODO: L10N
+            Text(
+              l10n.emptyNotTrackingAnything,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
@@ -166,18 +166,19 @@ class TrackedLegislationScreenState extends State<TrackedLegislationScreen> with
       itemBuilder: (context, index) {
         final bill = _bills[index];
         
-        return LegislationListCard(
-          bill: bill,
-          onTap: () {
-            final manager = context.read<ParliamentManager>();
-            final slug = manager.activeSlug;
-            final lang = context.read<LanguageProvider>().appLanguageCode;
-            
-            // Dynamiczne routowanie: Obywatelskie vs Oficjalne
-            final term = bill.documentType == 'civic' ? 'civic' : manager.currentTerm.toString();
-            
-            context.smartNavigate('/$lang/$slug/$term/legislations/${bill.id}?list=tracked', extra: bill);
-          },
+        final manager = context.read<ParliamentManager>();
+        final slug = manager.activeSlug;
+        final lang = context.read<LanguageProvider>().appLanguageCode;
+        final term = bill.documentType == 'civic' ? 'civic' : manager.currentTerm.toString();
+        final internalPath = '/$lang/$slug/$term/legislations/${bill.id}?list=tracked';
+
+        return WebLink(
+          path: internalPath,
+          extra: bill,
+          builder: (context, onTapCallback) => LegislationListCard(
+            bill: bill,
+            onTap: onTapCallback,
+          ),
         );
       },
     );

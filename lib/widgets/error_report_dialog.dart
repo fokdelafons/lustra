@@ -76,8 +76,8 @@ void showErrorReportDialog({
                     ),
                     const SizedBox(height: 16),
                     CheckboxListTile(
-                      title: const Text("Include system diagnostics", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)), // TODO: l10n
-                      subtitle: const Text("Attaches active state (Parliament, Term, Target) to help us patch the issue.", style: TextStyle(fontSize: 12, color: Colors.grey)), // TODO: l10n
+                      title: Text(l10n.reportIncludeDiagnosticsTitle, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                      subtitle: Text(l10n.reportIncludeDiagnosticsSubtitle, style: const TextStyle(fontSize: 12, color: Colors.grey)),
                       value: includeDiagnostics,
                       activeColor: Theme.of(mainContext).primaryColor,
                       visualDensity: VisualDensity.compact,
@@ -90,10 +90,10 @@ void showErrorReportDialog({
                       contentPadding: EdgeInsets.zero,
                     ),
                   ] else ...[
-                    const SizedBox(
+                    SizedBox(
                       height: 120,
                       child: Center(
-                        child: OsintLoader(text: "SENDING REPORT..."), //TODO
+                        child: OsintLoader(text: l10n.loaderSendingReport),
                       ),
                     ),
                   ],

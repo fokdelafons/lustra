@@ -4,7 +4,6 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:lustra/providers/language_provider.dart';
-import 'package:go_router/go_router.dart';
 import 'package:url_launcher/link.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -14,6 +13,7 @@ import 'package:web_smooth_scroll/web_smooth_scroll.dart';
 
 import '../models/legislation.dart';
 import '../providers/interaction_provider.dart';
+import '../providers/user_provider.dart';
 import '../services/parliament_service_interface.dart';
 import '../services/share_service.dart';
 import '../services/parliament_manager.dart';
@@ -26,6 +26,7 @@ import '../widgets/details_app_bar.dart';
 import '../widgets/error_report_dialog.dart';
 import '../widgets/lists_specific/curated_list_manager_dialog.dart';
 import '../../widgets/osint_loader.dart';
+import '../../widgets/web_link.dart';
 
 
 class LegislationDetailsScreen extends StatefulWidget {
@@ -113,6 +114,7 @@ void _handleInitialAction(String action) {
 }
 
 Future<void> _toggleTracking() async {
+  final l10n = AppLocalizations.of(context)!;
   if (FirebaseAuth.instance.currentUser == null) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.mustBeLoggedInToReport)));
     return;
@@ -132,7 +134,7 @@ Future<void> _toggleTracking() async {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(!isCurrentlyTracked ? "Added to your tracking list." : "Removed from tracking list."),// TODO l10n
+          content: Text(!isCurrentlyTracked ? l10n.snackbarAddedToList : l10n.snackbarRemovedFromList),
           duration: const Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
         ),
@@ -299,24 +301,6 @@ void _shareLegislation() {
                   );
                 },
               ),
-              ListTile(
-                leading: const Icon(Icons.playlist_add),
-                title: const Text("Manage in Public List"), // TODO: L10N
-                onTap: () {
-                  Navigator.of(bottomSheetContext).pop();
-                  if (FirebaseAuth.instance.currentUser == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("You must be logged in."))); // TODO: L10N
-                    return;
-                  }
-                  showDialog(
-                    context: context,
-                    builder: (dialogContext) => CuratedListManagerDialog(
-                      bill: _bill!,
-                      listType: widget.listType ?? 'bill',
-                    ),
-                  );
-                },
-              ),
             ],
           ),
         );
@@ -350,7 +334,7 @@ void _reportError() {
     if (manager.isLoading || !manager.isInitialized) {
       return Scaffold(
         appBar: DetailsAppBar(title: l10n.detailsScreenTitle, onShare: null),
-        body: const OsintLoader(text: "ANALYZING DOSSIER...")// TODO: l10n
+        body: OsintLoader(text: l10n.loaderLoadingData)
       );
     }
     if (manager.error != null) {
@@ -366,7 +350,7 @@ void _reportError() {
     if (_isLoading) {
       return Scaffold(
         appBar: DetailsAppBar(title: l10n.detailsScreenTitle, onShare: null),
-        body: const OsintLoader(text: "ANALYZING DOSSIER...")// TODO: l10n
+        body: OsintLoader(text: l10n.loaderLoadingData)
       );
     }
     if (_error != null) {
@@ -441,73 +425,135 @@ void _reportError() {
           final String? officialUrl = activeService.getOfficialUrl(_bill!);
           final String? processUrl = activeService.getProcessUrl(_bill!);
           final List<Widget> buttonWidgets = [];
+          
           if (officialUrl != null) {
             buttonWidgets.add(
-              Expanded(
-                child: Link(
-                  uri: Uri.parse(officialUrl),
-                  target: LinkTarget.blank,
-                  builder: (context, followLink) => OutlinedButton.icon(
-                    icon: const Icon(Icons.article_outlined),
-                    label: Text(l10n.officialContentButton, textAlign: TextAlign.center),
-                    onPressed: followLink,
-                    style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12))
-                  ),
+              Link(
+                uri: Uri.parse(officialUrl),
+                target: LinkTarget.blank,
+                builder: (context, followLink) => OutlinedButton.icon(
+                  icon: const Icon(Icons.article_outlined),
+                  label: Text(l10n.officialContentButton, textAlign: TextAlign.center),
+                  onPressed: followLink,
+                  style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12))
                 ),
               )
             );
           }
           if (processUrl != null) {
-            if (buttonWidgets.isNotEmpty) buttonWidgets.add(const SizedBox(width: 12));
             buttonWidgets.add(
-              Expanded(
-                child: Link(
-                  uri: Uri.parse(processUrl),
-                  target: LinkTarget.blank,
-                  builder: (context, followLink) => OutlinedButton.icon(
-                    icon: const Icon(Icons.account_balance_outlined),
-                    label: Text(l10n.processPageButton, textAlign: TextAlign.center),
-                    onPressed: followLink,
-                    style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 12))
-                  ),
+              Link(
+                uri: Uri.parse(processUrl),
+                target: LinkTarget.blank,
+                builder: (context, followLink) => OutlinedButton.icon(
+                  icon: const Icon(Icons.account_balance_outlined),
+                  label: Text(l10n.processPageButton, textAlign: TextAlign.center),
+                  onPressed: followLink,
+                  style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12))
                 ),
               )
             );
           }
-          if (buttonWidgets.isNotEmpty) buttonWidgets.add(const SizedBox(width: 12));
+          
           final interactionProvider = context.watch<InteractionProvider>();
           final currentDocType = (_bill!.documentType == 'civic' || widget.listType == 'civic') ? 'civic' : 'bill';
           final isCurrentlyTracked = interactionProvider.isTracked(_bill!.id, docType: currentDocType);
 
           buttonWidgets.add(
-            Expanded(
-              child: OutlinedButton.icon(
-                icon: Icon(isCurrentlyTracked ? Icons.notifications_active : Icons.notifications_none,
-                        color: isCurrentlyTracked ? Theme.of(context).primaryColor : null),
-                label: Text(
-                  isCurrentlyTracked ? "Tracked" : "Track this Bill", 
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: isCurrentlyTracked ? Theme.of(context).primaryColor : null),
-                ),
-                onPressed: _toggleTracking,
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  side: isCurrentlyTracked ? BorderSide(color: Theme.of(context).primaryColor) : null,
-                ),
+            OutlinedButton.icon(
+              icon: Icon(isCurrentlyTracked ? Icons.notifications_active : Icons.notifications_none,
+                      color: isCurrentlyTracked ? Theme.of(context).primaryColor : null),
+              label: Text(
+                isCurrentlyTracked ? l10n.actionTracked : l10n.actionTrack,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: isCurrentlyTracked ? Theme.of(context).primaryColor : null),
+              ),
+              onPressed: _toggleTracking,
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                side: isCurrentlyTracked ? BorderSide(color: Theme.of(context).primaryColor) : null,
               ),
             )
           );
 
+          final userProv = context.watch<UserProvider>();
+          if (userProv.createdLists.isNotEmpty) {
+            buttonWidgets.add(
+              OutlinedButton.icon(
+                icon: const Icon(Icons.add),
+                label: Text(l10n.buttonAddToList, textAlign: TextAlign.center),
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (dialogContext) => CuratedListManagerDialog(
+                      bill: _bill!,
+                      listType: widget.listType ?? 'bill',
+                    ),
+                  );
+                },
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
+              ),
+            );
+          }
+
           if (buttonWidgets.isEmpty) return const SizedBox.shrink();
-          return Padding(padding: const EdgeInsets.symmetric(vertical: 8.0), child: Row(children: buttonWidgets));
+
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isMobile = constraints.maxWidth < 600;
+
+                if (isMobile) {
+                  final List<Widget> mobileRows = [];
+                  for (int i = 0; i < buttonWidgets.length; i += 2) {
+                    mobileRows.add(
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(child: buttonWidgets[i]),
+                              if (i + 1 < buttonWidgets.length) ...[
+                                const SizedBox(width: 8.0),
+                                Expanded(child: buttonWidgets[i + 1]),
+                              ]
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: mobileRows,
+                  );
+                } else {
+                  return IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: buttonWidgets.map((w) => Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                          child: w,
+                        ),
+                      )).toList(),
+                    ),
+                  );
+                }
+              },
+            ),
+          );
         }),
         
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
         
         if (showVotingWarning)
           Center(child: MissingDataWidget(action: action!))
         else if (_bill!.votingDate != null) ...[
-          const SizedBox(height: 24), 
           RepaintBoundary(
             child: LayoutBuilder(
               builder: (BuildContext context, BoxConstraints constraints) {
@@ -648,11 +694,8 @@ void _reportError() {
             }),
           ]),
         ],
-        
-        // UI UPDATE: Status Row UI integration
-        const SizedBox(height: 16),
-        const Divider(height: 1, thickness: 1, color: Color(0xFFEEEEEE)),
-        const SizedBox(height: 24),
+
+        const SizedBox(height: 32),
         Builder(builder: (context) {
           final activeService = context.read<ParliamentServiceInterface>();
           return Row(
@@ -671,7 +714,7 @@ void _reportError() {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-                                    "Poprzednio:", // TODO: l10n.previousStatusLabel
+                                    l10n.previousStatusLabel,
                                     style: TextStyle(
                                       fontSize: 10,
                                       color: Colors.grey[400],
@@ -718,7 +761,7 @@ void _reportError() {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        "Status:", // TODO: l10n.statusLabel
+                        l10n.statusLabel,
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.grey[500],
@@ -777,38 +820,26 @@ void _reportError() {
 
               final compositeId = '${_bill!.term}_$sponsorId';
               final internalPath = '/$lang/$slug/$term/members/$compositeId';
-              final fullWebUrl = kIsWeb 
-                  ? Uri.parse(Uri.base.origin + '#' + internalPath)
-                  : Uri.parse('https://lustra.dev$internalPath');
 
-              return Link(
-                uri: fullWebUrl,
-                target: LinkTarget.blank,
-                builder: (context, followLink) {
-                  return InkWell(
-                    onTap: () {
-                      if (kIsWeb) {
-                        followLink?.call();
-                      } else {
-                        context.push(internalPath);
-                      }
-                    },
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Flexible(
-                          child: Text(
-                            labelText,
-                            style: textStyle.copyWith(color: Colors.black87),
-                          ),
+              return WebLink(
+                path: internalPath,
+                builder: (context, onTapCallback) => InkWell(
+                  onTap: onTapCallback,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          labelText,
+                          style: textStyle.copyWith(color: Colors.black87),
                         ),
-                        const SizedBox(width: 6),
-                        Icon(Icons.launch, size: 14, color: Colors.grey[600]), 
-                      ],
-                    ),
-                  );
-                },
+                      ),
+                      const SizedBox(width: 6),
+                      Icon(Icons.launch, size: 14, color: Colors.grey[600]), 
+                    ],
+                  ),
+                ),
               );
             }),
           if (_bill!.processStartDate != null)

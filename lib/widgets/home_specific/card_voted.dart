@@ -89,9 +89,7 @@ class VotedCard extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             const Divider(height: 1, thickness: 1, color: Color(0xFFEEEEEE)),
-            const SizedBox(height: 8),
-            
-            const SizedBox(height: 24), 
+            const SizedBox(height: 16),
             RepaintBoundary(
               child: LayoutBuilder(
                 builder: (BuildContext context, BoxConstraints constraints) {
@@ -185,9 +183,7 @@ class VotedCard extends StatelessWidget {
                 },
               ),
             ),
-            const SizedBox(height: 16),
-            const Divider(height: 1, thickness: 1, color: Color(0xFFEEEEEE)),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
             Row(
               crossAxisAlignment: CrossAxisAlignment.center, 
               children: [
@@ -204,7 +200,7 @@ class VotedCard extends StatelessWidget {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
-                                      "Poprzednio:", // TODO: l10n.previousStatusLabel
+                                      l10n.previousStatusLabel,
                                       style: TextStyle(
                                         fontSize: 10,
                                         color: Colors.grey[400],
@@ -249,7 +245,7 @@ class VotedCard extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          "Status:", // TODO: l10n.statusLabel
+                          l10n.statusLabel,
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.grey[500],

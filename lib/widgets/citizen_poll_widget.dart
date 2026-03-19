@@ -56,7 +56,6 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
     _initializeVoteStatus();
   }
 
-  // --- LOGIKA (Nietknięta przez Tarczę) ---
   Map<String, int> _extractCountersFromItemData() {
     int likes = 0;
     int dislikes = 0;
@@ -94,9 +93,6 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
         finalCounters = persistedCounters.cast<String, int>();
       } else {
         finalCounters = _extractCountersFromItemData();
-        if (finalHasVoted) {
-          finalCounters['popularity'] = (finalCounters['popularity'] ?? 0) + 1;
-        }
       }
       
       if (mounted) {
@@ -136,6 +132,7 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
     final previousHasVoted = _hasVotedLocally;
     final previousCounters = _pollCounters != null ? Map<String, int>.from(_pollCounters!) : null;
 
+    if (!mounted) return;
     final interactionProvider = Provider.of<InteractionProvider>(context, listen: false);
     interactionProvider.markAsVotedLocally(voteKey);
 
@@ -199,7 +196,6 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
       }
   }
 
-  // --- NOWY UI (TARCZA REDESIGN) ---
 
   @override
   Widget build(BuildContext context) {
@@ -265,16 +261,14 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // TARCZA: Ukrywamy nagłówek, pasek i divider, jeśli nikt jeszcze nie zagłosował.
         if (totalCitizenVotes > 0) ...[
           if (widget.showContainer) ...[
-            // Terminalowy header
             Row(
               children: [
                 Container(width: 6, height: 6, decoration: BoxDecoration(color: Theme.of(context).primaryColor, shape: BoxShape.circle)),
                 const SizedBox(width: 8),
                 Text(
-                  "CIVIC WILL RECORD", // TODO: L10N
+                  l10n.civicWillRecord,
                   style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: Theme.of(context).primaryColor),
                 ),
               ],
@@ -292,11 +286,8 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
         ),
       ],
     );
-
-// TARCZA: Celowo zbudowane klamry (Brackets) po prawej + lewy pasek. Stabilne 60fps.
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 16.0),
-      // Podstawa z tłem i lewym paskiem
       decoration: BoxDecoration(
         border: Border(
           left: BorderSide(color: Theme.of(context).primaryColor, width: 4.0),
@@ -325,6 +316,7 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
   }
 
   Widget _buildModernResultsBar(double forPercent, double againstPercent, int forVotes, int againstVotes, int totalVotes) {
+    final l10n = AppLocalizations.of(context)!;
     if (totalVotes == 0) {
       return Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -349,9 +341,9 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text("SUPPORT ${forPercent.round()}%", style: TextStyle(color: Colors.green[700], fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1)),
-            if (flexPending > 0) const Text("SYNCING...", style: TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
-            Text("OPPOSE ${againstPercent.round()}%", style: TextStyle(color: Colors.red[700], fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1)),
+            Text(l10n.pollSupportPercent(forPercent.round().toString()), style: TextStyle(color: Colors.green[700], fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1)),
+            if (flexPending > 0) Text(l10n.pollSyncing, style: const TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
+            Text(l10n.pollOpposePercent(againstPercent.round().toString()), style: TextStyle(color: Colors.red[700], fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1)),
           ],
         ),
         const SizedBox(height: 8),
@@ -369,9 +361,8 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
           ),
         ),
         const SizedBox(height: 8),
-        // Licznik
         Text(
-          "$totalVotes RECORDED VOTES", // TODO: L10N
+          l10n.totalVotesRecorded(totalVotes.toString()),
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 10, color: Colors.grey[500], fontWeight: FontWeight.bold, letterSpacing: 1),
         ),
@@ -379,14 +370,13 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
     );
   }
 
-// --- NOWE PRZYCISKI GŁOSOWANIA ---
   Widget _buildVotingButtons({Key? key}) {
     final l10n = AppLocalizations.of(context)!;
     return Column(
       key: key,
       children: [
         Text(
-          "Record your position for audit.", // TODO: l10n
+          l10n.recordYourPositionForAudit,
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 12, color: Colors.grey[600], fontWeight: FontWeight.w600, letterSpacing: 0.5),
         ),
@@ -440,7 +430,6 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
     );
   }
 
-// --- STAN PO GŁOSOWANIU (OFFICIAL RECEIPT) ---
   Widget _buildOfficialReceipt(int totalVotes) {
     final primaryColor = Theme.of(context).primaryColor;
     final l10n = AppLocalizations.of(context)!;
@@ -460,7 +449,7 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
               Icon(Icons.verified_user, size: 20, color: primaryColor), 
               const SizedBox(width: 8),
               Text(
-                "POSITION RECORDED", // Zostawiamy jako twardy, analityczny stempel
+                l10n.pollPositionRecorded,
                 style: TextStyle(
                   fontSize: 14, 
                   fontWeight: FontWeight.w900, 
@@ -473,7 +462,6 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
           
           if (widget.enablePostVoteAction) ...[
             const SizedBox(height: 16),
-            // TARCZA: Przywrócono Twoje oryginalne, dwuzdaniowe copy L10N
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
@@ -522,6 +510,7 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
   }
 
 Widget _buildRestrictedView(String parliamentName) {
+  final l10n = AppLocalizations.of(context)!;
     final primaryColor = Theme.of(context).primaryColor;
 
     return Container(
@@ -536,7 +525,7 @@ Widget _buildRestrictedView(String parliamentName) {
           Icon(Icons.security, size: 20, color: primaryColor),
           const SizedBox(width: 8),
           Text(
-            "RESTRICTED TO CITIZENS OF COUNTRY", 
+            l10n.pollRestrictedToCitizens,
             style: TextStyle(
               fontSize: 14, 
               fontWeight: FontWeight.w900, 
@@ -569,7 +558,6 @@ Widget _buildRestrictedView(String parliamentName) {
   }
 
   Widget _buildDeputyResultsView(int upVotes, int downVotes, int totalVotes) {
-    // TARCZA: Dla posłów zostawiam stary kod, zgodnie z poleceniem, ale można go też kiedyś zmodernizować.
     final l10n = AppLocalizations.of(context)!;
     final double supportPercentage = totalVotes > 0 ? upVotes / totalVotes : 0.0;
     final String supportPercentageFormatted = NumberFormat.percentPattern(l10n.localeName).format(supportPercentage);
@@ -643,7 +631,6 @@ Widget _buildRestrictedView(String parliamentName) {
   }
 }
 
-// TARCZA: Świadomy malarz klamer. Rysuje perfekcyjne i stabilne "celowniki" (Targeting Brackets)
 class TargetingBracketsPainter extends CustomPainter {
   final Color color;
   final double length;
@@ -651,8 +638,8 @@ class TargetingBracketsPainter extends CustomPainter {
 
   TargetingBracketsPainter({
     required this.color,
-    this.length = 16.0, // Długość kresek klamry
-    this.strokeWidth = 2.0, // Grubość linii klamry
+    this.length = 16.0,
+    this.strokeWidth = 2.0,
   });
 
   @override
@@ -662,7 +649,6 @@ class TargetingBracketsPainter extends CustomPainter {
       ..strokeWidth = strokeWidth
       ..style = PaintingStyle.stroke;
 
-    // Prawy Górny Narożnik (Klamra górna)
     canvas.drawPath(
       Path()
         ..moveTo(size.width - length, 0)
@@ -671,7 +657,6 @@ class TargetingBracketsPainter extends CustomPainter {
       paint,
     );
 
-    // Prawy Dolny Narożnik (Klamra dolna)
     canvas.drawPath(
       Path()
         ..moveTo(size.width - length, size.height)

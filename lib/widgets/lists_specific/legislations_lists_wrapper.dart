@@ -92,9 +92,9 @@ class _LegislationWrapperScreenState extends State<LegislationWrapperScreen> {
       case 'process': return l10n.sectionLegislationInProcess;
       case 'upcoming': return l10n.sectionUpcoming;
       case 'civic': return l10n.civicProjectsSectionTitle;
-      case 'tracked': return "Tracked Bills"; // TODO: Dodaj do l10n.trackedBillsTitle
-      case 'curated': return "Public List"; // TODO: Dodaj do l10n.curatedListTitle
-      case 'voted': //gówno?
+      case 'tracked': return l10n.trackedBillsTitle;
+      case 'curated': return l10n.curatedListTitle;
+      case 'voted': return l10n.sectionPopularVotes;
       default: return l10n.legislationScreenTitle(""); 
     }
   }
@@ -198,7 +198,7 @@ class _LegislationWrapperScreenState extends State<LegislationWrapperScreen> {
               return CivicLegislationScreen(key: _civicKey);
             case 'curated':
               if (widget.listId == null) {
-                 return const Center(child: Text("Error: Missing List ID")); // TODO: L10N
+                 return Center(child: Text(l10n.errorMissingListId));
               }
               return CuratedLegislationScreen(key: _curatedKey, listId: widget.listId!);
             case 'voted':

@@ -14,7 +14,7 @@ import '../../models/legislation.dart';
 import '../../models/parliament_source.dart';
 import '../../services/parliament_manager.dart';
 import '../../providers/translators.dart';
-import '../../services/app_router.dart';
+import '../../widgets/web_link.dart';
 import '../../widgets/lists_specific/legislation_control_bar.dart';
 import '../../widgets/lists_specific/legislation_list_card.dart';
 import '../../widgets/osint_loader.dart';
@@ -162,6 +162,7 @@ import '../../widgets/osint_loader.dart';
       if (!mounted) return;
       final activeService = Provider.of<ParliamentServiceInterface>(context, listen: false);
       final documentTypes = await activeService.getLegislationFilterDocumentTypes(context);
+      if (!mounted) return;
       final statuses = await activeService.getLegislationFilterStatuses(context);
       
       if (mounted) {
@@ -313,12 +314,12 @@ Future<void> _loadMoreBills() async {
 			final l10n = AppLocalizations.of(context)!;
       
       if (_isSyncingParliament) {
-      return const Center(child: OsintLoader(text: "ESTABLISHING SECURE CONNECTION...")); //TODO
+      return Center(child: OsintLoader(text: l10n.loaderEstablishingConnection));
       }
 
       final manager = Provider.of<ParliamentManager>(context);
       if (manager.isLoading || !manager.isInitialized) {
-      return const Center(child: OsintLoader(text: "LOADING LEGISLATIVE DATA...")); //TODO
+      return Center(child: OsintLoader(text: l10n.loaderLoadingData));
       }
     if (manager.error != null) {
         return Center(
@@ -387,7 +388,7 @@ Future<void> _loadMoreBills() async {
                     },
                     sortOptions: {
                       'popularity': l10n.sortByPopularity,
-                      'processStartDate': l10n.sortByFreshness,
+                      'lastUpdated': l10n.sortByFreshness,
                     },
                     selectedSortKey: _sortBy,
                     onSortChanged: (String? newValue) {
@@ -414,8 +415,9 @@ Future<void> _loadMoreBills() async {
     }
 
   Widget _buildListComponent(List<Legislation> processedBills) {
+    final l10n = AppLocalizations.of(context)!;
         if (_isLoading && _bills.isEmpty) {
-          return const Center(child: OsintLoader(text: "QUERYING THE ARCHIVE...")); //TODO
+          return Center(child: OsintLoader(text: l10n.loaderLoadingData));
         }
 
         if (_errorMessage != null) {
@@ -434,13 +436,13 @@ Future<void> _loadMoreBills() async {
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           itemCount: processedBills.length + (_isLoadingMore ? 1 : 0),
           itemBuilder: (context, index) {
+            final l10n = AppLocalizations.of(context)!;
             if (index == processedBills.length) {
               return _isLoadingMore 
-                  ? const Center(child: Padding(padding: EdgeInsets.symmetric(vertical: 16.0), child: OsintLoader(text: "LOADING MORE BILLS..."))) //TODO
+                  ? Center(child: Padding(padding: const EdgeInsets.symmetric(vertical: 16.0), child: OsintLoader(text: l10n.loaderLoadingMore)))
                   : const SizedBox.shrink();
             }
             final bill = processedBills[index];
-            final l10n = AppLocalizations.of(context)!;
 
             Widget? processInfoWidget;
 
@@ -461,16 +463,20 @@ Future<void> _loadMoreBills() async {
               );
             }
 
-            return LegislationListCard(
-              bill: bill,
-              additionalInfoWidget: processInfoWidget,
-              onTap: () {
-                final manager = context.read<ParliamentManager>();
-                final slug = manager.activeSlug;
-                final lang = context.read<LanguageProvider>().appLanguageCode;
-                final term = manager.currentTerm;
-                context.smartNavigate('/$lang/$slug/$term/legislations/${bill.id}?list=process', extra: bill);
-              },
+            final manager = context.read<ParliamentManager>();
+            final slug = manager.activeSlug;
+            final lang = context.read<LanguageProvider>().appLanguageCode;
+            final term = manager.currentTerm;
+            final internalPath = '/$lang/$slug/$term/legislations/${bill.id}?list=process';
+
+            return WebLink(
+              path: internalPath,
+              extra: bill,
+              builder: (context, onTapCallback) => LegislationListCard(
+                bill: bill,
+                additionalInfoWidget: processInfoWidget,
+                onTap: onTapCallback,
+              ),
             );
           },
         );

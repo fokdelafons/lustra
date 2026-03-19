@@ -6,7 +6,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../models/mp.dart';
 import '../../services/parliament_manager.dart';
 import '../../providers/language_provider.dart';
-import '../../services/app_router.dart';
+import '../../widgets/web_link.dart';
 import 'ui_deputy_card.dart';
 
 class PoliticiansCard extends StatelessWidget {
@@ -64,88 +64,94 @@ class PoliticiansCard extends StatelessWidget {
 
     return Material(
       color: Colors.transparent,
-      child: InkWell(
-        hoverColor: Colors.black.withAlpha(15), 
-        onTap: () {
+      child: Builder(
+        builder: (context) {
           final manager = context.read<ParliamentManager>();
           final slug = manager.activeSlug;
           final lang = context.read<LanguageProvider>().appLanguageCode;
           final term = manager.currentTerm;
-          context.smartNavigate(
-              '/$lang/$slug/$term/members/${deputyData.id}',
-              extra: deputyData);
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0), // TARCZA: Zwiększony padding, żeby wypełnić lukę po usunięciu height: 24 z Dividera
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Hero(
-                  tag: 'avatar_${deputyData.id}', 
-                  child: CachedNetworkImage(
-                    imageUrl: imageUrl,
-                    width: 80, // TARCZA: Przywrócony oryginalny rozmiar
-                    height: 100, // TARCZA: Przywrócony oryginalny rozmiar
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(
-                      width: 80, height: 100, color: Colors.grey[200],
-                      child: const Center(child: Icon(Icons.person_outline, color: Colors.grey, size: 30)),
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      width: 80, height: 100, color: Colors.grey[300],
-                      child: const Icon(Icons.person, size: 40, color: Colors.grey),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
+          final internalPath = '/$lang/$slug/$term/members/${deputyData.id}';
+
+          return WebLink(
+            path: internalPath,
+            extra: deputyData,
+            builder: (context, onTapCallback) => InkWell(
+              hoverColor: Colors.black.withAlpha(15), 
+              onTap: onTapCallback,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0), 
+                child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      deputyName,
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      maxLines: 1, overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      deputyInfo,
-                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                      maxLines: 1, overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    if (attendance != null)
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          '${l10n.attendanceLabelShort}: ',
-                          style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                        ),
-                        Text(
-                          '${attendance.round()}%',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.grey[700],
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Hero(
+                        tag: 'avatar_${deputyData.id}', 
+                        child: CachedNetworkImage(
+                          imageUrl: imageUrl,
+                          width: 80, 
+                          height: 100, 
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Container(
+                            width: 80, height: 100, color: Colors.grey[200],
+                            child: const Center(child: Icon(Icons.person_outline, color: Colors.grey, size: 30)),
+                          ),
+                          errorWidget: (context, url, error) => Container(
+                            width: 80, height: 100, color: Colors.grey[300],
+                            child: const Icon(Icons.person, size: 40, color: Colors.grey),
                           ),
                         ),
-                      ],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            deputyName,
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            maxLines: 1, overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            deputyInfo,
+                            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                            maxLines: 1, overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          if (attendance != null)
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                '${l10n.attendanceLabelShort}: ',
+                                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                              ),
+                              Text(
+                                '${attendance.round()}%',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      height: 100,
+                      alignment: Alignment.center,
+                      child: Icon(Icons.chevron_right, color: Colors.grey[400]),
                     ),
                   ],
                 ),
               ),
-              Container(
-                height: 100,
-                alignment: Alignment.center,
-                child: Icon(Icons.chevron_right, color: Colors.grey[400]),
-              ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }

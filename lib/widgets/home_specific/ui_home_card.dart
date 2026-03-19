@@ -9,7 +9,7 @@ import '../../services/share_service.dart';
 import '../../services/parliament_manager.dart';
 import '../../providers/language_provider.dart';
 import '../../services/parliament_service_interface.dart';
-import '../../services/app_router.dart';
+import '../../widgets/web_link.dart';
 
 class HomeSectionCard extends StatelessWidget {
   final String title;
@@ -106,31 +106,36 @@ return Card(
                           Expanded(
                             child: Material(
                               color: Colors.transparent,
-                              child: InkWell(
-                                hoverColor: Colors.black.withAlpha(15),
-                                onTap: () {
-                                  if (legislationItem != null) {
-                                    final manager = context.read<ParliamentManager>();
-                                    final slug = manager.activeSlug;
-                                    final lang = context.read<LanguageProvider>().appLanguageCode;
-                                    final term = manager.currentTerm;
-                                    context.smartNavigate('/$lang/$slug/$term/legislations/${legislationItem!.id}', extra: legislationItem);
-                                  }
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 10),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.article_outlined, size: 18, color: primaryColor),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        l10n.detailsButton,
-                                        style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 14),
+                              child: Builder(
+                                builder: (context) {
+                                  final manager = context.read<ParliamentManager>();
+                                  final slug = manager.activeSlug;
+                                  final lang = context.read<LanguageProvider>().appLanguageCode;
+                                  final term = manager.currentTerm;
+                                  
+                                  return WebLink(
+                                    path: '/$lang/$slug/$term/legislations/${legislationItem!.id}',
+                                    extra: legislationItem,
+                                    builder: (context, onTapCallback) => InkWell(
+                                      hoverColor: Colors.black.withAlpha(15),
+                                      onTap: onTapCallback,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 10),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(Icons.article_outlined, size: 18, color: primaryColor),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              l10n.detailsButton,
+                                              style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 14),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ],
-                                  ),
-                                ),
+                                    ),
+                                  );
+                                }
                               ),
                             ),
                           ),
@@ -181,33 +186,34 @@ return Card(
             if (showFooter)
               Material(
                 color: isHighlighted ? primaryColor.withAlpha((255 * 0.08).round()) : primaryColor.withAlpha((255 * 0.05).round()),
-              child: InkWell(
-                hoverColor: primaryColor.withAlpha((255 * 0.15).round()), // TARCZA: Dynamiczny kolor hover na bazie koloru wiodącego
-                onTap: () {
-                  context.smartNavigate(destinationPath);
-                },
-                child: Container(
-                  width: double.infinity,
-                  alignment: Alignment.center,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          buttonText,
-                          style: TextStyle(
-                            color: primaryColor, 
-                            fontWeight: FontWeight.bold, 
-                            fontSize: 13
+              child: WebLink(
+                path: destinationPath,
+                builder: (context, onTapCallback) => InkWell(
+                  hoverColor: primaryColor.withAlpha((255 * 0.15).round()), // TARCZA: Dynamiczny kolor hover na bazie koloru wiodącego
+                  onTap: onTapCallback,
+                  child: Container(
+                    width: double.infinity,
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            buttonText,
+                            style: TextStyle(
+                              color: primaryColor, 
+                              fontWeight: FontWeight.bold, 
+                              fontSize: 13
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                           ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
                         ),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(Icons.arrow_forward, size: 16, color: primaryColor),
-                    ],
+                        const SizedBox(width: 4),
+                        Icon(Icons.arrow_forward, size: 16, color: primaryColor),
+                      ],
+                    ),
                   ),
                 ),
               ),

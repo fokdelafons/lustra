@@ -204,16 +204,16 @@ class ShareService {
     required int term,
   }) async {
     try {
+      final l10n = AppLocalizations.of(context)!;
       final deepLink = '$_baseDeepLinkUrl/#/$lang/$slug/$term/legislations?list=curated&listId=$listId';
-      
-      // TODO: Przenieść do AppLocalizations po dodaniu kluczy, ogarnąć sharing pożądny jak jest w reszcie. Przerzucic na ui list. Pozytywnie zaktualizować nazwę listy przy rename i success.
-      final shareText = 'Check out this public list: $listName\n\n$deepLink\n\n#Lustra'; 
+
+      final shareText = 'Check out my curated legislation list: $listName\n\n$deepLink'; //TODO: someday better
       
       await Clipboard.setData(ClipboardData(text: shareText));
       
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Link copied to clipboard!')), // TODO: L10N
+          SnackBar(content: Text(l10n.snackbarLinkCopied)),
         );
       }
 

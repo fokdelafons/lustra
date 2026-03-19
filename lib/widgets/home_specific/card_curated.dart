@@ -29,7 +29,7 @@ class _CuratedListCardState extends State<CuratedListCard> {
   bool _isLoading = true;
   
   Legislation? _highlightedItem;
-  String _listName = "Public List"; //TODO
+  String _listName = ""; 
   int _subscriberCount = 0;
 
   @override
@@ -66,7 +66,7 @@ class _CuratedListCardState extends State<CuratedListCard> {
             });
             return;
           }
-          _listName = metadata['listName'] ?? "Public List";
+          _listName = metadata['listName'] ?? "Private List";
           _subscriberCount = metadata['subscriberCount'] ?? 0;
         }
         final rawLegislations = data['legislations'] as List? ?? [];
@@ -84,18 +84,13 @@ class _CuratedListCardState extends State<CuratedListCard> {
 
         if (combined.isNotEmpty) {
           final String? highlightedBillId = metadata?['highlightedBillId'];
-          
-          // TARCZA: Szukamy ustawy z Koroną
           if (highlightedBillId != null) {
             try {
               _highlightedItem = combined.firstWhere((bill) => bill.id == highlightedBillId);
             } catch (_) {
-              // Błąd cichy: Ustawa usunięta z listy, ale ID zostało w bazie. (Fallback)
               _highlightedItem = null;
             }
           }
-
-          // TARCZA: Fallback (Brak Korony lub usunięta) - dajemy najnowszą
           if (_highlightedItem == null) {
             combined.sort((a, b) {
               final dateA = a.lastUpdated ?? a.votingDate ?? DateTime.fromMillisecondsSinceEpoch(0);
@@ -116,23 +111,23 @@ class _CuratedListCardState extends State<CuratedListCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     
     if (_isLoading) {
-      return const Center(child: Padding(padding: EdgeInsets.all(16.0), child: OsintLoader(text: "LOADING CURATED FEED..."))); //TODO
+      return Center(child: Padding(padding: const EdgeInsets.all(16.0), child: OsintLoader(text: l10n.loaderLoadingCuratedFeed)));
     }
     
     if (_highlightedItem == null) {
       return const SizedBox.shrink(); 
     }
 
-    final l10n = AppLocalizations.of(context)!;
     final manager = context.read<ParliamentManager>();
     final slug = manager.activeSlug;
     final lang = context.read<LanguageProvider>().appLanguageCode;
     final term = manager.currentTerm;
 
 return HomeSectionCard(
-      title: _listName,
+      title: _listName.isEmpty ? l10n.privateList : _listName,
       icon: Icons.draw,
       trailingTitleWidget: Row(
         mainAxisSize: MainAxisSize.min,
@@ -146,7 +141,7 @@ return HomeSectionCard(
         ],
       ),
       destinationPath: '/$lang/$slug/$term/legislations?list=curated&listId=${widget.listId}',
-      buttonText: "Open Full List", // TODO: L10N
+      buttonText: l10n.buttonOpenFullList,
       legislationItem: _highlightedItem,
       isHighlighted: true,
       child: Padding(

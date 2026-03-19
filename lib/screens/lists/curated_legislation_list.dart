@@ -5,6 +5,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:web_smooth_scroll/web_smooth_scroll.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../services/parliament_manager.dart';
 import '../../services/curated_list_service.dart';
@@ -17,6 +18,7 @@ import '../../services/app_router.dart';
 import '../../services/cache/parliament_cache_manager.dart';
 import '../../widgets/osint_loader.dart';
 import '../../widgets/error_report_dialog.dart';
+import '../../widgets/web_link.dart';
 
 class CuratedLegislationScreen extends StatefulWidget {
   final String listId;
@@ -54,7 +56,7 @@ Future<void> refreshData() async {
     await ParliamentCacheManager(prefix).clearCuratedListFeed(widget.listId);
     await _loadData(forceRefresh: true);
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("List refreshed!"))); // TODO: L10N
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.listRefreshed)));
     }
   }
 
@@ -70,10 +72,11 @@ Future<void> refreshData() async {
       final lang = Provider.of<LanguageProvider>(context, listen: false).appLanguageCode;
       final manager = Provider.of<ParliamentManager>(context, listen: false);
       final prefix = manager.activeServiceId ?? '';
+      final loc = AppLocalizations.of(context)!;
 
       final data = await _curatedService.getFeed(widget.listId, lang, prefix, forceRefresh: forceRefresh);
       
-      if (data == null) throw Exception("No data returned");
+      if (data == null) throw Exception(loc.errorNoDataReturned);
 
       final rawLegislations = data['legislations'] ?? [];
       final rawCivic = data['civic'] ?? [];
@@ -105,7 +108,7 @@ Future<void> refreshData() async {
       developer.log('Błąd podczas ładowania feedu listy: $e', name: 'CuratedLegislationScreen');
       if (mounted) {
         setState(() {
-          _errorMessage = "Failed to load list data."; // TODO: L10N - errorFetchData
+          _errorMessage = AppLocalizations.of(context)!.errorFetchData;
           _isLoading = false;
         });
       }
@@ -123,7 +126,7 @@ Future<void> refreshData() async {
   Future<void> _toggleSubscription() async {
     if (FirebaseAuth.instance.currentUser == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("You must be logged in to subscribe.")), // TODO: L10N
+        SnackBar(content: Text(AppLocalizations.of(context)!.errorMustBeLoggedInToSubscribe)),
       );
       return;
     }
@@ -141,7 +144,7 @@ Future<void> refreshData() async {
         
         context.read<UserProvider>().updateListSubscriptionLocally(widget.listId, newState);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(newState ? "Subscribed to list!" : "Unsubscribed from list.")), // TODO: L10N
+          SnackBar(content: Text(newState ? AppLocalizations.of(context)!.subscribedToList : AppLocalizations.of(context)!.unsubscribedFromList)),
         );
       }
     } catch (e) {
@@ -150,13 +153,13 @@ Future<void> refreshData() async {
           context.read<UserProvider>().updateListSubscriptionLocally(widget.listId, false);
           setState(() => _isSubscribed = false);
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("List no longer exists. Removed from your subscriptions.")), // TODO: L10N
+            SnackBar(content: Text(AppLocalizations.of(context)!.errorListRemovedByOwner)),
           );
         }
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Failed to update subscription.")), // TODO: L10N
+            SnackBar(content: Text(AppLocalizations.of(context)!.errorFailedToUpdateSubscription)),
           );
         }
       }
@@ -174,7 +177,7 @@ Future<void> refreshData() async {
       await _curatedService.notifySubscribers(widget.listId, prefix);
       
       if (mounted) {
-         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Notification sent to subscribers!"))); // TODO: L10N
+         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.notificationSentCooldownActive)));
          setState(() {
            if (_metadata != null) {
              _metadata!['lastNotifiedAt'] = DateTime.now().toIso8601String();
@@ -184,13 +187,93 @@ Future<void> refreshData() async {
     } catch (e) {
       if (mounted) {
         final errorMsg = e.toString().contains('RESOURCE_EXHAUSTED') 
-            ? "Cooldown active. You can send 1 notification per 24h." // TODO: L10N
-            : "Failed to send notification."; // TODO: L10N
+          ? AppLocalizations.of(context)!.errorCooldownActiveNotification
+          : AppLocalizations.of(context)!.errorFailedToSendNotification;
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errorMsg)));
       }
     } finally {
       if (mounted) setState(() => _isNotifyingSubscribers = false);
     }
+  }
+
+  void _showCreateListFromCTA() {
+    final TextEditingController nameController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
+          child: Container(
+            width: 400,
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(AppLocalizations.of(context)!.nameYourCuratorList, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: nameController,
+                  maxLength: 40,
+                  textCapitalization: TextCapitalization.words,
+                  autofocus: true,
+                  textInputAction: TextInputAction.done,
+                  decoration: InputDecoration(
+                    hintText: AppLocalizations.of(context)!.hintCuratorListExample,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      child: Text(AppLocalizations.of(context)!.actionCancel, style: const TextStyle(color: Colors.grey)),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).primaryColor,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        elevation: 0,
+                      ),
+                      onPressed: () async {
+                        final text = nameController.text.trim();
+                        if (text.isEmpty) return;
+                        
+                        final messenger = ScaffoldMessenger.of(context);
+                        final manager = context.read<ParliamentManager>();
+                        final userProv = context.read<UserProvider>();
+                        final prefix = manager.activeServiceId ?? 'us';
+                        
+                        Navigator.of(ctx).pop(); 
+                        
+                        try {
+                          await _curatedService.createList(text, prefix);
+                          await ParliamentCacheManager(prefix).clearMyCuratedLists(); 
+                          
+                          if (!mounted) return;
+                          messenger.showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.listCreatedSuccess(text))));
+                          userProv.triggerCuratedListsRebuild(); 
+                        } catch (e) {
+                          if (!mounted) return;
+                          messenger.showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.errorFailedToCreateList)));
+                        }
+                      },
+                      child: Text(AppLocalizations.of(context)!.actionCreate),
+                    )
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+    );
   }
 
   @override
@@ -202,11 +285,9 @@ Future<void> refreshData() async {
   Widget _buildGamificationHeader() {
     if (_metadata == null) return const SizedBox.shrink();
     
-    final listName = _metadata!['listName'] ?? 'Unnamed List'; // TODO: L10N
+    final listName = _metadata!['listName'] ?? AppLocalizations.of(context)!.unnamedList;
     final subs = _metadata!['subscriberCount'] ?? 0;
-
-    final currentUid = FirebaseAuth.instance.currentUser?.uid;
-    final isOwner = currentUid != null && _metadata!['ownerUid'] == currentUid;
+    final isOwner = context.read<UserProvider>().createdLists.contains(widget.listId);
 
     bool isOnCooldown = false;
     int hoursLeft = 0;
@@ -230,7 +311,6 @@ Future<void> refreshData() async {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                // 1. TYTUŁ I EDYCJA
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -240,25 +320,41 @@ Future<void> refreshData() async {
                     if (isOwner)
                       IconButton(
                         icon: const Icon(Icons.edit, size: 20, color: Colors.blueGrey),
-                        tooltip: "Rename List", // TODO: L10N
-                        onPressed: _showRenameListModal,
+                        tooltip: AppLocalizations.of(context)!.tooltipEditList,
+                        onPressed: _showEditListModal,
                       ),
                   ],
                 ),
                 
-                // 2. SUBSKRYBENCI
+                if ((_metadata!['description'] != null && _metadata!['description'].toString().isNotEmpty) || isOwner)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4.0, bottom: 8.0, left: 16.0, right: 16.0),
+                    child: Text(
+                      (_metadata!['description'] != null && _metadata!['description'].toString().isNotEmpty) 
+                          ? _metadata!['description'] 
+                          : AppLocalizations.of(context)!.addDescriptionHint,
+                      style: TextStyle(
+                        fontSize: 14, 
+                        color: (_metadata!['description'] != null && _metadata!['description'].toString().isNotEmpty) 
+                            ? Colors.black87 
+                            : Colors.grey,
+                        fontStyle: (_metadata!['description'] != null && _metadata!['description'].toString().isNotEmpty) 
+                            ? FontStyle.normal 
+                            : FontStyle.italic,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
                 const SizedBox(height: 4),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Icon(Icons.people_outline, size: 18),
                     const SizedBox(width: 4),
-                    Text("$subs subscribers", style: const TextStyle(fontSize: 16)), // TODO: L10N
+                    Text(AppLocalizations.of(context)!.subscribersCount(subs), style: const TextStyle(fontSize: 16)),
                   ],
                 ),
                 const SizedBox(height: 16),
-                
-                // 3. GŁÓWNE PRZYCISKI AKCJI 
                 Wrap(
                   alignment: WrapAlignment.center,
                   spacing: 12.0,
@@ -267,20 +363,55 @@ Future<void> refreshData() async {
                     ElevatedButton.icon(
                        onPressed: _shareList,
                        icon: const Icon(Icons.ios_share),
-                       label: const Text("Share List"), // TODO: L10N
+                       label: Text(AppLocalizations.of(context)!.actionShareList),
                        style: ElevatedButton.styleFrom(
                          backgroundColor: Theme.of(context).primaryColor, 
                          foregroundColor: Colors.white,
                        ),
                     ),
                     
+                    if (_metadata!['tipProvider'] != null && _metadata!['tipProvider'].toString().isNotEmpty && _metadata!['tipUsername'] != null && _metadata!['tipUsername'].toString().isNotEmpty)
+                      ElevatedButton.icon(
+                         onPressed: () async {
+                           final provider = _metadata!['tipProvider'];
+                           final user = _metadata!['tipUsername'];
+                           String url = '';
+                           
+                           if (provider == 'Patreon') {
+                             url = 'https://www.patreon.com/$user';
+                           } else if (provider == 'BuyMeACoffee') {
+                             url = 'https://www.buymeacoffee.com/$user';
+                           } else if (provider == 'Ko-fi') {
+                             url = 'https://ko-fi.com/$user';
+                           }
+                           
+                           // Safety check to prevent app crash on unhandled provider or empty URL
+                           if (url.isNotEmpty) {
+                             try {
+                               await launchUrl(
+                                 Uri.parse(url), 
+                                 mode: LaunchMode.externalApplication,
+                               );
+                             } catch (e) {
+                               debugPrint('Error launching URL: $e');
+                             }
+                           }
+                         },
+                         icon: const Icon(Icons.coffee),
+                         label: Text(AppLocalizations.of(context)!.actionSupportCreator),
+                         style: ElevatedButton.styleFrom(
+                           backgroundColor: Colors.pinkAccent, 
+                           foregroundColor: Colors.white,
+                         ),
+                      ),
+
                     if (isOwner)
                       ElevatedButton.icon(
                          onPressed: (_isNotifyingSubscribers || isOnCooldown) ? null : _notifySubscribers,
                          icon: _isNotifyingSubscribers 
                            ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                            : Icon(isOnCooldown ? Icons.timer : Icons.campaign),
-                         label: Text(isOnCooldown ? "Available in ${hoursLeft}h" : "Notify Subscribers"), // TODO: L10N
+                         label: Text(isOnCooldown ? AppLocalizations.of(context)!.availableInHours(hoursLeft) : AppLocalizations.of(context)!.actionNotifySubscribers),
                          style: ElevatedButton.styleFrom(
                            backgroundColor: Colors.orange, 
                            foregroundColor: Colors.white,
@@ -293,7 +424,7 @@ Future<void> refreshData() async {
                          icon: _isSubscribing 
                            ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                            : Icon(_isSubscribed ? Icons.check : Icons.notifications_active),
-                         label: Text(_isSubscribed ? "Subscribed" : "Subscribe"), // TODO: L10N
+                         label: Text(_isSubscribed ? AppLocalizations.of(context)!.actionSubscribed : AppLocalizations.of(context)!.actionSubscribe),
                          style: ElevatedButton.styleFrom(
                            backgroundColor: _isSubscribed ? Colors.green : Theme.of(context).primaryColor,
                            foregroundColor: Colors.white,
@@ -304,18 +435,15 @@ Future<void> refreshData() async {
               ],
             ),
           ),
-          
-          /* TARCZA: App Store UGC Compliance - Report & Delete actions */
           Positioned(
             top: 4,
             right: 4,
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Widoczne dla każdego (Apple wymaga zgłaszania UGC)
                 IconButton(
                   icon: Icon(Icons.flag_outlined, color: Colors.grey.withAlpha(150), size: 20),
-                  tooltip: "Report List", // TODO: L10N
+                  tooltip: AppLocalizations.of(context)!.tooltipReportList,
                   onPressed: () {
                     final manager = context.read<ParliamentManager>();
                     showErrorReportDialog(
@@ -326,11 +454,10 @@ Future<void> refreshData() async {
                     );
                   },
                 ),
-                // Widoczne tylko dla właściciela
                 if (isOwner)
                   IconButton(
                     icon: Icon(Icons.delete_outline, color: Colors.red.withAlpha(150), size: 20),
-                    tooltip: "Delete List", // TODO: L10N
+                    tooltip: AppLocalizations.of(context)!.tooltipDeleteList,
                     onPressed: _confirmDeleteList,
                   ),
               ],
@@ -340,51 +467,218 @@ Future<void> refreshData() async {
       ),
     );
   }
+  static const String _lustraMasterListId = 'wIsxT9kCo0t02927tBIs'; // DEFAULT LIST - LUSTRA TRANSPARENCY FIGHT
 
-  // TARCZA: Logika zarządzania listą sklonowana z Twojego modalu
-  void _showRenameListModal() {
+  Widget _buildCivicProjectCTA(BuildContext context) {
+    final manager = context.read<ParliamentManager>();
+    final lang = context.read<LanguageProvider>().appLanguageCode;
+    final slug = manager.activeSlug;
+    final path = '/$lang/$slug/civic-project';
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 16.0, bottom: 32.0),
+      child: WebLink(
+        path: path,
+        builder: (context, onTapCallback) => Card(
+          elevation: 0,
+          color: Theme.of(context).primaryColor.withAlpha(20),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: Theme.of(context).primaryColor, width: 2),
+          ),
+          child: InkWell(
+            onTap: onTapCallback,
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                children: [
+                  Icon(Icons.volunteer_activism, size: 48, color: Theme.of(context).primaryColor),
+                  const SizedBox(height: 16),
+                  Text(
+                    AppLocalizations.of(context)!.draftYourCivicProject,
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    AppLocalizations.of(context)!.draftCivicProjectDescription,
+                    style: const TextStyle(fontSize: 14, color: Colors.black87),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCreateListCTA(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 16.0, bottom: 32.0),
+      child: Card(
+        elevation: 0,
+        color: Colors.orange.withAlpha(20),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: Colors.orange, width: 2),
+        ),
+        child: InkWell(
+          onTap: _showCreateListFromCTA,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              children: [
+                const Icon(Icons.playlist_add_check_circle, size: 48, color: Colors.orange),
+                const SizedBox(height: 16),
+                Text(
+                  AppLocalizations.of(context)!.createYourOwnList,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.orange),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  AppLocalizations.of(context)!.createYourOwnListDescription,
+                  style: const TextStyle(fontSize: 14, color: Colors.black87),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showEditListModal() {
     final currentName = _metadata?['listName'] ?? '';
-    final TextEditingController nameController = TextEditingController(text: currentName);
+    final currentDesc = _metadata?['description'] ?? '';
+    final currentTipProvider = _metadata?['tipProvider'];
+    final currentTipUsername = _metadata?['tipUsername'] ?? '';
+
+    final TextEditingController nameCtrl = TextEditingController(text: currentName);
+    final TextEditingController descCtrl = TextEditingController(text: currentDesc);
+    final TextEditingController tipUserCtrl = TextEditingController(text: currentTipUsername);
+    String selectedProvider = (currentTipProvider != null && currentTipProvider.isNotEmpty) ? currentTipProvider : 'None';
+
     showDialog(
       context: context,
       builder: (ctx) {
-        return AlertDialog(
-          title: const Text("Rename Public List"), // TODO: L10N
-          content: TextField(
-            controller: nameController,
-            maxLength: 40, 
-            textCapitalization: TextCapitalization.words,
-            autofocus: true,
-            decoration: const InputDecoration(hintText: "New name", border: OutlineInputBorder()),
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.of(ctx).pop(), child: Text(AppLocalizations.of(context)!.actionCancel)),
-            ElevatedButton(
-              onPressed: () async {
-                final text = nameController.text.trim();
-                if (text.isEmpty || text == currentName) { Navigator.of(ctx).pop(); return; }
-                
-                final messenger = ScaffoldMessenger.of(context);
-                final userProv = context.read<UserProvider>();
-                final prefix = context.read<ParliamentManager>().activeServiceId ?? 'us';
-                Navigator.of(ctx).pop(); 
-                
-                try {
-                  await _curatedService.renameList(widget.listId, text);
-                  await ParliamentCacheManager(prefix).clearMyCuratedLists();
-                  await ParliamentCacheManager(prefix).clearCuratedListFeed(widget.listId);
-                  
-                  if (!mounted) return;
-                  setState(() => _metadata!['listName'] = text); // Optimistic UI
-                  userProv.triggerCuratedListsRebuild(); 
-                  messenger.showSnackBar(const SnackBar(content: Text("List renamed!"))); // TODO: L10N
-                } catch (e) {
-                  if (mounted) messenger.showSnackBar(const SnackBar(content: Text("Failed to rename list."))); // TODO: L10N
-                }
-              },
-              child: const Text("Save"), // TODO: L10N
-            )
-          ],
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Dialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              backgroundColor: Colors.white,
+              surfaceTintColor: Colors.transparent,
+              child: Container(
+                width: 450,
+                padding: const EdgeInsets.all(24.0),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(AppLocalizations.of(context)!.editListDetails, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: nameCtrl,
+                        maxLength: 40,
+                        textInputAction: TextInputAction.next,
+                        decoration: InputDecoration(labelText: AppLocalizations.of(context)!.listNameLabel, border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: descCtrl,
+                        maxLength: 200,
+                        maxLines: 3,
+                        decoration: InputDecoration(labelText: AppLocalizations.of(context)!.descriptionOptionalLabel, alignLabelWithHint: true, border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+                      ),
+                      const SizedBox(height: 16),
+                      const Divider(),
+                      const SizedBox(height: 12),
+                      Text(AppLocalizations.of(context)!.supportCreatorOptionalLabel, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+                      DropdownButtonFormField<String>(
+                        value: selectedProvider,
+                        decoration: InputDecoration(border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)), isDense: true),
+                        items: ['None', 'Patreon', 'BuyMeACoffee', 'Ko-fi'].map((String val) {
+                          return DropdownMenuItem(value: val, child: Text(val));
+                        }).toList(),
+                        onChanged: (val) {
+                          setModalState(() {
+                            selectedProvider = val!;
+                            if (selectedProvider == 'None') tipUserCtrl.clear();
+                          });
+                        },
+                      ),
+                      if (selectedProvider != 'None') ...[
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: tipUserCtrl,
+                          decoration: InputDecoration(labelText: AppLocalizations.of(context)!.providerUsernameLabel(selectedProvider), border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+                        ),
+                      ],
+                      const SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(),
+                            child: Text(AppLocalizations.of(context)!.actionCancel, style: const TextStyle(color: Colors.grey)),
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Theme.of(context).primaryColor,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              elevation: 0,
+                            ),
+                            onPressed: () async {
+                              final newName = nameCtrl.text.trim();
+                              if (newName.isEmpty) return;
+
+                              final newDesc = descCtrl.text.trim();
+                              final tipProv = selectedProvider == 'None' ? '' : selectedProvider;
+                              final tipUser = tipUserCtrl.text.trim();
+
+                              final messenger = ScaffoldMessenger.of(context);
+                              final userProv = context.read<UserProvider>();
+                              final prefix = context.read<ParliamentManager>().activeServiceId ?? 'us';
+                              final loc = AppLocalizations.of(context)!;
+                              Navigator.of(ctx).pop(); 
+
+                              try {
+                                await _curatedService.updateListMeta(widget.listId, newName, newDesc, tipProv, tipUser);
+                                await ParliamentCacheManager(prefix).clearMyCuratedLists();
+                                await ParliamentCacheManager(prefix).clearCuratedListFeed(widget.listId);
+                                
+                                if (!mounted) return;
+                                setState(() {
+                                  _metadata!['listName'] = newName;
+                                  _metadata!['description'] = newDesc;
+                                  _metadata!['tipProvider'] = tipProv;
+                                  _metadata!['tipUsername'] = tipUser;
+                                }); 
+                                userProv.triggerCuratedListsRebuild(); 
+                                messenger.showSnackBar(SnackBar(content: Text(loc.listUpdatedSuccess)));
+                              } catch (e) {
+                                if (mounted) messenger.showSnackBar(SnackBar(content: Text(loc.errorFailedToUpdate)));
+                              }
+                            },
+                            child: Text(AppLocalizations.of(context)!.actionSave),
+                          )
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }
         );
       }
     );
@@ -393,37 +687,72 @@ Future<void> refreshData() async {
   void _confirmDeleteList() {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text("Delete List?"), // TODO: L10N
-        content: const Text("This action cannot be undone. Are you sure?"), // TODO: L10N
-        actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: Text(AppLocalizations.of(context)!.actionCancel)),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
-            onPressed: () async {
-              final messenger = ScaffoldMessenger.of(context);
-              final userProv = context.read<UserProvider>();
-              final prefix = context.read<ParliamentManager>().activeServiceId ?? 'us';
-              final routerCtx = context; // Kopia contextu do nawigacji
-              Navigator.of(ctx).pop();
-              
-              try {
-                await _curatedService.deleteList(widget.listId);
-                await ParliamentCacheManager(prefix).clearMyCuratedLists();
-                await ParliamentCacheManager(prefix).clearCuratedListFeed(widget.listId);
-                
-                if (!mounted) return;
-                userProv.triggerCuratedListsRebuild();
-                messenger.showSnackBar(const SnackBar(content: Text("List deleted."))); // TODO: L10N
-                // TARCZA: Usunęliśmy listę, więc musimy wyrzucić usera z tego ekranu
-                routerCtx.smartNavigate('/'); 
-              } catch (e) {
-                if (mounted) messenger.showSnackBar(const SnackBar(content: Text("Failed to delete."))); // TODO: L10N
-              }
-            },
-            child: const Text("Delete"), // TODO: L10N
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        child: Container(
+          width: 400,
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
+                  const SizedBox(width: 12),
+                  Text(AppLocalizations.of(context)!.deleteListDialogTitle, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Text(AppLocalizations.of(context)!.deleteListDialogBody, style: const TextStyle(color: Colors.black87)),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.of(ctx).pop(),
+                    child: Text(AppLocalizations.of(context)!.actionCancel, style: const TextStyle(color: Colors.grey)),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red, 
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      elevation: 0,
+                    ),
+                    onPressed: () async {
+                      final messenger = ScaffoldMessenger.of(context);
+                      final userProv = context.read<UserProvider>();
+                      final prefix = context.read<ParliamentManager>().activeServiceId ?? 'us';
+                      final routerCtx = context;
+                      final loc = AppLocalizations.of(context)!;
+                      Navigator.of(ctx).pop();
+                      
+                      try {
+                        await _curatedService.deleteList(widget.listId);
+                        await ParliamentCacheManager(prefix).clearMyCuratedLists();
+                        await ParliamentCacheManager(prefix).clearCuratedListFeed(widget.listId);
+                        
+                        if (!mounted) return;
+                        userProv.triggerCuratedListsRebuild();
+                        messenger.showSnackBar(SnackBar(content: Text(loc.listDeletedSuccess)));
+                        if (routerCtx.mounted) {
+                          routerCtx.smartNavigate('/'); 
+                        }
+                      } catch (e) {
+                        if (mounted) messenger.showSnackBar(SnackBar(content: Text(loc.errorFailedToDelete)));
+                      }
+                    },
+                    child: Text(AppLocalizations.of(context)!.actionDelete),
+                  ),
+                ],
+              )
+            ],
           ),
-        ],
+        ),
       )
     );
   }
@@ -441,7 +770,7 @@ Future<void> refreshData() async {
   Widget build(BuildContext context) {
     super.build(context);
     
-    if (_isLoading) return const Center(child: OsintLoader(text: "SYNCING CURATED FEED...")); //TODO
+    if (_isLoading) return Center(child: OsintLoader(text: AppLocalizations.of(context)!.syncingCuratedFeed));
     
     if (_errorMessage != null) {
       return Center(
@@ -452,7 +781,7 @@ Future<void> refreshData() async {
             const SizedBox(height: 16),
             Text(_errorMessage!, style: const TextStyle(fontSize: 16)),
             const SizedBox(height: 16),
-            ElevatedButton(onPressed: _loadData, child: const Text("Try Again")), // TODO: L10N
+            ElevatedButton(onPressed: _loadData, child: Text(AppLocalizations.of(context)!.actionTryAgain)),
           ],
         ),
       );
@@ -464,63 +793,68 @@ Future<void> refreshData() async {
       controller: _scrollController,
       physics: isDesktopWeb ? const NeverScrollableScrollPhysics() : const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-      itemCount: _bills.length,
+      itemCount: _bills.length + 1,
       itemBuilder: (context, index) {
-        final bill = _bills[index];
-// TARCZA: Sprawdzamy, czy aktualny użytkownik jest właścicielem TEJ listy
-        final currentUid = FirebaseAuth.instance.currentUser?.uid;
-        final isOwner = _metadata != null && currentUid != null && _metadata!['ownerUid'] == currentUid;
+        final isOwner = context.read<UserProvider>().createdLists.contains(widget.listId);
+
+        if (index == _bills.length) {
+          if (isOwner) {
+            return _buildCivicProjectCTA(context);
+          } else if (widget.listId == _lustraMasterListId) {
+            return _buildCreateListCTA(context);
+          }
+          return const SizedBox.shrink();
+        }
         
-        // TARCZA: Sprawdzamy, czy ten konkretny rachunek ma "Koronę"
+        final bill = _bills[index];
         final isHighlighted = _metadata != null && _metadata!['highlightedBillId'] == bill.id;
 
-        return LegislationListCard(
-          bill: bill,
-          onTap: () {
-            final manager = context.read<ParliamentManager>();
-            final slug = manager.activeSlug;
-            final lang = context.read<LanguageProvider>().appLanguageCode;
-            final term = bill.documentType == 'civic' ? 'civic' : manager.currentTerm.toString();
-            
-            context.smartNavigate('/$lang/$slug/$term/legislations/${bill.id}?list=curated&listId=${widget.listId}', extra: bill);
-          },
-          // TARCZA: Wstrzykujemy Widget tylko dla twórcy. Zwykły user dostanie tu kiedyś Dzwoneczek.
-          trailingAction: isOwner ? IconButton(
-            icon: Icon(
-              isHighlighted ? Icons.star : Icons.star_border,
-              color: isHighlighted ? Colors.amber : Colors.grey[400],
-              size: 28,
-            ),
-            tooltip: "Set as list cover", // TODO: L10N
-              onPressed: () async {
-              // TARCZA: Pobranie referencji PRZED asynchronicznymi zadaniami
-              final manager = context.read<ParliamentManager>();
-              final userProv = context.read<UserProvider>();
-              final messenger = ScaffoldMessenger.of(context);
-              final prefix = manager.activeServiceId ?? '';
+        final manager = context.read<ParliamentManager>();
+        final slug = manager.activeSlug;
+        final lang = context.read<LanguageProvider>().appLanguageCode;
+        final term = bill.documentType == 'civic' ? 'civic' : manager.currentTerm.toString();
+        final internalPath = '/$lang/$slug/$term/legislations/${bill.id}?list=curated&listId=${widget.listId}';
 
-              try {
-                // Uderzenie do Node.js
-                await _curatedService.setHighlightedBill(widget.listId, bill.id);
-                
-                // Czysty Cache
-                await ParliamentCacheManager(prefix).clearMyCuratedLists();
-                await ParliamentCacheManager(prefix).clearCuratedListFeed(widget.listId);
-                await ParliamentCacheManager(prefix).clearCuratedListPreview(widget.listId);
-                
-                if (!mounted) return;
-                
-                // TARCZA: Użycie bezpiecznych referencji
-                userProv.triggerCuratedListsRebuild(); 
-                _loadData(forceRefresh: true); 
-                messenger.showSnackBar(const SnackBar(content: Text("Cover updated!"))); // TODO: L10N
-                
-              } catch (e) {
-                if (!mounted) return;
-                messenger.showSnackBar(const SnackBar(content: Text("Error updating cover."))); // TODO: L10N
-              }
-            },
-          ) : null, // <-- Tutaj w przyszłości damy : _buildTrackingBell(bill)
+        return WebLink(
+          path: internalPath,
+          extra: bill,
+          builder: (context, onTapCallback) => LegislationListCard(
+            bill: bill,
+            onTap: onTapCallback,
+            trailingAction: isOwner ? IconButton(
+              icon: Icon(
+                isHighlighted ? Icons.star : Icons.star_border,
+                color: isHighlighted ? Colors.amber : Colors.grey[400],
+                size: 28,
+              ),
+              tooltip: AppLocalizations.of(context)!.tooltipSetAsListCover,
+              onPressed: () async {
+                final manager = context.read<ParliamentManager>();
+                final userProv = context.read<UserProvider>();
+                final messenger = ScaffoldMessenger.of(context);
+                final prefix = manager.activeServiceId ?? '';
+                final loc = AppLocalizations.of(context)!;
+
+                try {
+                  await _curatedService.setHighlightedBill(widget.listId, bill.id);
+                  
+                  await ParliamentCacheManager(prefix).clearMyCuratedLists();
+                  await ParliamentCacheManager(prefix).clearCuratedListFeed(widget.listId);
+                  await ParliamentCacheManager(prefix).clearCuratedListPreview(widget.listId);
+                  
+                  if (!mounted) return;
+                  
+                  userProv.triggerCuratedListsRebuild(); 
+                  _loadData(forceRefresh: true); 
+                  messenger.showSnackBar(SnackBar(content: Text(loc.coverUpdatedSuccess)));
+                  
+                } catch (e) {
+                  if (!mounted) return;
+                  messenger.showSnackBar(SnackBar(content: Text(loc.errorUpdatingCover)));
+                }
+              },
+            ) : null, // <-- FUTURE - BELL : _buildTrackingBell(bill)
+          ),
         );
       },
     );
