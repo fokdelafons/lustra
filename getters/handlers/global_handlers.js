@@ -762,10 +762,13 @@ const createCuratedList = async (req, res) => {
     
     const { listName, prefix, description = '', tipProvider = null, tipUsername = null } = payload;
     if (!listName || !prefix) return res.status(400).json({ error: { message: 'Missing listName or prefix', status: 'INVALID_ARGUMENT' } });
-
-    const userListsSnapshot = await db.collection('curated_lists').where('ownerUid', '==', uid).get();
+    const userListsSnapshot = await db.collection('curated_lists')
+      .where('ownerUid', '==', uid)
+      .where('prefix', '==', prefix)
+      .get();
+      
     if (userListsSnapshot.size >= 3) {
-      return res.status(403).json({ error: { message: 'Osiągnięto limit 3 publicznych list.', status: 'PERMISSION_DENIED' } });
+      return res.status(403).json({ error: { message: `Osiągnięto limit 3 list dla regionu: ${prefix.toUpperCase()}.`, status: 'PERMISSION_DENIED' } });
     }
 
     const userDoc = await db.collection('users').doc(uid).get();
@@ -808,15 +811,19 @@ const toggleBillInCuratedList = async (req, res) => {
   try {
     const payload = req.body.data || {};
     const uid = req.user?.uid || payload.userId;
-    const { listId, billId, docType = 'bill' } = payload;
+    const { listId, billId, prefix, docType = 'bill' } = payload;
 
-    if (!uid || !listId || !billId) return res.status(400).json({ error: { message: 'Brakuje parametrów', status: 'INVALID_ARGUMENT' } });
+    if (!uid || !listId || !billId || !prefix) return res.status(400).json({ error: { message: 'Brakuje parametrów', status: 'INVALID_ARGUMENT' } });
 
     const listRef = db.collection('curated_lists').doc(listId);
     const listDoc = await listRef.get();
 
     if (!listDoc.exists) return res.status(404).json({ error: { message: 'Lista nie istnieje', status: 'NOT_FOUND' } });
     if (listDoc.data().ownerUid !== uid) return res.status(403).json({ error: { message: 'Brak uprawnień do edycji tej listy', status: 'PERMISSION_DENIED' } });
+
+    if (listDoc.data().prefix !== prefix) {
+      return res.status(403).json({ error: { message: 'Nie można dodać projektu z innego kraju do tej listy.', status: 'PERMISSION_DENIED' } });
+    }
 
     const arrayField = docType === 'civic' ? 'civic' : 'bills';
     const currentArray = listDoc.data()[arrayField] || [];
@@ -960,19 +967,51 @@ const getMyCuratedLists = async (req, res) => {
   try {
     const payload = req.body.data || {};
     const uid = req.user?.uid || payload.userId;
+    const prefix = payload.prefix;
     if (!uid) return res.status(401).json({ error: { message: 'Brak autoryzacji', status: 'UNAUTHENTICATED' } });
 
-    const snapshot = await db.collection('curated_lists').where('ownerUid', '==', uid).get();
-    const lists = snapshot.docs.map(doc => ({ 
+    let query = db.collection('curated_lists').where('ownerUid', '==', uid);
+    if (prefix) query = query.where('prefix', '==', prefix);
+    const ownedSnapshot = await query.get();
+    
+    const ownedLists = ownedSnapshot.docs.map(doc => ({ 
       id: doc.id, 
       listName: doc.data().listName, 
       bills: doc.data().bills || [],
       civic: doc.data().civic || [],
-      highlightedBillId: doc.data().highlightedBillId || null
+      highlightedBillId: doc.data().highlightedBillId || null,
+      prefix: doc.data().prefix,
+      isOwner: true
     }));
 
-    return res.status(200).json({ data: { lists } });
+    const userDoc = await db.collection('users').doc(uid).get();
+    const subscribedIds = userDoc.exists ? (userDoc.data().subscribedLists || []) : [];
+    let subscribedLists = [];
+    
+    if (subscribedIds.length > 0) {
+      const chunks = [];
+      for (let i = 0; i < subscribedIds.length; i += 30) {
+         chunks.push(subscribedIds.slice(i, i + 30));
+      }
+      for (const chunk of chunks) {
+        let subQuery = db.collection('curated_lists').where(admin.firestore.FieldPath.documentId(), 'in', chunk);
+        if (prefix) subQuery = subQuery.where('prefix', '==', prefix);
+        const subSnap = await subQuery.get();
+        subSnap.forEach(doc => {
+          subscribedLists.push({
+            id: doc.id,
+            listName: doc.data().listName,
+            prefix: doc.data().prefix,
+            isOwner: false
+          });
+        });
+      }
+    }
+
+    const allLists = [...ownedLists, ...subscribedLists];
+    return res.status(200).json({ data: { lists: allLists } });
   } catch (error) {
+    console.error('Błąd w getMyCuratedLists:', error);
     return res.status(500).json({ error: { message: 'Wewnętrzny błąd serwera', status: 'INTERNAL' } });
   }
 };

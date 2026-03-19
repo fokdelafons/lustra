@@ -31,38 +31,27 @@ class _MobileAppBarState extends State<MobileAppBar> {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
 
   Future<void> _handleNotificationsToggle(bool isEnabled) async {
-    final authService = context.read<AuthService>();
     final parliamentManager = context.read<ParliamentManager>();
     final userProvider = context.read<UserProvider>();
     final parliamentId = parliamentManager.activeServiceId;
 
-    if (authService.currentUser == null || parliamentId == null) return;
+    if (parliamentId == null) return;
     List<String> updatedList = List.from(userProvider.subscribedParliaments);
-    if (isEnabled && !updatedList.contains(parliamentId)) {
-      updatedList.add(parliamentId);
-    } else if (!isEnabled) {
-      updatedList.remove(parliamentId);
-    }
-
-    userProvider.updatePreferences(subscribedParliaments: updatedList);
 
     if (isEnabled) {
-      NotificationSettings settings = await _firebaseMessaging.requestPermission(
-        alert: true, badge: true, sound: true,
-      );
-
+      NotificationSettings settings = await _firebaseMessaging.requestPermission(alert: true, badge: true, sound: true);
       if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+        if (!updatedList.contains(parliamentId)) updatedList.add(parliamentId);
         String? fcmToken = await _firebaseMessaging.getToken();
-        if (fcmToken != null) {
-          await userProvider.updatePreferences(subscribedParliaments: updatedList, fcmToken: fcmToken);
-          developer.log('Powiadomienia włączone dla $parliamentId.', name: 'Notifications');
-        }
+        await userProvider.updatePreferences(subscribedParliaments: updatedList, fcmToken: fcmToken);
+        developer.log('Powiadomienia włączone dla $parliamentId.', name: 'Notifications');
       } else {
         updatedList.remove(parliamentId);
-        userProvider.updatePreferences(subscribedParliaments: updatedList);
+        await userProvider.updatePreferences(subscribedParliaments: updatedList);
         developer.log('Odmowa powiadomień.', name: 'Notifications');
       }
     } else {
+      updatedList.remove(parliamentId);
       await userProvider.updatePreferences(subscribedParliaments: updatedList);
       developer.log('Powiadomienia wyłączone dla $parliamentId.', name: 'Notifications');
     }
@@ -70,17 +59,14 @@ class _MobileAppBarState extends State<MobileAppBar> {
 
   Future<void> _handleTrackedNotificationsToggle(bool isEnabled) async {
     final userProvider = context.read<UserProvider>();
-    userProvider.updatePreferences(notificationsTrackedBills: isEnabled);
 
     if (isEnabled) {
       NotificationSettings settings = await _firebaseMessaging.requestPermission(alert: true, badge: true, sound: true);
       if (settings.authorizationStatus == AuthorizationStatus.authorized) {
         String? fcmToken = await _firebaseMessaging.getToken();
-        if (fcmToken != null) {
-          await userProvider.updatePreferences(notificationsTrackedBills: true, fcmToken: fcmToken);
-        }
+        await userProvider.updatePreferences(notificationsTrackedBills: true, fcmToken: fcmToken);
       } else {
-        userProvider.updatePreferences(notificationsTrackedBills: false);
+        await userProvider.updatePreferences(notificationsTrackedBills: false);
       }
     } else {
       await userProvider.updatePreferences(notificationsTrackedBills: false);
@@ -471,6 +457,7 @@ class _MobileAppBarState extends State<MobileAppBar> {
                 color: Colors.white,
                 surfaceTintColor: Colors.transparent,
                 onSelected: (String value) {
+                  if (value == 'ignore') return;
                   if (value == 'language') _showLanguageDialog(context);
                 },
                 itemBuilder: (BuildContext context) {
@@ -569,13 +556,7 @@ class _MobileAppBarState extends State<MobileAppBar> {
                             value: userProv.marketingConsent,
                             onChanged: (bool? value) async {
                               if (value == null) return;
-                              userProv.updatePreferences(marketing: value);
-                              final authService = context.read<AuthService>();
-                              try {
-                                await authService.updateUserNotificationPrefs({'marketingConsent': value});
-                              } catch (e) {
-                                developer.log('Błąd zapisu zgody: $e');
-                              }
+                              await userProv.updatePreferences(marketing: value); 
                             },
                             activeColor: Theme.of(context).primaryColor,
                             visualDensity: VisualDensity.compact,
@@ -584,88 +565,124 @@ class _MobileAppBarState extends State<MobileAppBar> {
                       ),
                     ),
                     const PopupMenuDivider(),
-
                     PopupMenuItem<String>(
-                      enabled: false,
+                      enabled: true,
+                      value: 'ignore',
                       padding: EdgeInsets.zero,
-                      child: FutureBuilder<List<Map<String, dynamic>>>(
-                        future: CuratedListService().getMyLists(prefix),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 24.0),
-                              child: Center(
-                                child: SizedBox(
-                                  width: 20, height: 20,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                ),
-                              ),
-                            );
-                          }
+                      child: Consumer<UserProvider>(
+                        builder: (context, userProvWatcher, child) {
+                          return FutureBuilder<List<Map<String, dynamic>>>(
+                            future: CuratedListService().getMyLists(prefix, forceRefresh: userProvWatcher.curatedListUpdateStamp > 0),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                return const Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 24.0),
+                                  child: Center(
+                                    child: SizedBox(
+                                      width: 20, height: 20,
+                                      child: CircularProgressIndicator(strokeWidth: 2),
+                                    ),
+                                  ),
+                                );
+                              }
 
-                          final allLists = snapshot.data ?? [];
-                          final currentPrefix = context.read<ParliamentManager>().activeServiceId;
-                          final lists = allLists.where((l) => (l['prefix'] ?? 'us') == currentPrefix).toList();
-                          
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 8.0, bottom: 4.0),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(l10n.yourListsForCountry(context.read<ParliamentManager>().activeService.source.name), style: TextStyle(fontSize: 12, color: Colors.grey[500], fontWeight: FontWeight.bold)),
-                                    Text("${allLists.length}/3", style: TextStyle(fontSize: 12, color: Colors.grey[500], fontWeight: FontWeight.bold)),
-                                  ],
-                                ),
-                              ),
-                              if (lists.isNotEmpty) ...[
-                                ...lists.map((listData) {
-                                  return InkWell(
-                                    onTap: () {
-                                      Navigator.of(context).pop();
-                                      final manager = context.read<ParliamentManager>();
-                                      final lang = context.read<LanguageProvider>().appLanguageCode;
-                                      final slug = manager.activeSlug;
-                                      final term = manager.currentTerm ?? 0;
-                                      final listId = listData['id'];
-                                      context.smartNavigate('/$lang/$slug/$term/legislations?list=curated&listId=$listId'); 
-                                    },
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                              final allLists = snapshot.data ?? [];
+                              final ownedLists = allLists.where((l) => l['isOwner'] == true).toList();
+                              final subscribedLists = allLists.where((l) => l['isOwner'] == false).toList();
+                              
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (subscribedLists.isNotEmpty) ...[
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 12.0, bottom: 4.0),
                                       child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
-                                          Icon(Icons.list_alt, size: 20, color: Colors.grey[700]),
-                                          const SizedBox(width: 12),
-                                          Expanded(
-                                            child: Text(listData['listName'] ?? 'Unnamed', style: const TextStyle(fontSize: 14)),
-                                          ),
+                                          Text(l10n.subscribedLists, style: TextStyle(fontSize: 12, color: Colors.grey[500], fontWeight: FontWeight.bold)),
+                                          Text("${subscribedLists.length}/10", style: TextStyle(fontSize: 12, color: Colors.grey[500], fontWeight: FontWeight.bold)),
                                         ],
                                       ),
                                     ),
-                                  );
-                                }),
-                              ],
-                              if (userProv.createdLists.length < 3)
-                                InkWell(
-                                  onTap: () {
-                                    Navigator.of(context).pop();
-                                    _showCreateListModal();
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                                    ...subscribedLists.map((listData) {
+                                      return InkWell(
+                                        onTap: () {
+                                          Navigator.of(context).pop();
+                                          final manager = context.read<ParliamentManager>();
+                                          final lang = context.read<LanguageProvider>().appLanguageCode;
+                                          context.smartNavigate('/$lang/${manager.activeSlug}/${manager.currentTerm ?? 0}/legislations?list=curated&listId=${listData['id']}'); 
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.list_alt, size: 20, color: Colors.grey[700]),
+                                              const SizedBox(width: 12),
+                                              Expanded(
+                                                child: Text(listData['listName'] ?? 'Unnamed', style: TextStyle(fontSize: 14, color: Colors.grey[800])),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    }),
+                                    const SizedBox(height: 8),
+                                  ],
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 8.0, bottom: 4.0),
                                     child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Icon(Icons.add_circle_outline, size: 20, color: Theme.of(context).primaryColor),
-                                        const SizedBox(width: 12),
-                                        Text(lists.isNotEmpty ? "Create Another List" : "Create Tracking List", style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold)),
+                                        Text(l10n.yourListsForCountry(context.read<ParliamentManager>().activeService.source.name), style: TextStyle(fontSize: 12, color: Colors.grey[500], fontWeight: FontWeight.bold)),
+                                        Text("${ownedLists.length}/3", style: TextStyle(fontSize: 12, color: Colors.grey[500], fontWeight: FontWeight.bold)),
                                       ],
                                     ),
                                   ),
-                                ),
-                            ],
+                                  if (ownedLists.isNotEmpty) ...[
+                                    ...ownedLists.map((listData) {
+                                      return InkWell(
+                                        onTap: () {
+                                          Navigator.of(context).pop();
+                                          final manager = context.read<ParliamentManager>();
+                                          final lang = context.read<LanguageProvider>().appLanguageCode;
+                                          context.smartNavigate('/$lang/${manager.activeSlug}/${manager.currentTerm ?? 0}/legislations?list=curated&listId=${listData['id']}'); 
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.draw_outlined, size: 20, color: Colors.grey[700]),
+                                              const SizedBox(width: 12),
+                                              Expanded(
+                                                child: Text(listData['listName'] ?? 'Unnamed', style: TextStyle(fontSize: 14, color: Colors.grey[800])),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    }),
+                                  ],
+                                  if (ownedLists.length < 3)
+                                    InkWell(
+                                      onTap: () {
+                                        Navigator.of(context).pop();
+                                        _showCreateListModal();
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                                        child: Row(
+                                          children: [
+                                            Icon(Icons.add_circle_outline, size: 20, color: Theme.of(context).primaryColor),
+                                            const SizedBox(width: 12),
+                                            Text(ownedLists.isNotEmpty ? l10n.buttonCreateAnotherList : l10n.buttonCreateTrackingList, style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold)),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              );
+                            }
                           );
                         }
                       ),

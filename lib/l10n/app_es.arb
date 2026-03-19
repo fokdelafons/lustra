@@ -627,10 +627,10 @@
   "actionSubscribe": "Suscribirse",
   "tooltipReportList": "Reportar Lista",
   "tooltipDeleteList": "Eliminar Lista",
-  "draftYourCivicProject": "Redacta tu propio proyecto ciudadano",
-  "draftCivicProjectDescription": "Convierte tus ideas en...",
-  "createYourOwnList": "Crear Lista Propia",
-  "createYourOwnListDescription": "Sé el autor. Selecciona proyectos de ley...",
+"draftYourCivicProject": "Redacta tu propio proyecto ciudadano",
+  "draftCivicProjectDescription": "Transforma tus ideas en verdaderos proyectos de ley y reúne apoyo. Lustra está lista para tus políticas.",
+  "createYourOwnList": "Crea tu propia lista",
+  "createYourOwnListDescription": "Conviértete en curador. Selecciona proyectos de ley importantes, invita a seguidores y envía notificaciones a sus dispositivos para mantenerlos informados sobre los cambios en tu lista de legislación o proyectos ciudadanos.",
   "editListDetails": "Editar Detalles",
   "listNameLabel": "Nombre de la Lista",
   "descriptionOptionalLabel": "Descripción (Opcional)",
@@ -678,7 +678,6 @@
   "snackbarFailedToDelete": "Error al eliminar.",
   "loaderFetchingMirrorParliamentData": "OBTENIENDO DATOS DEL PARLAMENTO ESPEJO...",
   "loaderSecuringSafeChannel": "CIFRANDO CONEXIÓN...",
-  "snackbarAddedToList": "Añadido a tu lista.",
   "snackbarRemovedFromList": "Eliminado de tu lista.",
   "loaderLoadingData": "CARGANDO DATOS...",
   "buttonAddToList": "Añadir a la Lista",
@@ -742,5 +741,7 @@
   "actWatchlistSubtitle": "Crea listas personalizadas de proyectos de ley oficiales para reunir suscriptores y crear conciencia. Usa las redes sociales como poder de presión.",
   "actDraftTitle": "Redactar Leyes Ciudadanas",
   "actDraftSubtitle": "Envía tus propias iniciativas profesionales a Lustra. La sociedad necesita nuevas ideas que no estén bloqueadas por el capital. Crea, comparte y reúne apoyo.",
-  "joinCommunityTitle": "Únete a la Comunidad"
+  "joinCommunityTitle": "Únete a la Comunidad",
+  "snackbarAddedToList": "Añadido a la lista. ¡Descarga la aplicación móvil para recibir notificaciones en tiempo real!",
+  "subscribedLists": "Suscrito"
 }

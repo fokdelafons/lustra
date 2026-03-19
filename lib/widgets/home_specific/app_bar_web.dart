@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'dart:developer' as developer;
 
 import '../../providers/language_provider.dart';
 import '../../providers/user_provider.dart';
@@ -465,6 +464,7 @@ class _WebAppBarState extends State<WebAppBar> {
                     child: Icon(Icons.settings, color: Colors.grey[800], size: 28),
                   ),
                   onSelected: (String value) {
+                    if (value == 'ignore') return;
                     if (value == 'language') _showLanguageDialog(context);
                   },
                   itemBuilder: (BuildContext context) {
@@ -510,13 +510,7 @@ class _WebAppBarState extends State<WebAppBar> {
                               value: userProv.marketingConsent,
                               onChanged: (bool? value) async {
                                 if (value == null) return;
-                                userProv.updatePreferences(marketing: value);
-                                final authService = context.read<AuthService>();
-                                try {
-                                  await authService.updateUserNotificationPrefs({'marketingConsent': value});
-                                } catch (e) {
-                                  developer.log('Błąd zapisu zgody: $e');
-                                }
+                                await userProv.updatePreferences(marketing: value);
                               },
                               activeColor: Theme.of(context).primaryColor,
                               visualDensity: VisualDensity.compact,
@@ -526,10 +520,13 @@ class _WebAppBarState extends State<WebAppBar> {
                       ),
                       const PopupMenuDivider(),
                       PopupMenuItem<String>(
-                        enabled: false,
+                        enabled: true, 
+                        value: 'ignore',
                         padding: EdgeInsets.zero,
-                        child: FutureBuilder<List<Map<String, dynamic>>>(
-                        future: CuratedListService().getMyLists(prefix),
+                        child: Consumer<UserProvider>(
+                          builder: (context, userProvWatcher, child) {
+                            return FutureBuilder<List<Map<String, dynamic>>>(
+                              future: CuratedListService().getMyLists(prefix, forceRefresh: userProvWatcher.curatedListUpdateStamp > 0),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.waiting) {
                             return const Padding(
@@ -544,45 +541,78 @@ class _WebAppBarState extends State<WebAppBar> {
                           }
 
                           final allLists = snapshot.data ?? [];
-                          final currentPrefix = context.read<ParliamentManager>().activeServiceId;
-                          final lists = allLists.where((l) => (l['prefix'] ?? 'us') == currentPrefix).toList();
+                          final ownedLists = allLists.where((l) => l['isOwner'] == true).toList();
+                          final subscribedLists = allLists.where((l) => l['isOwner'] == false).toList();
                             
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Padding(
-                                    padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 8.0, bottom: 4.0),
+                                // --- SEKCJA 1: SUBSKRYBOWANE LISTY (WIDZ) ---
+                                if (subscribedLists.isNotEmpty) ...[
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 12.0, bottom: 4.0),
                                     child: Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Text(l10n.yourListsForCountry(context.read<ParliamentManager>().activeService.source.name), style: TextStyle(fontSize: 12, color: Colors.grey[500], fontWeight: FontWeight.bold)),
-                                        Text("${allLists.length}/3", style: TextStyle(fontSize: 12, color: Colors.grey[500], fontWeight: FontWeight.bold)),
+                                        Text(l10n.subscribedLists, style: TextStyle(fontSize: 12, color: Colors.grey[500], fontWeight: FontWeight.bold)),
+                                        Text("${subscribedLists.length}/10", style: TextStyle(fontSize: 12, color: Colors.grey[500], fontWeight: FontWeight.bold)),
                                       ],
                                     ),
                                   ),
-                                if (lists.isNotEmpty) ...[
-                                  ...lists.map((listData) {
+                                  ...subscribedLists.map((listData) {
                                     return InkWell(
                                       onTap: () {
-                                        Navigator.of(context).pop();
-                                        
+                                        Navigator.of(context).pop(); // Zamknij menu
                                         final manager = context.read<ParliamentManager>();
-                                        final lang = context.read<LanguageProvider>().appLanguageCode;
-                                        final slug = manager.activeSlug;
-                                        final term = manager.currentTerm ?? 0;
-                                        final listId = listData['id'];
-                                        
-                                        context.smartNavigate('/$lang/$slug/$term/legislations?list=curated&listId=$listId'); 
+                                        context.smartNavigate('/${context.read<LanguageProvider>().appLanguageCode}/${manager.activeSlug}/${manager.currentTerm ?? 0}/legislations?list=curated&listId=${listData['id']}'); 
                                       },
                                       child: Padding(
                                         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                                         child: Row(
                                           children: [
+                                            // TARCZA: Zwykła ikona listy dla subskrybowanych
                                             Icon(Icons.list_alt, size: 20, color: Colors.grey[700]),
                                             const SizedBox(width: 12),
                                             Expanded(
-                                              child: Text(listData['listName'] ?? 'Unnamed', style: const TextStyle(fontSize: 14)),
+                                              child: Text(listData['listName'] ?? 'Unnamed', style: TextStyle(fontSize: 14, color: Colors.grey[800])),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  }),
+                                  const SizedBox(height: 8),
+                                ],
+
+                                // --- SEKCJA 2: TWOJE LISTY (TWÓRCA) ---
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 8.0, bottom: 4.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(l10n.yourListsForCountry(context.read<ParliamentManager>().activeService.source.name), style: TextStyle(fontSize: 12, color: Colors.grey[500], fontWeight: FontWeight.bold)),
+                                      Text("${ownedLists.length}/3", style: TextStyle(fontSize: 12, color: Colors.grey[500], fontWeight: FontWeight.bold)),
+                                    ],
+                                  ),
+                                ),
+                                if (ownedLists.isNotEmpty) ...[
+                                  ...ownedLists.map((listData) {
+                                    return InkWell(
+                                      onTap: () {
+                                        Navigator.of(context).pop(); // Zamknij menu
+                                        final manager = context.read<ParliamentManager>();
+                                        context.smartNavigate('/${context.read<LanguageProvider>().appLanguageCode}/${manager.activeSlug}/${manager.currentTerm ?? 0}/legislations?list=curated&listId=${listData['id']}'); 
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                                        child: Row(
+                                          children: [
+                                            // TARCZA: Pióro (draw) dla własnych (edycja)
+                                            Icon(Icons.draw_outlined, size: 20, color: Colors.grey[700]),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: Text(listData['listName'] ?? 'Unnamed', style: TextStyle(fontSize: 14, color: Colors.grey[800])),
                                             ),
                                           ],
                                         ),
@@ -590,7 +620,9 @@ class _WebAppBarState extends State<WebAppBar> {
                                     );
                                   }),
                                 ],
-                                if (userProv.createdLists.length < 3)
+                                
+                                const SizedBox(height: 8),
+                                if (ownedLists.length < 3)
                                   InkWell(
                                     onTap: () {
                                       Navigator.of(context).pop();
@@ -602,17 +634,19 @@ class _WebAppBarState extends State<WebAppBar> {
                                         children: [
                                           Icon(Icons.add_circle_outline, size: 20, color: Theme.of(context).primaryColor),
                                           const SizedBox(width: 12),
-                                          Text(lists.isNotEmpty ? l10n.buttonCreateAnotherList : l10n.buttonCreateTrackingList, style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold)),
+                                          Text(ownedLists.isNotEmpty ? l10n.buttonCreateAnotherList : l10n.buttonCreateTrackingList, style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold)),
                                         ],
                                       ),
                                     ),
                                   ),
                               ],
                             );
-                          }
-                        ),
-                      ),
-                      const PopupMenuDivider(),
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                  const PopupMenuDivider(),
                       PopupMenuItem<String>(
                         enabled: false,
                         padding: EdgeInsets.zero,

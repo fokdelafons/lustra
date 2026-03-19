@@ -627,10 +627,10 @@
   "actionSubscribe": "Subskrybuj",
   "tooltipReportList": "Zgłoś listę",
   "tooltipDeleteList": "Usuń listę",
-  "draftYourCivicProject": "Zgłoś własny projekt obywatelski",
-  "draftCivicProjectDescription": "Przekształć swoje pomysły w realne...",
+  "draftYourCivicProject": "Stwórz własny projekt obywatelski",
+  "draftCivicProjectDescription": "Przekształć swoje pomysły w realne projekty ustaw i zdobywaj dla nich poparcie. Lustra jest gotowa na Twoją politykę.",
   "createYourOwnList": "Utwórz własną listę",
-  "createYourOwnListDescription": "Zostań autorem. Wybierz projekty ustaw...",
+  "createYourOwnListDescription": "Zostań kuratorem. Wybieraj ważne projekty ustaw, zapraszaj obserwujących i wysyłaj na ich urządzenia powiadomienia, aby informować ich na bieżąco o zmianach na Twojej liście legislacji lub projektach obywatelskich.",
   "editListDetails": "Edytuj szczegóły",
   "listNameLabel": "Nazwa listy",
   "descriptionOptionalLabel": "Opis (opcjonalnie)",
@@ -678,7 +678,6 @@
   "snackbarFailedToDelete": "Nie udało się usunąć.",
   "loaderFetchingMirrorParliamentData": "POBIERANIE DANYCH LUSTRZANEGO PARLAMENTU...",
   "loaderSecuringSafeChannel": "SZYFROWANIE POŁĄCZENIA...",
-  "snackbarAddedToList": "Dodano do listy.",
   "snackbarRemovedFromList": "Usunięto z listy.",
   "loaderLoadingData": "POBIERANIE DANYCH...",
   "buttonAddToList": "Dodaj do listy",
@@ -742,5 +741,7 @@
   "actWatchlistSubtitle": "Twórz własne listy ustaw i projektów obywatelskich, zdobywaj obserwujących i buduj świadomość. Użyj social mediów jako siły lobbingowej.",
   "actDraftTitle": "Twórz Projekty Ustaw",
   "actDraftSubtitle": "Zgłaszaj własne, profesjonalne inicjatywy bezpośrednio do Lustra. Społeczeństwo potrzebuje idei, których nie blokuje kapitał. Twórz, udostępniaj i zbieraj poparcie.",
-  "joinCommunityTitle": "Dołącz do Społeczności"
+  "joinCommunityTitle": "Dołącz do Społeczności",
+  "snackbarAddedToList": "Dodano do listy. Aby otrzymywać powiadomienia na żywo, pobierz aplikację mobilną!",
+  "subscribedLists": "Subskrybowane"
 }

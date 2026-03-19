@@ -627,10 +627,10 @@
   "actionSubscribe": "Abonnieren",
   "tooltipReportList": "Liste melden",
   "tooltipDeleteList": "Liste löschen",
-  "draftYourCivicProject": "Reiche dein Bürgerprojekt ein",
-  "draftCivicProjectDescription": "Mach aus deinen Ideen konkrete...",
-  "createYourOwnList": "Eigene Liste erstellen",
-  "createYourOwnListDescription": "Werde Autor. Wähle Gesetzentwürfe...",
+"draftYourCivicProject": "Entwerfen Sie Ihr eigenes Bürgerprojekt",
+  "draftCivicProjectDescription": "Verwandeln Sie Ihre Ideen in echte Gesetzentwürfe und sammeln Sie Unterstützung. Lustra ist bereit für Ihre Politik.",
+  "createYourOwnList": "Erstellen Sie Ihre eigene Liste",
+  "createYourOwnListDescription": "Werden Sie Kurator. Wählen Sie wichtige Gesetzentwürfe aus, laden Sie Follower ein und senden Sie Push-Benachrichtigungen auf deren Geräte, um sie über Änderungen in Ihrer Gesetzgebungsliste oder bei Bürgerprojekten auf dem Laufenden zu halten.",
   "editListDetails": "Listendetails bearbeiten",
   "listNameLabel": "Listenname",
   "descriptionOptionalLabel": "Beschreibung (Optional)",
@@ -678,7 +678,6 @@
   "snackbarFailedToDelete": "Löschen fehlgeschlagen.",
   "loaderFetchingMirrorParliamentData": "ABRUF DER SPIEGELPARLAMENT-DATEN...",
   "loaderSecuringSafeChannel": "VERBINDUNG WIRD VERSCHLÜSSELT...",
-  "snackbarAddedToList": "Zur Liste hinzugefügt.",
   "snackbarRemovedFromList": "Von der Liste entfernt.",
   "loaderLoadingData": "DATEN WERDEN GELADEN...",
   "buttonAddToList": "Zur Liste hinzufügen",
@@ -742,5 +741,7 @@
   "actWatchlistSubtitle": "Erstellen Sie eigene Listen von offiziellen Gesetzentwürfen und Bürgerprojekten, um Abonnenten zu sammeln. Nutzen Sie soziale Medien als Lobbykraft.",
   "actDraftTitle": "Bürgergesetze entwerfen",
   "actDraftSubtitle": "Reichen Sie Ihre eigenen professionellen Initiativen direkt bei Lustra ein. Die Gesellschaft braucht neue Ideen, die nicht vom Kapital zurückgehalten werden.",
-  "joinCommunityTitle": "Treten Sie der Community bei"
+  "joinCommunityTitle": "Treten Sie der Community bei",
+  "snackbarAddedToList": "Zur Liste hinzugefügt. Laden Sie die mobile App herunter, um Echtzeit-Benachrichtigungen zu erhalten!",
+  "subscribedLists": "Abonniert"
 }

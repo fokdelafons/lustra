@@ -627,10 +627,10 @@
   "actionSubscribe": "Iscriviti",
   "tooltipReportList": "Segnala Lista",
   "tooltipDeleteList": "Elimina Lista",
-  "draftYourCivicProject": "Proponi il tuo progetto civico",
-  "draftCivicProjectDescription": "Trasforma le tue idee in...",
-  "createYourOwnList": "Crea la tua Lista",
-  "createYourOwnListDescription": "Diventa un autore. Seleziona disegni di legge...",
+"draftYourCivicProject": "Redigi il tuo progetto cittadino",
+  "draftCivicProjectDescription": "Trasforma le tue idee in veri e propri disegni di legge e raccogli consensi. Lustra è pronta per le tue politiche.",
+  "createYourOwnList": "Crea la tua lista",
+  "createYourOwnListDescription": "Diventa un curatore. Seleziona i disegni di legge importanti, invita follower e invia notifiche ai loro dispositivi per tenerli aggiornati sui cambiamenti nella tua lista di legislazione o nei progetti cittadini.",
   "editListDetails": "Modifica Dettagli",
   "listNameLabel": "Nome della Lista",
   "descriptionOptionalLabel": "Descrizione (Opzionale)",
@@ -678,7 +678,6 @@
   "snackbarFailedToDelete": "Impossibile eliminare.",
   "loaderFetchingMirrorParliamentData": "RECUPERO DATI DEL PARLAMENTO SPECCHIO...",
   "loaderSecuringSafeChannel": "CRITTOGRAFIA CONNESSIONE...",
-  "snackbarAddedToList": "Aggiunto alla lista.",
   "snackbarRemovedFromList": "Rimosso dalla lista.",
   "loaderLoadingData": "CARICAMENTO DATI...",
   "buttonAddToList": "Aggiungi alla Lista",
@@ -742,5 +741,7 @@
   "actWatchlistSubtitle": "Crea liste personalizzate di disegni di legge per raccogliere iscritti e aumentare la consapevolezza. Usa i social media come forza di lobbying.",
   "actDraftTitle": "Proponi Leggi Cittadine",
   "actDraftSubtitle": "Invia le tue iniziative a Lustra. La società moderna ha bisogno di nuove idee non ostacolate dal capitale. Crea, condividi e raccogli supporto.",
-  "joinCommunityTitle": "Unisciti alla Community"
+  "joinCommunityTitle": "Unisciti alla Community",
+  "snackbarAddedToList": "Aggiunto alla tua lista. Per ricevere notifiche in tempo reale, scarica l'app mobile!",
+  "subscribedLists": "Iscritto"
 }

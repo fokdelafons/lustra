@@ -628,10 +628,10 @@
   "actionSubscribe": "Subscrever",
   "tooltipReportList": "Denunciar Lista",
   "tooltipDeleteList": "Apagar Lista",
-  "draftYourCivicProject": "Redige o teu próprio projeto cívico",
-  "draftCivicProjectDescription": "Transforma as tuas ideias em...",
-  "createYourOwnList": "Criar Lista Própria",
-  "createYourOwnListDescription": "Sê o autor. Seleciona projetos de lei...",
+"draftYourCivicProject": "Elabore seu próprio projeto cidadão",
+  "draftCivicProjectDescription": "Transforme suas ideias em projetos de lei reais e reúna apoio. O Lustra está pronto para as suas políticas.",
+  "createYourOwnList": "Crie sua própria lista",
+  "createYourOwnListDescription": "Torne-se um curador. Selecione projetos de lei importantes, convide seguidores e envie notificações para seus dispositivos para mantê-los informados sobre mudanças em sua lista de legislação ou projetos cidadãos.",
   "editListDetails": "Editar Detalhes",
   "listNameLabel": "Nome da Lista",
   "descriptionOptionalLabel": "Descrição (Opcional)",
@@ -679,7 +679,6 @@
   "snackbarFailedToDelete": "Falha ao apagar.",
   "loaderFetchingMirrorParliamentData": "A OBTER DADOS DO PARLAMENTO ESPELHO...",
   "loaderSecuringSafeChannel": "A ENCRIPTAR A LIGAÇÃO...",
-  "snackbarAddedToList": "Adicionado à tua lista.",
   "snackbarRemovedFromList": "Removido da tua lista.",
   "loaderLoadingData": "A CARREGAR DADOS...",
   "buttonAddToList": "Adicionar à Lista",
@@ -743,5 +742,7 @@
   "actWatchlistSubtitle": "Crie listas de projetos de lei para reunir assinantes e aumentar a conscientização. Use as mídias sociais como poder de lobby.",
   "actDraftTitle": "Elaborar Projetos Cidadãos",
   "actDraftSubtitle": "Envie suas próprias iniciativas ao Lustra. A sociedade moderna precisa de novas ideias que não sejam bloqueadas pelo capital.",
-  "joinCommunityTitle": "Junte-se à Comunidade"
+  "joinCommunityTitle": "Junte-se à Comunidade",
+  "snackbarAddedToList": "Adicionado à sua lista. Para receber notificações em tempo real, baixe o aplicativo móvel!",
+  "subscribedLists": "Inscrito"
 }

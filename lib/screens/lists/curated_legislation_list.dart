@@ -143,6 +143,7 @@ Future<void> refreshData() async {
         });
         
         context.read<UserProvider>().updateListSubscriptionLocally(widget.listId, newState);
+        context.read<UserProvider>().triggerCuratedListsRebuild();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(newState ? AppLocalizations.of(context)!.subscribedToList : AppLocalizations.of(context)!.unsubscribedFromList)),
         );
@@ -435,39 +436,65 @@ Future<void> refreshData() async {
               ],
             ),
           ),
-          Positioned(
-            top: 4,
-            right: 4,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.flag_outlined, color: Colors.grey.withAlpha(150), size: 20),
-                  tooltip: AppLocalizations.of(context)!.tooltipReportList,
-                  onPressed: () {
-                    final manager = context.read<ParliamentManager>();
-                    showErrorReportDialog(
-                      context: context,
-                      targetId: widget.listId,
-                      targetType: 'curated_list',
-                      sourceId: manager.activeServiceId ?? 'unknown',
-                    );
-                  },
+          
+          if (isOwner)
+            Positioned(
+              top: 12,
+              left: 12,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white.withAlpha(200),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade300),
                 ),
-                if (isOwner)
-                  IconButton(
-                    icon: Icon(Icons.delete_outline, color: Colors.red.withAlpha(150), size: 20),
-                    tooltip: AppLocalizations.of(context)!.tooltipDeleteList,
-                    onPressed: _confirmDeleteList,
-                  ),
-              ],
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.storage_outlined, size: 12, color: Colors.grey[700]),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${_bills.length}/80',
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey[800]),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+          if (isOwner)
+            Positioned(
+              top: 4,
+              right: 4,
+              child: IconButton(
+                icon: Icon(Icons.delete_outline, color: Colors.red.withAlpha(150), size: 20),
+                tooltip: AppLocalizations.of(context)!.tooltipDeleteList,
+                onPressed: _confirmDeleteList,
+              ),
+            ),
+          
+          Positioned(
+            bottom: 4,
+            right: 4,
+            child: IconButton(
+              icon: Icon(Icons.flag_outlined, color: Colors.grey.withAlpha(150), size: 20),
+              tooltip: AppLocalizations.of(context)!.tooltipReportList,
+              onPressed: () {
+                final manager = context.read<ParliamentManager>();
+                showErrorReportDialog(
+                  context: context,
+                  targetId: widget.listId,
+                  targetType: 'curated_list',
+                  sourceId: manager.activeServiceId ?? 'unknown',
+                );
+              },
             ),
           ),
         ],
       ),
     );
   }
-  static const String _lustraMasterListId = 'wIsxT9kCo0t02927tBIs'; // DEFAULT LIST - LUSTRA TRANSPARENCY FIGHT
+  static const String _lustraMasterListId = 'G0V2PdSmQtwh8bGxdT7e'; // DEFAULT LIST - LUSTRA TRANSPARENCY FIGHT, US only for now
 
   Widget _buildCivicProjectCTA(BuildContext context) {
     final manager = context.read<ParliamentManager>();

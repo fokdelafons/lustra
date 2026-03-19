@@ -10,6 +10,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:web_smooth_scroll/web_smooth_scroll.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 import '../models/legislation.dart';
 import '../providers/interaction_provider.dart';
@@ -140,6 +141,24 @@ Future<void> _toggleTracking() async {
         ),
       );
     }
+
+    if (!kIsWeb && !isCurrentlyTracked && mounted) {
+      final userProv = context.read<UserProvider>();
+      final messaging = FirebaseMessaging.instance;
+      final settings = await messaging.getNotificationSettings();
+      
+      if (settings.authorizationStatus != AuthorizationStatus.authorized || !userProv.notificationsTrackedBills) {
+        final newSettings = await messaging.requestPermission(alert: true, badge: true, sound: true);
+        
+        if (newSettings.authorizationStatus == AuthorizationStatus.authorized) {
+          final token = await messaging.getToken();
+          if (token != null) {
+            await userProv.updatePreferences(notificationsTrackedBills: true, fcmToken: token);
+          }
+        }
+      }
+    }
+
   } catch (e) {
     interactionProvider.toggleTrackingLocally(_bill!.id, isCurrentlyTracked, docType: currentDocType);
     if (mounted) {

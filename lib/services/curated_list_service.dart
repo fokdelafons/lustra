@@ -29,6 +29,7 @@ class CuratedListService {
         'listId': listId,
         'billId': billId,
         'docType': docType,
+        'prefix': prefix,
       });
       await ParliamentCacheManager(prefix).clearMyCuratedLists();
       await ParliamentCacheManager(prefix).clearCuratedListFeed(listId);
@@ -124,7 +125,9 @@ Future<List<Map<String, dynamic>>> getMyLists(String prefix, {bool forceRefresh 
     }
 
     try {
-      final response = await _apiService.callFunction('getMyCuratedLists');
+      final response = await _apiService.callFunction('getMyCuratedLists', params: {
+        'prefix': prefix,
+      });
       final lists = response['lists'] as List<dynamic>? ?? [];
       
       await cacheManager.saveMyCuratedLists(lists);

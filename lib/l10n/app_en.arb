@@ -771,10 +771,10 @@
   "actionSubscribe": "Subscribe",
   "tooltipReportList": "Report List",
   "tooltipDeleteList": "Delete List",
-  "draftYourCivicProject": "Draft Your Own Civic Project",
-  "draftCivicProjectDescription": "Turn your ideas into actual...",
-  "createYourOwnList": "Create Your Own List",
-  "createYourOwnListDescription": "Be a curator. Select bills...",
+"draftYourCivicProject": "Draft your own civic project",
+  "draftCivicProjectDescription": "Transform your ideas into real bills and gather support. Lustra is ready for your policies.",
+  "createYourOwnList": "Create your own list",
+  "createYourOwnListDescription": "Become a curator. Select important bills, invite followers, and push notifications to their devices to keep them updated on changes in your legislation list or civic projects.",
   "editListDetails": "Edit List Details",
   "listNameLabel": "List Name",
   "descriptionOptionalLabel": "Description (Optional)",
@@ -840,7 +840,7 @@
   "snackbarFailedToDelete": "Failed to delete.",
   "loaderFetchingMirrorParliamentData": "FETCHING MIRROR PARLIAMENT DATA...",
   "loaderSecuringSafeChannel": "SECURING SAFE CHANNEL...",
-  "snackbarAddedToList": "Added to your list.",
+  "snackbarAddedToList": "Added to your list. To receive real-time notifications, download dedicated mobile app!",
   "snackbarRemovedFromList": "Removed from your list.",
   "loaderLoadingData": "LOADING DATA...",
   "buttonAddToList": "Add to List",
@@ -948,5 +948,6 @@
   "actWatchlistSubtitle": "Create custom lists of official bills and civic projects to gather subscribers and increase awareness. Use existing social media as lobbying power.",
   "actDraftTitle": "Draft Civic Bills",
   "actDraftSubtitle": "Submit your own professional initiatives directly to Lustra. Modern society needs new ideas that are not gatekeeped by capital. Create, share and collect support.",
-  "joinCommunityTitle": "Join the Community"
+  "joinCommunityTitle": "Join the Community",
+  "subscribedLists": "Subscribed"
 }

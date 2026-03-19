@@ -240,7 +240,7 @@ class _CuratedListManagerDialogState extends State<CuratedListManagerDialog> {
                     return const SizedBox(height: 120, child: Center(child: CircularProgressIndicator(strokeWidth: 2)));
                   }
                   
-                  final lists = snapshot.data ?? [];
+                  final lists = (snapshot.data ?? []).where((l) => l['isOwner'] == true).toList();
                   
                   return SingleChildScrollView(
                     child: Column(

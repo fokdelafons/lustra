@@ -627,10 +627,10 @@
   "actionSubscribe": "Abonneren",
   "tooltipReportList": "Lijst rapporteren",
   "tooltipDeleteList": "Lijst verwijderen",
-  "draftYourCivicProject": "Dien je eigen burgerproject in",
-  "draftCivicProjectDescription": "Verander je ideeën in...",
-  "createYourOwnList": "Maak je eigen lijst",
-  "createYourOwnListDescription": "Word een auteur. Selecteer wetsvoorstellen...",
+"draftYourCivicProject": "Stel uw eigen burgerproject op",
+  "draftCivicProjectDescription": "Zet uw ideeën om in echte wetsvoorstellen en verzamel steun. Lustra is klaar voor uw beleid.",
+  "createYourOwnList": "Maak uw eigen lijst",
+  "createYourOwnListDescription": "Word een curator. Selecteer belangrijke wetsvoorstellen, nodig volgers uit en stuur meldingen naar hun apparaten om ze op de hoogte te houden van wijzigingen in uw wetgevingslijst of burgerprojecten.",
   "editListDetails": "Lijstdetails bewerken",
   "listNameLabel": "Naam van de lijst",
   "descriptionOptionalLabel": "Beschrijving (Optioneel)",
@@ -678,7 +678,6 @@
   "snackbarFailedToDelete": "Verwijderen mislukt.",
   "loaderFetchingMirrorParliamentData": "GEGEVENS SPIEGELPARLEMENT OPHALEN...",
   "loaderSecuringSafeChannel": "VERBINDING VERSLEUTELEN...",
-  "snackbarAddedToList": "Toegevoegd aan je lijst.",
   "snackbarRemovedFromList": "Verwijderd uit je lijst.",
   "loaderLoadingData": "GEGEVENS LADEN...",
   "buttonAddToList": "Toevoegen aan lijst",
@@ -742,5 +741,7 @@
   "actWatchlistSubtitle": "Maak aangepaste lijsten van wetsvoorstellen om abonnees te verzamelen en bewustzijn te creëren. Gebruik sociale media als lobbykracht.",
   "actDraftTitle": "Stel Burgerwetten Op",
   "actDraftSubtitle": "Dien je eigen initiatieven in bij Lustra. De samenleving heeft behoefte aan nieuwe ideeën die niet door kapitaal worden tegengehouden.",
-  "joinCommunityTitle": "Word lid van de Community"
+  "joinCommunityTitle": "Word lid van de Community",
+  "snackbarAddedToList": "Toegevoegd aan je lijst. Download de mobiele app om realtime meldingen te ontvangen!",
+  "subscribedLists": "Geabonneerd"
 }

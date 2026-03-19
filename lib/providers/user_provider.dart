@@ -9,7 +9,7 @@ class UserProvider with ChangeNotifier {
   
   Map<String, dynamic> _votes = {};
   bool _marketingConsent = false;
-  bool _notificationsTrackedBills = true;
+  bool _notificationsTrackedBills = false;
   List<String> _subscribedParliaments = [];
   String? _primaryParliamentId;
 
@@ -93,7 +93,7 @@ class UserProvider with ChangeNotifier {
         final profile = result['profile'] as Map<String, dynamic>;
         
         _marketingConsent = profile['marketingConsent'] ?? false;
-        _notificationsTrackedBills = profile['notificationsTrackedBills'] ?? true;
+        _notificationsTrackedBills = profile['notificationsTrackedBills'] ?? false;
         _subscribedParliaments = List<String>.from(profile['subscribedParliaments'] ?? []);
         _primaryParliamentId = profile['primaryParliamentId'];
 

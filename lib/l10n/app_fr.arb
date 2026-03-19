@@ -627,10 +627,10 @@
   "actionSubscribe": "S'abonner",
   "tooltipReportList": "Signaler la liste",
   "tooltipDeleteList": "Supprimer la liste",
-  "draftYourCivicProject": "Rédigez votre propre projet citoyen",
-  "draftCivicProjectDescription": "Transformez vos idées en...",
-  "createYourOwnList": "Créer votre propre liste",
-  "createYourOwnListDescription": "Devenez auteur. Sélectionnez des projets...",
+"draftYourCivicProject": "Rédigez votre propre projet citoyen",
+  "draftCivicProjectDescription": "Transformez vos idées en véritables projets de loi et rassemblez des soutiens. Lustra est prête pour vos politiques.",
+  "createYourOwnList": "Créez votre propre liste",
+  "createYourOwnListDescription": "Devenez curateur. Sélectionnez des projets de loi importants, invitez des abonnés et envoyez des notifications sur leurs appareils pour les tenir informés des changements dans votre liste de législation ou de projets citoyens.",
   "editListDetails": "Modifier les détails",
   "listNameLabel": "Nom de la liste",
   "descriptionOptionalLabel": "Description (Optionnel)",
@@ -678,7 +678,6 @@
   "snackbarFailedToDelete": "Échec de la suppression.",
   "loaderFetchingMirrorParliamentData": "RÉCUPÉRATION DES DONNÉES DU PARLEMENT MIROIR...",
   "loaderSecuringSafeChannel": "CHIFFREMENT DE LA CONNEXION...",
-  "snackbarAddedToList": "Ajouté à votre liste.",
   "snackbarRemovedFromList": "Retiré de votre liste.",
   "loaderLoadingData": "CHARGEMENT DES DONNÉES...",
   "buttonAddToList": "Ajouter à la liste",
@@ -742,5 +741,7 @@
   "actWatchlistSubtitle": "Créez des listes personnalisées de projets de loi pour rassembler des abonnés et sensibiliser. Utilisez les réseaux sociaux comme force de lobbying.",
   "actDraftTitle": "Rédiger des Projets Citoyens",
   "actDraftSubtitle": "Soumettez vos initiatives professionnelles à Lustra. La société a besoin d'idées nouvelles non bloquées par le capital. Créez, partagez et rassemblez des soutiens.",
-  "joinCommunityTitle": "Rejoindre la Communauté"
+  "joinCommunityTitle": "Rejoindre la Communauté",
+  "snackbarAddedToList": "Ajouté à votre liste. Téléchargez l'application mobile pour recevoir des notifications en temps réel !",
+  "subscribedLists": "Abonné"
 }
