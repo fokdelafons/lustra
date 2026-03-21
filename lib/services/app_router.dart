@@ -145,11 +145,15 @@ final GoRouter router = GoRouter(
         final pid = ParliamentSource.getIdBySlug(slug)!;
         final queryList = state.uri.queryParameters['list'];
         final listId = state.uri.queryParameters['listId'];
-        
+
         String type = queryList ?? 'voted';
-        if (queryList == 'tracked') type = 'tracked';
-        if (queryList == 'curated') type = 'curated';
-        if (termParam == 'civic' && queryList != 'curated') type = 'civic';
+        if (queryList == 'tracked') {
+          type = 'tracked';
+        } else if (queryList == 'curated') {
+          type = 'curated';
+        } else if (termParam == 'civic') {
+          type = 'civic';
+        }
 
         return RouteContextGuard(
           targetLang: lang,

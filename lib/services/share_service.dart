@@ -207,7 +207,7 @@ class ShareService {
       final l10n = AppLocalizations.of(context)!;
       final deepLink = '$_baseDeepLinkUrl/#/$lang/$slug/$term/legislations?list=curated&listId=$listId';
 
-      final shareText = 'Check out my curated legislation list: $listName\n\n$deepLink'; //TODO: someday better
+      final shareText = 'Check out my curated legislation list: $listName\n\n$deepLink'; //TODO: l10n + rethink
       
       await Clipboard.setData(ClipboardData(text: shareText));
       

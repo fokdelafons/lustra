@@ -10,6 +10,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../services/tracking_service.dart';
 import '../../services/parliament_manager.dart';
 import '../../providers/language_provider.dart';
+import '../../providers/interaction_provider.dart';
 import '../../models/legislation.dart';
 import 'ui_home_card.dart';
 import '../../widgets/osint_loader.dart';
@@ -28,11 +29,24 @@ class _TrackedCardState extends State<TrackedCard> {
   bool _playAnimation = true;
   bool _isQrHovered = false;
   List<Legislation> _trackedBills = [];
+  int? _lastTrackedCount;
 
   @override
   void initState() {
     super.initState();
     _fetchTracked();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final interactionProvider = context.watch<InteractionProvider>();
+    final currentCount = interactionProvider.trackedCount;
+    
+    if (_lastTrackedCount != null && _lastTrackedCount != currentCount) {
+      _fetchTracked();
+    }
+    _lastTrackedCount = currentCount;
   }
 
   Future<void> _fetchTracked() async {

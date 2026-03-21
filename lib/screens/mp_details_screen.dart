@@ -446,7 +446,7 @@ return Scaffold(
       body: Listener(
         onPointerDown: (_) => FocusManager.instance.primaryFocus?.unfocus(),
         child: SelectionArea(
-          child: contentBody, // TARCZA: Usunięto zacinającego się WebSmoothScrolla
+          child: contentBody,
         ),
       ),
     );

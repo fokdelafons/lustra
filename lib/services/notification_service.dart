@@ -6,6 +6,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/language_provider.dart';
+import '../providers/user_provider.dart';
 import '../services/tracking_service.dart';
 import '../models/parliament_source.dart';
 import 'parliament_manager.dart';
@@ -38,6 +39,41 @@ class NotificationService {
       final dataToProcess = Map<String, dynamic>.from(_pendingNotificationData!);
       _pendingNotificationData = null; 
       _handleNavigation(context, dataToProcess);
+    }
+  }
+
+Future<void> syncPermissionsWithBackend(UserProvider userProvider) async {
+    if (kIsWeb) return; 
+    if (userProvider.notificationsTrackedBills == true) {
+      developer.log('TARCZA: Weryfikacja uprawnień OS względem stanu z bazy...', name: 'NotificationService');
+
+      final messaging = FirebaseMessaging.instance;
+      NotificationSettings settings = await messaging.getNotificationSettings();
+
+      if (settings.authorizationStatus == AuthorizationStatus.notDetermined) {
+        developer.log('TARCZA: Nowe urządzenie. Pytam system o uprawnienia.', name: 'NotificationService');
+        settings = await messaging.requestPermission(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+      }
+
+      if (settings.authorizationStatus == AuthorizationStatus.authorized || 
+          settings.authorizationStatus == AuthorizationStatus.provisional) {
+        try {
+          final token = await messaging.getToken();
+          if (token != null) {
+            developer.log('TARCZA: Uprawnienia przyznane. Aktualizuję token FCM.', name: 'NotificationService');
+            await userProvider.updatePreferences(fcmToken: token);
+          }
+        } catch (e) {
+          developer.log('TARCZA ERROR: Błąd pobierania tokena FCM: $e', name: 'NotificationService');
+        }
+      } else {
+        developer.log('TARCZA: Odmowa na poziomie OS. Wymuszam synchronizację profilu (wyłączam).', name: 'NotificationService');
+        await userProvider.updatePreferences(notificationsTrackedBills: false);
+      }
     }
   }
 

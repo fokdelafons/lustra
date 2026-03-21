@@ -742,6 +742,7 @@
   "actDraftTitle": "Twórz Projekty Ustaw",
   "actDraftSubtitle": "Zgłaszaj własne, profesjonalne inicjatywy bezpośrednio do Lustra. Społeczeństwo potrzebuje idei, których nie blokuje kapitał. Twórz, udostępniaj i zbieraj poparcie.",
   "joinCommunityTitle": "Dołącz do Społeczności",
-  "snackbarAddedToList": "Dodano do listy. Aby otrzymywać powiadomienia na żywo, pobierz aplikację mobilną!",
-  "subscribedLists": "Subskrybowane"
+  "snackbarAddedToList": "Dodano do listy.",
+  "subscribedLists": "Subskrybowane",
+  "snackbarAddedToListWebPromo": "Dodano! Pobierz aplikację, by otrzymywać powiadomienia o tej ustawie."
 }

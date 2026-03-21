@@ -39,6 +39,7 @@ class NewHomeScreen extends StatefulWidget {
 }
 
 class NewHomeScreenState extends State<NewHomeScreen> {
+  bool _permissionsSynced = false; 
 
 @override
   Widget build(BuildContext context) {
@@ -46,6 +47,14 @@ class NewHomeScreenState extends State<NewHomeScreen> {
     if (userProvider.isInitialized && !userProvider.profileExists) {
        WidgetsBinding.instance.addPostFrameCallback((_) {
          context.read<AuthService>().signOut();
+       });
+    }
+
+    if (userProvider.isInitialized && userProvider.profileExists && !_permissionsSynced) {
+       _permissionsSynced = true;
+       
+       WidgetsBinding.instance.addPostFrameCallback((_) {
+         NotificationService.instance.syncPermissionsWithBackend(userProvider);
        });
     }
     
@@ -112,7 +121,6 @@ class HomeContentState extends State<HomeContent> {
   final FocusNode _searchFocusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _searchWidgetKey = GlobalKey();
-  final GlobalKey _trackedCardKey = GlobalKey();
   bool _isInitialScrollPerformed = false;
   HomeScreenData? _data;
   bool _isLoading = true;
@@ -316,11 +324,15 @@ Widget _buildContentList(BuildContext context) {
       return const SizedBox.shrink();
     }
 
-    List<Widget> sectionWidgets = [];
-    sectionWidgets.add(Container(key: _trackedCardKey, child: const TrackedCard()));
-
     final userProvider = context.watch<UserProvider>();
-    const String masterListId = 'wIsxT9kCo0t02927tBIs';
+    final authService = context.watch<AuthService>();
+
+    List<Widget> sectionWidgets = [];
+    sectionWidgets.add(Container(
+      key: ValueKey('tracked_card_${authService.currentUser?.uid ?? "guest"}'),
+      child: const TrackedCard()
+    ));
+    const String masterListId = 'G0V2PdSmQtwh8bGxdT7e';
     
     final Set<String> uniqueListIds = {
       masterListId, 

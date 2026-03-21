@@ -37,9 +37,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="lustra.dev" />
                 <data android:scheme="https" android:host="lustra.news" />
-                <data android:scheme="https" android:host="www.lustra.news" />
             </intent-filter>
         </activity>
 

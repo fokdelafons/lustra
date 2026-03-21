@@ -4,11 +4,8 @@ import 'dart:developer' as developer;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
-import 'package:flutter/foundation.dart';
 
 import '../../models/legislation.dart';
 import '../../models/mp.dart';
@@ -18,6 +15,7 @@ import '../../providers/language_provider.dart';
 import '../../providers/translators.dart';
 import '../parliament_service_interface.dart';
 import '../api_service.dart';
+import '../app_router.dart';
 import '../cache/parliament_cache_manager.dart';
 import '../parliament_manager.dart';
 
@@ -449,21 +447,20 @@ class USParliamentService with ChangeNotifier implements ParliamentServiceInterf
 @override
 VoidCallback? getInterpellationTapAction(BuildContext context, InterpellationPreview interp) {
   if (interp.id.isNotEmpty) {
-    return () async {
-      final pManager = context.read<ParliamentManager>();
-      final lang = context.read<LanguageProvider>().appLanguageCode;
-      final parliamentId = pManager.activeServiceId;
-      final term = pManager.currentTerm;
-      final slug = ParliamentSource.getSlugById(parliamentId);
-      final path = '/#/$lang/$slug/$term/legislations/${interp.id}';
-      if (kIsWeb) {
-        final fullUrl = Uri.parse(Uri.base.origin + path);
-        await launchUrl(fullUrl, webOnlyWindowName: '_blank');
-      } else {
-        context.push(path);
+        return () {
+          final pManager = context.read<ParliamentManager>();
+          final lang = context.read<LanguageProvider>().appLanguageCode;
+          final parliamentId = pManager.activeServiceId;
+          final term = pManager.currentTerm;
+          final slug = ParliamentSource.getSlugById(parliamentId);
+          
+          // ARCHITECTURE: Functional equivalent of WebLink logic.
+          // Uses custom smartNavigate (go for Web, push for Mobile) without breaking the VoidCallback signature.
+          final logicalPath = '/$lang/$slug/$term/legislations/${interp.id}';
+          
+          context.smartNavigate(logicalPath);
+        };
       }
-    };
-  }
   return null;
 }
   

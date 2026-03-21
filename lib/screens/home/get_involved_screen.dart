@@ -96,45 +96,52 @@ class FutureFeaturesScreen extends StatelessWidget {
               builder: (context) {
                 final lang = Localizations.localeOf(context).languageCode;
                 return Link(
-                  uri: Uri.parse('https://lustra.news/$lang/info/blueprint/'),
-                  target: LinkTarget.blank,
+                  // Tarcza: Czysty URL, bez literówek i bez www
+                  uri: Uri.parse('https://www.lustra.news/$lang/info/blueprint/'),
+                  target: LinkTarget.blank, // KLUCZ: Wymusza nową kartę, obchodzi GoRoutera
                   builder: (context, followLink) {
-                    return InkWell(
-                      onTap: followLink,
-                      borderRadius: BorderRadius.circular(12),
-                      child: Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: 0.8)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Theme.of(context).primaryColor.withValues(alpha: 0.3), 
-                              blurRadius: 10, 
-                              offset: const Offset(0, 4)
+                    return Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: followLink, // Natywne zachowanie przeglądarki
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Theme.of(context).primaryColor, 
+                                Theme.of(context).primaryColor.withValues(alpha: 0.8)
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
                             ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.menu_book, size: 40, color: Colors.white),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(l10n.manualTitle, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
-                                  const SizedBox(height: 4),
-                                  Text(l10n.manualSubtitle, style: const TextStyle(fontSize: 14, color: Colors.white70)),
-                                ],
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Theme.of(context).primaryColor.withValues(alpha: 0.3), 
+                                blurRadius: 10, 
+                                offset: const Offset(0, 4)
                               ),
-                            ),
-                            const Icon(Icons.arrow_forward_ios, color: Colors.white70, size: 16),
-                          ],
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.menu_book, size: 40, color: Colors.white),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(l10n.manualTitle, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                                    const SizedBox(height: 4),
+                                    Text(l10n.manualSubtitle, style: const TextStyle(fontSize: 14, color: Colors.white70)),
+                                  ],
+                                ),
+                              ),
+                              const Icon(Icons.arrow_forward_ios, color: Colors.white70, size: 16),
+                            ],
+                          ),
                         ),
                       ),
                     );

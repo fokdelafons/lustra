@@ -143,7 +143,6 @@ class ShareableImage extends StatelessWidget {
     final double innerPadding = isSquare ? 40.0 : 60.0;
   
     final double titleFontSize = isSquare ? 40 : 54;
-    final double keyPointsTitleSize = isSquare ? 28 : 40;
     final double keyPointsItemSize = isSquare ? 26 : 36;
     final double pollFontSize = isSquare ? 28 : 40;
 
@@ -224,27 +223,18 @@ class ShareableImage extends StatelessWidget {
                           },
                           blendMode: BlendMode.dstIn,
                           child: Padding(
-                            padding: EdgeInsets.fromLTRB(innerPadding, innerPadding, innerPadding, 0),
+                            padding: EdgeInsets.fromLTRB(innerPadding, innerPadding / 2, innerPadding, 0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                if (showMissingDataWarning) ...[
+                                if (showMissingDataWarning || legislation!.keyPoints.isEmpty) ...[
                                   _buildMissingDataWarning(isSquare),
-                                  const SizedBox(height: 20),
+                                  const SizedBox(height: 12),
                                 ],
                                 if (legislation!.keyPoints.isNotEmpty)
                                   _buildKeyPointsSection(
                                     legislation!.keyPoints,
-                                    l10n,
-                                    keyPointsTitleSize,
                                     keyPointsItemSize,
-                                  )
-                                else
-                                  Center(
-                                    child: Text(
-                                      l10n.noKeyPoints,
-                                      style: TextStyle(fontSize: keyPointsItemSize, color: Colors.grey[500], fontStyle: FontStyle.italic),
-                                    ),
                                   ),
                               ],
                             ),
@@ -924,8 +914,6 @@ Widget _buildParliamentInfo(String parliamentName, String flagAssetPath, bool is
 
 Widget _buildKeyPointsSection(
   List<String> keyPoints,
-  AppLocalizations l10n,
-  double titleSize,
   double itemSize,
 ) {
   if (keyPoints.isEmpty) {
@@ -935,14 +923,7 @@ Widget _buildKeyPointsSection(
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     mainAxisSize: MainAxisSize.min,
-    children: [
-      Text(
-        l10n.keyPoints,
-        style: TextStyle(fontSize: titleSize, fontWeight: FontWeight.bold, color: Colors.grey[700]),
-      ),
-      const SizedBox(height: 8),
-      ...keyPoints.map((point) => _bulletPoint(point, itemSize)),
-    ],
+    children: keyPoints.map((point) => _bulletPoint(point, itemSize)).toList(),
   );
 }
 
@@ -1036,7 +1017,7 @@ Widget _buildKeyPointsSection(
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              l10n.missingDataWarningShare,
+              l10n.missingDataSourceUserMessage,
               style: TextStyle(
                 color: Colors.grey.shade800,
                 fontSize: fontSize,

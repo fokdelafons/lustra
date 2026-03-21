@@ -212,6 +212,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
       if (hasProfile) {
         userProvider.setOnboardingStatus(false);
+        await userProvider.refreshProfile();
         _handleSmartNavigation();
       } else {
         final user = authService.currentUser;
@@ -293,6 +294,7 @@ class _LoginScreenState extends State<LoginScreen> {
 			if (!mounted) return;
 			if (hasProfile) {
                 userProvider.setOnboardingStatus(false);
+                await userProvider.refreshProfile();
                 _handleSmartNavigation();
 			} else {
 				final user = authService.currentUser;

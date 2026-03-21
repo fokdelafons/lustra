@@ -743,6 +743,7 @@
   "actDraftTitle": "Elaborar Projetos Cidadãos",
   "actDraftSubtitle": "Envie suas próprias iniciativas ao Lustra. A sociedade moderna precisa de novas ideias que não sejam bloqueadas pelo capital.",
   "joinCommunityTitle": "Junte-se à Comunidade",
-  "snackbarAddedToList": "Adicionado à sua lista. Para receber notificações em tempo real, baixe o aplicativo móvel!",
-  "subscribedLists": "Inscrito"
+  "snackbarAddedToList": "Adicionado à sua lista.",
+  "subscribedLists": "Inscrito",
+  "snackbarAddedToListWebPromo": "Adicionado! Baixe o aplicativo para receber notificações sobre este projeto."
 }

@@ -102,16 +102,18 @@ class VotedCard extends StatelessWidget {
                   final double calculatedHeightBasedOnWidth = chartFullWidth / 2;
                   final double chartHeight = calculatedHeightBasedOnWidth.clamp(140.0, 240.0);
                   
+                  final double narrowScreenOffset = (1.0 - scaleFactor) * 35.0; 
+                  
                   return SizedBox(
                     width: chartFullWidth,
-                    height: chartHeight + 10,
+                    height: chartHeight + 10 + narrowScreenOffset,
                     child: Stack(
                       children: [
                         Positioned(
                           right: 0,
                           left: 0, 
                           bottom: 10,
-                          top: 0,
+                          top: narrowScreenOffset,
                           child: CustomPaint(
                             painter: ParliamentaryVotePainter(
                               labelFor: l10n.votingFor,
@@ -127,7 +129,7 @@ class VotedCard extends StatelessWidget {
                         if (totalSejmVotes > 0)
                           Positioned(
                             left: 0,
-                            top: 10,
+                            top: 0,
                             child: Container(
                               padding: EdgeInsets.symmetric(horizontal: paddingH, vertical: paddingV),
                               decoration: BoxDecoration(

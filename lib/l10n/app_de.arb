@@ -742,6 +742,7 @@
   "actDraftTitle": "Bürgergesetze entwerfen",
   "actDraftSubtitle": "Reichen Sie Ihre eigenen professionellen Initiativen direkt bei Lustra ein. Die Gesellschaft braucht neue Ideen, die nicht vom Kapital zurückgehalten werden.",
   "joinCommunityTitle": "Treten Sie der Community bei",
-  "snackbarAddedToList": "Zur Liste hinzugefügt. Laden Sie die mobile App herunter, um Echtzeit-Benachrichtigungen zu erhalten!",
-  "subscribedLists": "Abonniert"
+  "snackbarAddedToList": "Zur Liste hinzugefügt.",
+  "subscribedLists": "Abonniert",
+  "snackbarAddedToListWebPromo": "Hinzugefügt! Lade die App herunter, um Push-Benachrichtigungen zu erhalten."
 }

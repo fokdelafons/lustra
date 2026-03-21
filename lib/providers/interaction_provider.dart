@@ -43,6 +43,8 @@ class InteractionProvider with ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
+    int get trackedCount => _trackedBills.length + _trackedCivic.length;
+
   bool isTracked(String billId, {String docType = 'bill'}) {
     if (docType == 'civic') {
       return _trackedCivic.contains(billId);

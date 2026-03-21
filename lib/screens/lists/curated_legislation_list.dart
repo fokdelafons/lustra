@@ -10,6 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../services/parliament_manager.dart';
 import '../../services/curated_list_service.dart';
 import '../../services/share_service.dart';
+import 'package:go_router/go_router.dart';
 import '../../models/legislation.dart';
 import '../../widgets/lists_specific/legislation_list_card.dart';
 import '../../providers/language_provider.dart';
@@ -198,6 +199,24 @@ Future<void> refreshData() async {
   }
 
   void _showCreateListFromCTA() {
+    if (FirebaseAuth.instance.currentUser == null) {
+      final l10n = AppLocalizations.of(context)!;
+      final currentUri = GoRouterState.of(context).uri.toString();
+      final encodedNext = Uri.encodeComponent(currentUri);
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.drafterAuthRequired),
+          action: SnackBarAction(
+            label: l10n.promptToLogin, 
+            onPressed: () => context.smartNavigate('/login?next=$encodedNext'),
+          ),
+          duration: const Duration(seconds: 5),
+        ),
+      );
+      return;
+    }
+
     final TextEditingController nameController = TextEditingController();
     showDialog(
       context: context,
@@ -819,21 +838,33 @@ Future<void> refreshData() async {
     Widget listView = ListView.builder(
       controller: _scrollController,
       physics: isDesktopWeb ? const NeverScrollableScrollPhysics() : const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-      itemCount: _bills.length + 1,
+      padding: const EdgeInsets.only(bottom: 32.0),
+      itemCount: _bills.length + 2,
       itemBuilder: (context, index) {
         final isOwner = context.read<UserProvider>().createdLists.contains(widget.listId);
 
-        if (index == _bills.length) {
+        if (index == 0) {
+          return _buildGamificationHeader();
+        }
+
+        final billIndex = index - 1;
+
+        if (billIndex == _bills.length) {
           if (isOwner) {
-            return _buildCivicProjectCTA(context);
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: _buildCivicProjectCTA(context),
+            );
           } else if (widget.listId == _lustraMasterListId) {
-            return _buildCreateListCTA(context);
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: _buildCreateListCTA(context),
+            );
           }
           return const SizedBox.shrink();
         }
         
-        final bill = _bills[index];
+        final bill = _bills[billIndex];
         final isHighlighted = _metadata != null && _metadata!['highlightedBillId'] == bill.id;
 
         final manager = context.read<ParliamentManager>();
@@ -842,11 +873,13 @@ Future<void> refreshData() async {
         final term = bill.documentType == 'civic' ? 'civic' : manager.currentTerm.toString();
         final internalPath = '/$lang/$slug/$term/legislations/${bill.id}?list=curated&listId=${widget.listId}';
 
-        return WebLink(
-          path: internalPath,
-          extra: bill,
-          builder: (context, onTapCallback) => LegislationListCard(
-            bill: bill,
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: WebLink(
+            path: internalPath,
+            extra: bill,
+            builder: (context, onTapCallback) => LegislationListCard(
+              bill: bill,
             onTap: onTapCallback,
             trailingAction: isOwner ? IconButton(
               icon: Icon(
@@ -882,26 +915,21 @@ Future<void> refreshData() async {
               },
             ) : null, // <-- FUTURE - BELL : _buildTrackingBell(bill)
           ),
-        );
+        ));
       },
     );
 
-    Widget content = Column(
-      children: [
-        _buildGamificationHeader(),
-        Expanded(child: RefreshIndicator(
-          onRefresh: _loadData,
-          child: isDesktopWeb
-              ? WebSmoothScroll(
-                  controller: _scrollController,
-                  scrollAnimationLength: 450,
-                  scrollSpeed: 0.7,
-                  curve: Curves.easeOut,
-                  child: listView,
-                )
-              : listView,
-        )),
-      ],
+    Widget content = RefreshIndicator(
+      onRefresh: _loadData,
+      child: isDesktopWeb
+          ? WebSmoothScroll(
+              controller: _scrollController,
+              scrollAnimationLength: 450,
+              scrollSpeed: 0.7,
+              curve: Curves.easeOut,
+              child: listView,
+            )
+          : listView,
     );
 
     return content;

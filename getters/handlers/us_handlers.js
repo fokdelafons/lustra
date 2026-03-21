@@ -230,7 +230,7 @@ async function getUsHomeScreenDoc(docId, langCode, collectionName, topDeputiesDo
 }
 
 // ============================================================================
-// TARCZA: GETTER V2 - BEZ FLICKERINGU, JEDEN ODCZYT BAZY
+// TARCZA: GETTER V2
 // ============================================================================
 
 const getHomeScreenDataV2 = async (req, res) => {
@@ -244,7 +244,7 @@ const getHomeScreenDataV2 = async (req, res) => {
             return res.status(400).json({ error: { code: 'invalid-argument', message: "Brak parametru 'term'." } });
         }
 
-        const lang = normalizeLang(requestedLang, 'eng'); // Założenie, że masz tę funkcję wyżej w pliku
+        const lang = normalizeLang(requestedLang, 'eng');
         const cacheKey = `us-homescreen-v2-${requestedTerm}-${lang}`;
         
         if (cache.has(cacheKey)) {
@@ -259,7 +259,6 @@ const getHomeScreenDataV2 = async (req, res) => {
 
         const fetchPromise = (async () => {
             const HOME_SCREEN_COLLECTION = 'us_home_screen';
-            // Pobieramy JEDEN zmaterializowany dokument
             const docSnap = await db.collection(HOME_SCREEN_COLLECTION).doc(`${requestedTerm}_dashboard_v2`).get();
             
             if (!docSnap.exists) {
@@ -275,7 +274,7 @@ const getHomeScreenDataV2 = async (req, res) => {
                 popularInProcess: localizeFullLegislation(rawData.popularInProcess, lang),
                 civicProject: localizeFullLegislation(rawData.civicProject, lang),
                 topDeputies: {
-                    deputies: rawData.topDeputies?.deputies || [], // Posłowie nie wymagają AI tłumaczeń na Home Screen
+                    deputies: rawData.topDeputies?.deputies || [],
                     lastUpdated: rawData.topDeputies?.lastUpdated || null
                 }
             };
@@ -291,12 +290,10 @@ const getHomeScreenDataV2 = async (req, res) => {
     }
 };
 
-// Pomocnicza funkcja mapująca dane pod pełny model Legislation we Flutterze
 function localizeFullLegislation(data, langCode) {
     if (!data || !data.id) return null;
     const localizedData = { ...data };
     
-    // Model w Flutterze używa zmiennej "title"
     localizedData.title = data[`${langCode}_ai_title`] || data.titleOfficial || data.title || 'No title';
     localizedData.description = data[`${langCode}_summary`] || data.description || 'We are sorry! No summary available at the moment.';
     
@@ -304,7 +301,6 @@ function localizeFullLegislation(data, langCode) {
     const keyPoints = data[`${langCode}_key_points`] || data['eng_key_points'] || [];
     localizedData.key_Points = Array.isArray(keyPoints) ? keyPoints : [];
 
-    // Oszczędzamy transfer ucinając wszystkie stringi z innych języków
     Object.keys(localizedData).forEach(key => {
         if (key.includes('_summary') || key.includes('_key_points') || key.includes('_ai_title')) {
             delete localizedData[key];
@@ -352,7 +348,6 @@ const getDetails = async (req, res) => {
                 if (!civicDoc.exists) {
                     return res.status(404).json({ error: { code: 'not-found', message: 'Nie znaleziono projektu obywatelskiego.' } });
                 }
-                // Używamy tej samej funkcji lokalizującej co dla ustaw, bo struktura jest identyczna
                 documentData = localizeUsDocument(civicDoc.data(), lang, defaultLang);
                 break;
             default:

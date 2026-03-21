@@ -9,11 +9,9 @@ class ForceUpdateScreen extends StatelessWidget {
   Future<void> _launchStore() async {
     String url;
     if (Platform.isAndroid) {
-      // Zmień 'dev.lustra' na ID Twojej aplikacji w sklepie Play
       url = 'market://details?id=dev.lustra'; 
     } else if (Platform.isIOS) {
-      // Zmień '123456789' na ID Twojej aplikacji w App Store
-      url = 'itms-apps://itunes.apple.com/app/id123456789';
+      url = 'https://apps.apple.com/app/id6751850630';
     } else {
       return;
     }
@@ -26,7 +24,6 @@ class ForceUpdateScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Import 'package:flutter_gen/gen_l10n/app_localizations.dart'; if not present
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(

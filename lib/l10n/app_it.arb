@@ -742,6 +742,7 @@
   "actDraftTitle": "Proponi Leggi Cittadine",
   "actDraftSubtitle": "Invia le tue iniziative a Lustra. La società moderna ha bisogno di nuove idee non ostacolate dal capitale. Crea, condividi e raccogli supporto.",
   "joinCommunityTitle": "Unisciti alla Community",
-  "snackbarAddedToList": "Aggiunto alla tua lista. Per ricevere notifiche in tempo reale, scarica l'app mobile!",
-  "subscribedLists": "Iscritto"
+  "snackbarAddedToList": "Aggiunto alla tua lista.",
+  "subscribedLists": "Iscritto",
+  "snackbarAddedToListWebPromo": "Aggiunto! Scarica l'app per ricevere notifiche push su questo disegno di legge."
 }

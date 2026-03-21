@@ -742,6 +742,7 @@
   "actDraftTitle": "Stel Burgerwetten Op",
   "actDraftSubtitle": "Dien je eigen initiatieven in bij Lustra. De samenleving heeft behoefte aan nieuwe ideeën die niet door kapitaal worden tegengehouden.",
   "joinCommunityTitle": "Word lid van de Community",
-  "snackbarAddedToList": "Toegevoegd aan je lijst. Download de mobiele app om realtime meldingen te ontvangen!",
-  "subscribedLists": "Geabonneerd"
+  "snackbarAddedToList": "Toegevoegd aan je lijst.",
+  "subscribedLists": "Geabonneerd",
+  "snackbarAddedToListWebPromo": "Toegevoegd! Download de app om pushmeldingen over dit wetsvoorstel te ontvangen."
 }

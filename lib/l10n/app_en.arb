@@ -840,7 +840,7 @@
   "snackbarFailedToDelete": "Failed to delete.",
   "loaderFetchingMirrorParliamentData": "FETCHING MIRROR PARLIAMENT DATA...",
   "loaderSecuringSafeChannel": "SECURING SAFE CHANNEL...",
-  "snackbarAddedToList": "Added to your list. To receive real-time notifications, download dedicated mobile app!",
+  "snackbarAddedToList": "Added to your list.",
   "snackbarRemovedFromList": "Removed from your list.",
   "loaderLoadingData": "LOADING DATA...",
   "buttonAddToList": "Add to List",
@@ -949,5 +949,6 @@
   "actDraftTitle": "Draft Civic Bills",
   "actDraftSubtitle": "Submit your own professional initiatives directly to Lustra. Modern society needs new ideas that are not gatekeeped by capital. Create, share and collect support.",
   "joinCommunityTitle": "Join the Community",
-  "subscribedLists": "Subscribed"
+  "subscribedLists": "Subscribed",
+  "snackbarAddedToListWebPromo": "Added! Download our app to get push notifications about this bill."
 }

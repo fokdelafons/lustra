@@ -11,11 +11,13 @@ import 'package:intl/intl.dart' as intl;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:web_smooth_scroll/web_smooth_scroll.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:go_router/go_router.dart';
 
 import '../models/legislation.dart';
 import '../providers/interaction_provider.dart';
 import '../providers/user_provider.dart';
 import '../services/parliament_service_interface.dart';
+import '../services/app_router.dart';
 import '../services/share_service.dart';
 import '../services/parliament_manager.dart';
 import '../services/tracking_service.dart';
@@ -117,7 +119,23 @@ void _handleInitialAction(String action) {
 Future<void> _toggleTracking() async {
   final l10n = AppLocalizations.of(context)!;
   if (FirebaseAuth.instance.currentUser == null) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.mustBeLoggedInToReport)));
+    // ARCHITECTURE: Inject 'action=track' into current URI to ensure auto-tracking after successful login
+    final currentUri = GoRouterState.of(context).uri;
+    final Map<String, dynamic> newParams = Map.from(currentUri.queryParameters);
+    newParams['action'] = 'track';
+    final redirectUri = currentUri.replace(queryParameters: newParams).toString();
+    final encodedNext = Uri.encodeComponent(redirectUri);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(l10n.drafterAuthRequired),
+        action: SnackBarAction(
+          label: l10n.promptToLogin,
+          onPressed: () => context.smartNavigate('/login?next=$encodedNext'),
+        ),
+        duration: const Duration(seconds: 5),
+      ),
+    );
     return;
   }
 
@@ -133,10 +151,18 @@ Future<void> _toggleTracking() async {
     await _trackingService.toggleTrackBill(activeService, _bill!.id, docType: currentDocType);
     
     if (mounted) {
+      // ARCHITECTURE: Contextual feedback based on platform capabilities (Push Notifications promo on Web)
+      String successMessage;
+      if (!isCurrentlyTracked) {
+        successMessage = kIsWeb ? l10n.snackbarAddedToListWebPromo : l10n.snackbarAddedToList;
+      } else {
+        successMessage = l10n.snackbarRemovedFromList;
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(!isCurrentlyTracked ? l10n.snackbarAddedToList : l10n.snackbarRemovedFromList),
-          duration: const Duration(seconds: 2),
+          content: Text(successMessage),
+          duration: const Duration(seconds: 3), // Extended duration for longer web promo reading
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -585,16 +611,20 @@ void _reportError() {
                 final double calculatedHeightBasedOnWidth = chartFullWidth / 2;
                 final double chartHeight = calculatedHeightBasedOnWidth.clamp(140.0, 240.0);
                 
+                // ARCHITECTURE: Dynamic vertical separation for narrow screens.
+                // Prevents the static-height results table from overlapping the shrinking pie chart.
+                final double narrowScreenOffset = (1.0 - scaleFactor) * 35.0; 
+                
                 return SizedBox(
                   width: chartFullWidth,
-                  height: chartHeight + 10,
+                  height: chartHeight + 10 + narrowScreenOffset,
                   child: Stack(
                     children: [
                       Positioned(
                         right: 0,
                         left: 0, 
                         bottom: 10,
-                        top: 0,
+                        top: narrowScreenOffset, // Push chart down on narrow screens
                         child: CustomPaint(
                           painter: ParliamentaryVotePainter(
                             labelFor: l10n.votingFor,
@@ -610,7 +640,7 @@ void _reportError() {
                       if (totalSejmVotes > 0)
                         Positioned(
                           left: 0,
-                          top: 10,
+                          top: 0,
                           child: Container(
                             padding: EdgeInsets.symmetric(horizontal: paddingH, vertical: paddingV),
                             decoration: BoxDecoration(

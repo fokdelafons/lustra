@@ -247,45 +247,73 @@
 // --- CHECKUSERPROFILE ---
 
     const checkUserProfile = async (req, res) => {
-        if (req.body.warmup === true) {
-            console.log("checkUserProfile: Otrzymano żądanie rozgrzewające.");
-            return res.status(200).json({ data: { status: 'warmed_up_successfully' } });
-        }
-        const uid = req.user?.uid;
-        if (!uid) {
-            return res.status(401).json({ error: { code: 'unauthenticated', message: 'The function must be called with a userId.' } });
-        }
-        const userDocRef = db.collection("users").doc(uid);
-        try {
-            const userDoc = await userDocRef.get();
-            if (userDoc.exists) {
-                const userData = userDoc.data();
-                
-                return res.status(200).json({ 
-                    data: { 
-                        exists: true, 
-                        profile: {
-                            marketingConsent: userData.marketingConsent ?? false,
-                            subscribedParliaments: userData.subscribedParliaments || 
-                                ((userData.notificationsEnabled && userData.notificationParliamentId) 
-                                    ? [userData.notificationParliamentId] 
-                                    : []),
-                            primaryParliamentId: userData.primaryParliamentId ?? null,
-                            votes: userData.votes || {}, //TODO: remove in future after pushing new vers
-                            subscribedLists: userData.subscribedLists || [],
-                            createdLists: userData.createdLists || [],
-                            isCurator: userData.isCurator ?? false
-                        }
-                    } 
-                });
-            } else {
-                return res.status(200).json({ data: { exists: false } });
+    if (req.body.warmup === true) {
+        return res.status(200).json({ data: { status: 'warmed_up_successfully' } });
+    }
+    const uid = req.user?.uid;
+    if (!uid) {
+        return res.status(401).json({ error: { code: 'unauthenticated', message: 'User ID required.' } });
+    }
+    const userDocRef = db.collection("users").doc(uid);
+    try {
+        const userDoc = await userDocRef.get();
+        if (userDoc.exists) {
+            const userData = userDoc.data();
+            
+            // TARCZA: Agresywna sterylizacja danych dla zablokowanego frontendu
+
+            // 1. Zabezpieczenie przed białymi znakami (usuwa niewidoczne spacje z bazy)
+            let safePrimaryId = typeof userData.primaryParliamentId === 'string' 
+                ? userData.primaryParliamentId.trim() 
+                : null;
+
+            // 2. Jeśli po wyczyszczeniu nadal jest null, bierzemy pierwszy subskrybowany (ratuje przed "unknown")
+            if (!safePrimaryId && Array.isArray(userData.subscribedParliaments) && userData.subscribedParliaments.length > 0) {
+                safePrimaryId = userData.subscribedParliaments[0];
             }
-        } catch (error) {
-            console.error(`Błąd podczas sprawdzania profilu dla ${uid}:`, error);
-            return res.status(500).json({ error: { code: 'internal', message: 'An internal error occurred while checking the user profile.' } });
+
+            // 3. Wymuszamy płaskie tablice stringów, żeby Flutter nie rzucił Type Cast Error
+            const safeSubscribedParliaments = Array.isArray(userData.subscribedParliaments) 
+                ? userData.subscribedParliaments.filter(i => typeof i === 'string') 
+                : [];
+                
+            const safeSubscribedLists = Array.isArray(userData.subscribedLists) 
+                ? userData.subscribedLists.filter(i => typeof i === 'string') 
+                : [];
+                
+            const safeCreatedLists = Array.isArray(userData.createdLists) 
+                ? userData.createdLists.filter(i => typeof i === 'string') 
+                : [];
+
+            return res.status(200).json({ 
+                data: { 
+                    exists: true, 
+                    profile: {
+                        marketingConsent: userData.marketingConsent === true,
+                        
+                        // Zwracamy stan powiadomień, żeby UI nie resetowało się przy restarcie apki.
+                        // (Glitch nowego telefonu ogarniemy po odblokowaniu frontu)
+                        notificationsTrackedBills: userData.notificationsTrackedBills === true,
+                        
+                        subscribedParliaments: safeSubscribedParliaments,
+                        primaryParliamentId: safePrimaryId,
+                        
+                        // Celowo nie wysyłamy votes. Stare mapy w bazie wywalały parser na starych kontach.
+                        
+                        subscribedLists: safeSubscribedLists,
+                        createdLists: safeCreatedLists,
+                        isCurator: userData.isCurator === true
+                    }
+                } 
+            });
+        } else {
+            return res.status(200).json({ data: { exists: false } });
         }
-    };
+    } catch (error) {
+        console.error(`Błąd checkUserProfile dla ${uid}:`, error);
+        return res.status(500).json({ error: { code: 'internal', message: 'Internal error' } });
+    }
+};
 
     // --- USERONBOARDING ---
 
@@ -890,11 +918,20 @@ const getCuratedListFeed = async (req, res) => {
     const payload = req.body.data || {};
     const { listId, lang: requestedLang, previewOnly } = payload;
 
-    if (!listId) return res.status(400).json({ error: { message: 'Brak listId', status: 'INVALID_ARGUMENT' } });
+    // ARCHITECTURE: Hard telemetry injected to trace Mobile vs Web payload discrepancies resulting in 404.
+    console.log(`[getCuratedListFeed] TRIGGERED BY UID: ${req.user?.uid || 'anonymous'}`);
+    console.log(`[getCuratedListFeed] INCOMING PAYLOAD: ${JSON.stringify(payload)}`);
+
+    if (!listId) {
+      console.warn(`[getCuratedListFeed] ABORT: Missing listId`);
+      return res.status(400).json({ error: { message: 'Brak listId', status: 'INVALID_ARGUMENT' } });
+    }
 
     const listDoc = await db.collection('curated_lists').doc(listId).get();
     if (!listDoc.exists) {
+      console.warn(`[getCuratedListFeed] 404 NOT_FOUND. Document missing for listId: ${listId}`);
       if (req.user?.uid) {
+        console.log(`[getCuratedListFeed] Purging ghost list ${listId} from user ${req.user.uid}`);
         db.collection('users').doc(req.user.uid).update({
           subscribedLists: admin.firestore.FieldValue.arrayRemove(listId)
         }).catch(err => console.error(`Błąd usuwania ducha dla usera ${req.user.uid}:`, err));
@@ -903,6 +940,7 @@ const getCuratedListFeed = async (req, res) => {
     }
 
     const data = listDoc.data();
+    console.log(`[getCuratedListFeed] SUCCESS. Loaded list: ${data.listName || 'Unnamed'}, Prefix: ${data.prefix}`);
     const prefix = data.prefix;
     const langStr = (requestedLang || '').toLowerCase();
     const lang = langAliases[langStr] || countryToDefaultLang[prefix] || defaultLang;

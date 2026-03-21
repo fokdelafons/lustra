@@ -68,7 +68,32 @@
       left: 50%;
       -ms-transform: translate(-50%, -50%);
       transform: translate(-50%, -50%);
-      animation: pulse 2s infinite ease-in-out;
+      width: 360px;
+    }
+
+    .dots-container {
+      position: absolute;
+      top: calc(50% + 40px); 
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 12px;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      background-color: #4658BE;
+      border-radius: 50%;
+      animation: pulse-dot 1.4s infinite ease-in-out both;
+    }
+
+    .dot:nth-child(1) { animation-delay: -0.32s; }
+    .dot:nth-child(2) { animation-delay: -0.16s; }
+
+    @keyframes pulse-dot {
+      0%, 80%, 100% { transform: scale(0); opacity: 0.3; }
+      40% { transform: scale(1); opacity: 1; }
     }
 
     .contain {
@@ -174,6 +199,11 @@
       <source srcset="splash/img/dark-1x.png 1x, splash/img/dark-2x.png 2x, splash/img/dark-3x.png 3x, splash/img/dark-4x.png 4x" media="(prefers-color-scheme: dark)">
       <img class="center" aria-hidden="true" src="splash/img/light-1x.png" alt="">
   </picture>
+  <div id="splash-branding" class="dots-container">
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
     <!-- SEO LAYER START -->
 <div class="seo-links">
   <nav>

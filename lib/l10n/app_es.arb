@@ -742,6 +742,7 @@
   "actDraftTitle": "Redactar Leyes Ciudadanas",
   "actDraftSubtitle": "Envía tus propias iniciativas profesionales a Lustra. La sociedad necesita nuevas ideas que no estén bloqueadas por el capital. Crea, comparte y reúne apoyo.",
   "joinCommunityTitle": "Únete a la Comunidad",
-  "snackbarAddedToList": "Añadido a la lista. ¡Descarga la aplicación móvil para recibir notificaciones en tiempo real!",
-  "subscribedLists": "Suscrito"
+  "snackbarAddedToList": "Añadido a la lista.",
+  "subscribedLists": "Suscrito",
+  "snackbarAddedToListWebPromo": "¡Añadido! Descarga la app para recibir notificaciones sobre este proyecto."
 }
