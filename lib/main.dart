@@ -170,6 +170,7 @@ class MyApp extends StatelessWidget {
 final List<String> _svgAssetsToPrecache = [
   'assets/logo_full.svg',
   'assets/logo_full_white.svg',
+  'assets/logo_solo.svg',
   'assets/flags/us.svg',
   'assets/flags/pl.svg',
   'assets/flags/gb.svg',

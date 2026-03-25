@@ -1,7 +1,7 @@
 name: lustra
 description: "Media reimagined"
 publish_to: 'none'
-version: 1.4.1+49
+version: 1.4.2+53
 
 environment:
   sdk: ^3.7.2
@@ -60,8 +60,14 @@ flutter:
     - assets/flags/
     - assets/google_logo.svg
     - assets/ja.jpg
+    - assets/founder.jpg
     - assets/logo_full.svg
     - assets/logo_full_white.svg
+    - assets/logo_solo.svg
+    - assets/protocol.png
+    - assets/transform.png
+    - assets/news-card.png
+    - assets/social-poll.png
   
 flutter_launcher_icons:
   android: "launcher_icon"

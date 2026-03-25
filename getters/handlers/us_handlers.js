@@ -6,7 +6,7 @@ if (!admin.apps.length) {
 const db = admin.firestore();
 
 const cache = new Map();
-const CACHE_TTL_SECONDS = 6000;
+const CACHE_TTL_SECONDS = 3000;
 
 function normalizeLang(requestedLang, defaultLang) {
     const langAliases = {

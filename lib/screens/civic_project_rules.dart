@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/foundation.dart';
 import 'package:lustra/services/parliament_manager.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -15,65 +15,43 @@ class CivicProjectScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final primaryColor = Colors.teal[800]!;
+    // TARCZA: Utrzymujemy accentColor tymczasowo dla Fazy 2, by zapobiec błędom kompilacji
     final accentColor = Colors.teal[700]!;
-    final backgroundColor = Colors.grey[100]!;
 
-    return Scaffold(
-      backgroundColor: backgroundColor,
-      appBar: (kIsWeb && MediaQuery.of(context).size.width > 1140)
-          ? null
-          : AppBar(
-              title: Text(l10n.civicTitle),
-              backgroundColor: Colors.white,
-              foregroundColor: Colors.black87,
-              elevation: 1,
+    final content = SingleChildScrollView(
+      padding: const EdgeInsets.all(24.0),
+      child: SelectionArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // HERO HEADER
+            Container(
+              margin: const EdgeInsets.only(bottom: 32),
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              decoration: const BoxDecoration(
+                border: Border(bottom: BorderSide(color: Colors.black12, width: 2)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(color: Theme.of(context).primaryColor, borderRadius: BorderRadius.circular(4)),
+                    child: const Text("CIVIC INCUBATOR", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, letterSpacing: 1.5, fontSize: 12)),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    l10n.civicIncubatorTitle,
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w900, color: Colors.black87, height: 1.2),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    l10n.civicSubtitle,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.grey.shade700, height: 1.5),
+                  ),
+                ],
+              ),
             ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 850),
-            child: Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              color: Colors.white,
-              child: Padding(
-                padding: const EdgeInsets.all(32.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // --- HEADER ---
-                    Center(
-                      child: Column(
-                        children: [
-                          Icon(Icons.volunteer_activism, size: 64, color: accentColor),
-                          const SizedBox(height: 16),
-                          Text(
-                            l10n.civicIncubatorTitle,
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: primaryColor,
-                                  letterSpacing: -0.5,
-                                ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            l10n.civicSubtitle,
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  color: Colors.grey[600],
-                                  fontStyle: FontStyle.italic,
-                                ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    
-                    const SizedBox(height: 40),
-                    const Divider(),
-                    const SizedBox(height: 40),
 
                     // --- SECTION 1: PROGRAM RULES ---
                     _SectionHeader(title: l10n.civicSection1Title, color: accentColor),
@@ -227,12 +205,26 @@ class CivicProjectScreen extends StatelessWidget {
                       ),
                     ),
                   ],
-                ),
-              ),
-            ),
-          ),
         ),
       ),
+    );
+
+    return Scaffold(
+      appBar: (kIsWeb && MediaQuery.of(context).size.width > 1140)
+          ? null
+          : AppBar(
+              title: Text(l10n.civicTitle),
+              backgroundColor: Theme.of(context).primaryColor,
+              foregroundColor: Colors.white,
+            ),
+      body: kIsWeb
+          ? Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 850),
+                child: content,
+              ),
+            )
+          : content,
     );
   }
 
@@ -311,7 +303,7 @@ void _showManualEmailDialog(BuildContext context, AppLocalizations l10n, String 
             crossAxisAlignment: isMultiline ? CrossAxisAlignment.start : CrossAxisAlignment.center,
             children: [
               Expanded(
-                child: SelectableText(
+                child: Text(
                   content,
                   style: const TextStyle(fontSize: 14, fontFamily: "Courier New"),
                   maxLines: isMultiline ? 8 : 1,
@@ -351,8 +343,8 @@ void _showManualEmailDialog(BuildContext context, AppLocalizations l10n, String 
               Text("$idx.", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
               const SizedBox(width: 12),
               Expanded(
-                child: RichText(
-                  text: TextSpan(
+                child: Text.rich(
+                  TextSpan(
                     style: const TextStyle(fontSize: 15, color: Colors.black87, height: 1.5, fontFamily: 'Roboto'), // Dopasuj font do apki
                     children: [
                       TextSpan(text: entry.value.bold, style: const TextStyle(fontWeight: FontWeight.bold)),
@@ -382,8 +374,8 @@ void _showManualEmailDialog(BuildContext context, AppLocalizations l10n, String 
                 child: Icon(Icons.circle, size: 6, color: Colors.black87),
               ),
               Expanded(
-                child: RichText(
-                  text: TextSpan(
+                child: Text.rich(
+                  TextSpan(
                     style: const TextStyle(fontSize: 15, color: Colors.black87, height: 1.5, fontFamily: 'Roboto'),
                     children: [
                       TextSpan(text: item.bold, style: const TextStyle(fontWeight: FontWeight.bold)),
@@ -553,7 +545,7 @@ class _CodeBlock extends StatelessWidget {
             color: const Color(0xFF2D3748),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: SelectableText(
+          child: Text(
             code,
             style: const TextStyle(fontFamily: "Courier New", color: Color(0xFFE2E8F0), fontSize: 13.5, height: 1.5),
           ),

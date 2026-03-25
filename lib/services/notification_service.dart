@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../providers/language_provider.dart';
 import '../providers/user_provider.dart';
 import '../services/tracking_service.dart';
+import '../services/cache/parliament_cache_manager.dart';
 import '../models/parliament_source.dart';
 import 'parliament_manager.dart';
 import 'app_router.dart';
@@ -44,11 +45,11 @@ class NotificationService {
 
 Future<void> syncPermissionsWithBackend(UserProvider userProvider) async {
     if (kIsWeb) return; 
-    if (userProvider.notificationsTrackedBills == true) {
-      developer.log('TARCZA: Weryfikacja uprawnień OS względem stanu z bazy...', name: 'NotificationService');
+    
+    developer.log('TARCZA: Weryfikacja uprawnień OS względem stanu z bazy...', name: 'NotificationService');
 
-      final messaging = FirebaseMessaging.instance;
-      NotificationSettings settings = await messaging.getNotificationSettings();
+    final messaging = FirebaseMessaging.instance;
+    NotificationSettings settings = await messaging.getNotificationSettings();
 
       if (settings.authorizationStatus == AuthorizationStatus.notDetermined) {
         developer.log('TARCZA: Nowe urządzenie. Pytam system o uprawnienia.', name: 'NotificationService');
@@ -71,26 +72,62 @@ Future<void> syncPermissionsWithBackend(UserProvider userProvider) async {
           developer.log('TARCZA ERROR: Błąd pobierania tokena FCM: $e', name: 'NotificationService');
         }
       } else {
-        developer.log('TARCZA: Odmowa na poziomie OS. Wymuszam synchronizację profilu (wyłączam).', name: 'NotificationService');
-        await userProvider.updatePreferences(notificationsTrackedBills: false);
+        developer.log('TARCZA: Odmowa na poziomie OS. Kasuję token w bazie, wymuszam wyłączenie powiadomień.', name: 'NotificationService');
+        await userProvider.updatePreferences(
+          fcmToken: '', 
+          notificationsTrackedBills: false
+        );
       }
-    }
   }
 
   void _handleNavigation(BuildContext context, Map<String, dynamic> data) {
+    final pManager = Provider.of<ParliamentManager>(context, listen: false);
+    
+    if (!pManager.isReady || pManager.currentTerm == null) {
+      late void Function() listener;
+      listener = () {
+        if (pManager.isReady && pManager.currentTerm != null) {
+          pManager.removeListener(listener);
+          if (context.mounted) _handleNavigation(context, data);
+        }
+      };
+      pManager.addListener(listener);
+      return;
+    }
+
     final lang = Provider.of<LanguageProvider>(context, listen: false).appLanguageCode;
     if (data['type'] == 'tracked_updates') {
       final parliamentId = data['parliamentId'];
       if (parliamentId != null) {
         final slug = ParliamentSource.getSlugById(parliamentId);
-        final currentTerm = Provider.of<ParliamentManager>(context, listen: false).currentTerm;
+        final currentTerm = pManager.currentTerm;
+        
         final trackingService = TrackingService();
         trackingService.getTrackedItems(parliamentId, lang, forceRefresh: true).then((_) {
+            if (!context.mounted) return;
             final location = '/$lang/$slug/$currentTerm/legislations?list=tracked';
             developer.log("Nawigacja do obserwowanych: $location", name: "NotificationService");
             router.push(location, extra: {'parliamentId': parliamentId});
         });
         return; 
+      }
+    }
+
+    if (data['type'] == 'curated_list_update') {
+      final listId = data['listId'];
+      final parliamentId = data['prefix'];
+
+      if (listId != null && parliamentId != null) {
+        final slug = ParliamentSource.getSlugById(parliamentId);
+        final currentTerm = pManager.currentTerm;
+        
+        ParliamentCacheManager(parliamentId).clearCuratedListFeed(listId).then((_) {
+            if (!context.mounted) return;
+            final location = '/$lang/$slug/$currentTerm/legislations?list=curated&listId=$listId';
+            developer.log("Nawigacja do Listy Kuratorskiej: $location", name: "NotificationService");
+            router.push(location, extra: {'parliamentId': parliamentId});
+        });
+        return;
       }
     }
     final String? filterTimestamp = data['filterTimestamp'];

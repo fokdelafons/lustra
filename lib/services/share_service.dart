@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 
+import '../providers/translators.dart';
 import '../models/legislation.dart';
 import '../models/mp.dart'; 
 import '../widgets/shareable_image_widget.dart';
@@ -26,8 +27,19 @@ class ShareService {
     }
   }
 
-  String _sanitizeHashtag(String text) {
-     return '#${text.replaceAll(RegExp(r'[\s,\.\-]'), '')}';
+  String _removeDiacritics(String text) {
+    const withDia = 'ĄĆĘŁŃÓŚŹŻąćęłńóśźżÄÖÜäöüßÉÈÊËéèêëÀÁÂÃÄÅàáâãäåÇçÎÏîïÔÕÖôõöÙÚÛÜùúûü';
+    const withoutDia = 'ACELNOSZZacelnoszzAOUaousEEEEeeeeAAAAAAaaaaaaCcIIiiOOOoooUUUUuuuu';
+    String result = text;
+    for (int i = 0; i < withDia.length; i++) {
+      result = result.replaceAll(withDia[i], withoutDia[i]);
+    }
+    return result;
+  }
+
+  String _sanitizeSingleHashtag(String text) {
+     final cleanText = _removeDiacritics(text).replaceAll(RegExp(r'[\s,\.\-]'), '');
+     return '#$cleanText';
   }
 
   // --- REMOTE CONFIG (Global Singleton) ---
@@ -83,7 +95,7 @@ class ShareService {
           mimeType: 'image/png',
           name: 'bill.png',
         );
-// docType might be null, I used status as backup
+
         final docType = (legislation.documentType ?? '').toUpperCase();
         final status = legislation.status.toUpperCase();
         
@@ -93,18 +105,29 @@ class ShareService {
         final deepLink = '$_baseDeepLinkUrl/$lang/$slug/$urlTerm/legislations/${legislation.id}/';
         
         final countryTag = _getParliamentHashtag(parliamentId);
-        final translatedLawHash = _sanitizeHashtag(l10n.hashtagLaw);
-        final catTag = legislation.category.isNotEmpty
-            ? _sanitizeHashtag(legislation.category) 
+        final translatedLawHash = _sanitizeSingleHashtag(l10n.hashtagLaw);
+        
+        final rawCats = legislation.category;
+        final translatedCatsList = rawCats.isNotEmpty
+            ? rawCats.split(',')
+                .map((cat) => categoryApiKeyToLabel(context, cat.trim()))
+                .where((cat) => cat.isNotEmpty)
+                .take(2)
+                .toList()
+            : [];
+
+        final catTags = translatedCatsList.isNotEmpty
+            ? translatedCatsList.map((cat) => _sanitizeSingleHashtag(cat)).join(' ')
             : translatedLawHash;
 
-        final typeTag = catTag == translatedLawHash ? '' : ' $translatedLawHash';
-        final hashtags = '$countryTag $catTag$typeTag #Lustra';
+        final typeTag = translatedCatsList.isNotEmpty ? ' $translatedLawHash' : '';
+        
+        final hashtags = '$countryTag $catTags$typeTag #Lustra';
 
         final promo = await _getPromoText(l10n);
 
         final sb = StringBuffer();
-        sb.write(l10n.shareLegislationText(deepLink));
+        sb.write(deepLink);
         sb.write('\n\n$hashtags');
         if (promo != null) {
           sb.write('\n\n$promo');
@@ -164,10 +187,10 @@ class ShareService {
         final deepLink = '$_baseDeepLinkUrl/$lang/$slug/$term/members/${deputy.id}/';
         
         final countryTag = _getParliamentHashtag(parliamentId);
-        final translatedPoliticianHash = _sanitizeHashtag(l10n.hashtagPolitician);
-        final partyTag = deputy.club.isNotEmpty ? _sanitizeHashtag(deputy.club) : translatedPoliticianHash;
+        final translatedPoliticianHash = _sanitizeSingleHashtag(l10n.hashtagPolitician);
+        final partyTag = deputy.club.isNotEmpty ? _sanitizeSingleHashtag(deputy.club) : translatedPoliticianHash;
 
-        final typeTag = partyTag == translatedPoliticianHash ? '' : '$translatedPoliticianHash ';
+        final typeTag = deputy.club.isNotEmpty ? '$translatedPoliticianHash ' : '';
         final hashtags = '$typeTag$countryTag $partyTag #Lustra';
 
         final promo = await _getPromoText(l10n);
@@ -207,7 +230,7 @@ class ShareService {
       final l10n = AppLocalizations.of(context)!;
       final deepLink = '$_baseDeepLinkUrl/#/$lang/$slug/$term/legislations?list=curated&listId=$listId';
 
-      final shareText = 'Check out my curated legislation list: $listName\n\n$deepLink'; //TODO: l10n + rethink
+      final shareText = '$listName\n\n$deepLink'; //TODO: rethink
       
       await Clipboard.setData(ClipboardData(text: shareText));
       
@@ -217,7 +240,6 @@ class ShareService {
         );
       }
 
-      // Wywołanie systemowego panelu udostępniania (sam tekst)
       await SharePlus.instance.share(ShareParams(text: shareText));
     } catch (e) {
       developer.log('Błąd podczas udostępniania listy: $e', name: 'ShareService');

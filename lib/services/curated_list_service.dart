@@ -1,13 +1,10 @@
 import 'dart:developer' as developer;
-import 'package:flutter/foundation.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 
 import 'api_service.dart';
 import 'cache/parliament_cache_manager.dart';
 
 class CuratedListService {
   final ApiService _apiService = ApiService();
-  final FirebaseMessaging _messaging = FirebaseMessaging.instance;
 
   Future<String?> createList(String listName, String prefix, {String description = ''}) async {
     try {
@@ -47,26 +44,7 @@ class CuratedListService {
         'listId': listId,
       });
       
-      final bool isSubscribed = response['isSubscribed'] as bool? ?? false;
-      final topicName = 'list_$listId';
-      
-      if (!kIsWeb) {
-        try {
-          if (isSubscribed) {
-            await _messaging.subscribeToTopic(topicName);
-            developer.log('Zasubskrybowano temat FCM: $topicName', name: 'CuratedListService');
-          } else {
-            await _messaging.unsubscribeFromTopic(topicName);
-            developer.log('Odsubskrybowano z tematu FCM: $topicName', name: 'CuratedListService');
-          }
-        } catch (fcmError) {
-          developer.log('Ignorowany błąd FCM: $fcmError', name: 'CuratedListService');
-        }
-      } else {
-         developer.log('FCM Topics pominięte (brak wsparcia na Webie). Backend zaktualizowany.', name: 'CuratedListService');
-      }
-
-      return isSubscribed;
+      return response['isSubscribed'] as bool? ?? false;
     } catch (e) {
       developer.log('Błąd podczas subskrypcji listy: $e', name: 'CuratedListService');
       rethrow;

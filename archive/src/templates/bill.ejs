@@ -80,7 +80,6 @@
         }
 
         if (doc.status) {
-            // Tłumaczenie statusu dla Schema (żeby Google widziało odpowiedź w języku strony)
             const sKey = doc.status;
             const sTrans = (labels.status && labels.status[sKey]) ? labels.status[sKey] : sKey;
 
@@ -149,7 +148,7 @@
             "acceptedAnswer": { "@type": "Answer", "text": labels.ans_impact }
         });
 
-        let legislativeBodyName = "United States Congress";
+        let legislativeBodyName = institutionName;
         if (doc.id && doc.id.includes("_H")) legislativeBodyName = "United States House of Representatives";
         else if (doc.id && doc.id.includes("_S")) legislativeBodyName = "United States Senate";
 
@@ -285,7 +284,7 @@
         .app-title {
             color: white;
             font-size: 21px;
-            font-weight: 500;
+            font-weight: 600;
             letter-spacing: 0.15px;
             text-align: center;
         }
@@ -336,7 +335,7 @@
 
         h1.title {
             font-size: 22px;
-            font-weight: 700;
+            font-weight: 600;
             margin: 0 0 12px 0;
             line-height: 1.2;
             color: #000000;
@@ -390,109 +389,100 @@
         .outlined-btn:hover { background-color: rgba(21, 101, 192, 0.04); }
         .outlined-btn .material-icons-outlined { font-size: 18px; margin-right: 8px; }
 
-        .voting-section {
-            display: flex; flex-direction: column; align-items: center;
-            margin-bottom: 16px; width: 100%;
+        .voting-section-stack {
+            position: relative; width: 100%; min-height: 250px; margin-bottom: 24px;
+        }
+        .voting-floating-stats {
+            position: absolute; top: 0; left: 0; z-index: 2;
+            background-color: rgba(245, 245, 245, 0.95);
+            padding: 12px 16px; border-radius: 8px;
+            border: 1px solid #FFFFFF;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            display: flex; flex-direction: column;
         }
         .voting-header {
-            font-size: 18px; font-weight: 500; color: #000000;
-            text-transform: uppercase; letter-spacing: 0.5px;
+            font-size: 14px; font-weight: 600; color: rgba(0,0,0,0.87);
+            letter-spacing: 0.5px; text-transform: uppercase;
         }
         .voting-date {
-            font-size: 13px; color: #616161; font-style: italic;
-            margin-top: 4px; margin-bottom: 12px;
+            font-size: 13px; color: #757575; font-style: italic; margin: 2px 0 8px 0;
         }
+        .vote-count-row { display: flex; align-items: baseline; margin-bottom: 4px; }
+        .vote-label { font-size: 14px; color: #616161; margin-right: 6px; }
+        .vote-number { font-size: 14px; font-weight: 700; }
+        
         #hemicycle-container {
-            position: relative; width: 100%; display: flex;
-            justify-content: center; margin-bottom: 8px;
-            height: 230px;
-            min-height: 230px;
+            position: absolute; bottom: 0; right: 0; width: 100%; height: 230px;
+            display: flex; justify-content: center; z-index: 1;
         }
         .percentage-badge {
-            position: absolute; bottom: 15px; left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(2px);
-            padding: 2px 12px; border-radius: 12px;
-            font-size: 42px; font-weight: 500; color: var(--vote-for);
-            z-index: 10;
+            position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+            padding: 2px 12px; border-radius: 12px; font-size: 42px; font-weight: 500; z-index: 10;
         }
-        .vote-counts { display: flex; justify-content: space-around; width: 100%; margin-bottom: 16px; }
-        .vote-count-item { display: flex; align-items: baseline; }
-        .vote-label { font-size: 15px; color: #616161; margin-right: 6px; }
-        .vote-number { font-size: 15px; font-weight: 700; }
-        
         .pdf-link {
-            display: flex; align-items: center; color: var(--primary);
-            text-decoration: none; font-size: 15px; font-weight: 500;
-            cursor: pointer; margin-top: 4px; align-self: flex-start;
+            display: flex; align-items: center; color: var(--primary); text-decoration: none;
+            font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 6px; align-self: flex-start;
         }
         .pdf-link .link-text { text-decoration: underline; text-decoration-color: var(--primary); font-weight: 300; }
         .pdf-link .material-icons { font-size: 18px; margin-left: 4px; }
 
-        .status-container { text-align: center; margin: 24px 0 32px 0; }
-        .status-text {
-            font-size: 20px; font-weight: 400; color: rgba(0,0,0,0.87);
-            text-decoration: underline; text-decoration-thickness: 1px;
+        .status-row {
+            display: flex; align-items: center; width: 100%; margin: 32px 0;
         }
+        .status-prev-col { flex: 1; display: flex; justify-content: flex-end; align-items: center; padding-right: 16px; }
+        .status-prev-text { text-align: left; }
+        .status-prev-label { font-size: 10px; color: #424242; letter-spacing: 0.5px; margin-bottom: 2px; }
+        .status-prev-value { font-size: 14px; color: #424242; font-weight: 500; line-height: 1.2; }
+        .status-current-col { display: flex; align-items: center; gap: 16px; }
+        .status-current-label { font-size: 14px; color: #424242; line-height: 1.0; margin-bottom: 4px; }
+        .status-current-value { 
+            font-size: 26px; color: rgba(0,0,0,0.87); font-weight: 700; 
+            letter-spacing: -0.5px; text-decoration: underline; text-decoration-color: rgba(0,0,0,0.87); line-height: 1.0;
+        }
+        .status-spacer { flex: 1; }
 
-        .citizen-poll {
-            background-color: #F5F5F5; border-radius: 12px;
-            padding: 16px; margin-bottom: 24px; text-align: center;
-            border: 1px solid #E0E0E0;
+        .citizen-poll-modern {
+            position: relative; margin: 16px 0 24px 0; padding: 16px;
+            background: linear-gradient(90deg, rgba(21, 101, 192, 0.08) 0%, rgba(21, 101, 192, 0.02) 100%);
+            border-left: 4px solid var(--primary);
         }
-        .poll-title { color: var(--primary); font-weight: 500; font-size: 15px; margin-bottom: 12px; }
-        .poll-bar-container {
-            display: flex; height: 40px; border-radius: 15px;
-            overflow: hidden; margin-bottom: 16px; width: 100%;
+        .citizen-poll-modern::before, .citizen-poll-modern::after {
+            content: ''; position: absolute; right: 0; width: 12px; height: 12px;
+            border-right: 1px solid rgba(21, 101, 192, 0.3);
         }
-        .poll-segment {
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-weight: 500; font-size: 15px;
-        }
-        .poll-actions { display: flex; justify-content: center; gap: 164px; }
-        .poll-group { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-        .poll-icon-btn {
-            display: flex; align-items: center; justify-content: center;
-            width: 48px; height: 48px; border-radius: 50%;
-            cursor: pointer; transition: background-color 0.2s;
-        }
-        .poll-icon-btn:hover { background-color: rgba(0,0,0,0.05); }
-        .poll-icon-btn .material-icons-outlined { font-size: 30px; }
+        .citizen-poll-modern::before { top: 0; border-top: 1px solid rgba(21, 101, 192, 0.3); }
+        .citizen-poll-modern::after { bottom: 0; border-bottom: 1px solid rgba(21, 101, 192, 0.3); }
+        
+        .poll-civic-will { display: flex; align-items: center; margin-bottom: 16px; }
+        .poll-civic-dot { width: 6px; height: 6px; background-color: var(--primary); border-radius: 50%; margin-right: 8px; }
+        .poll-civic-text { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: var(--primary); text-transform: uppercase; }
+        
+        .poll-bar-wrapper { display: flex; flex-direction: column; width: 100%; margin-bottom: 24px; }
+        .poll-bar-labels { display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .poll-pct-for { color: #388E3C; font-size: 11px; font-weight: 400; letter-spacing: 1px; }
+        .poll-pct-against { color: #D32F2F; font-size: 11px; font-weight: 400; letter-spacing: 1px; }
+        .poll-bar-track { display: flex; height: 8px; border-radius: 4px; overflow: hidden; width: 100%; background-color: #E0E0E0; margin-bottom: 8px; }
+        .poll-bar-for { background-color: #43A047; }
+        .poll-bar-against { background-color: #E53935; }
+        .poll-total-votes { font-size: 10px; color: #9E9E9E; font-weight: 700; letter-spacing: 1px; text-align: center; }
 
-        .poll-login-container {
-            display: flex;
-            justify-content: center;
-            margin-top: 8px;
+        .poll-action-subtitle { font-size: 12px; color: #757575; font-weight: 600; letter-spacing: 0.5px; text-align: center; margin-bottom: 16px; }
+        .poll-buttons-row { display: flex; gap: 12px; width: 100%; }
+        .poll-btn {
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 16px 0; border-radius: 6px; text-decoration: none; font-size: 11px; font-weight: 800; letter-spacing: 1px;
         }
-
+        .poll-btn-for { background-color: rgba(76, 175, 80, 0.06); border: 1px solid rgba(76, 175, 80, 0.23); color: #2E7D32; }
+        .poll-btn-against { background-color: rgba(244, 67, 54, 0.06); border: 1px solid rgba(244, 67, 54, 0.23); color: #C62828; }
+        .poll-btn .material-icons-outlined { font-size: 24px; margin-bottom: 4px; }
+        
         .poll-login-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #F3E5F5;
-            color: #7B1FA2;
-            border: 1px solid rgba(123, 31, 162, 0.1);
-            border-radius: 999px;
-            padding: 10px 24px;
-            font-size: 14px;
-            font-weight: 500;
-            text-decoration: none;
-            cursor: pointer;
-            transition: background-color 0.2s;
+            display: inline-flex; align-items: center; justify-content: center;
+            padding: 14px 24px; border: 2px solid var(--primary); border-radius: 4px;
+            color: var(--primary); font-size: 14px; font-weight: bold; text-decoration: none; width: 100%;
         }
-
-        .poll-login-btn:hover {
-            background-color: #E1BEE7;
-        }
-
-        .poll-login-btn .material-icons-outlined {
-            font-size: 18px;
-            margin-right: 8px;
-        }
-        .icon-support { color: var(--vote-for); }
-        .icon-oppose { color: var(--vote-against); }
-        .poll-label-text { font-size: 12px; color: rgba(0, 0, 0, 0.87); font-weight: 300; }
+        .poll-login-btn .material-icons-outlined { margin-right: 8px; font-size: 18px; }
+        /* ================= END UI LAYER ================= */
 
         .meta-title { font-size: 18px; font-weight: 500; margin-bottom: 8px; color: #000000; }
         .meta-item { font-size: 15px; line-height: 1.6; color: rgba(0, 0, 0, 0.87); font-weight: 400; }
@@ -681,51 +671,46 @@
             </a>
         </div>
 
-        <% if (doc.votesFor !== undefined && doc.votesFor !== null) { %>
-        <div class="voting-section">
-            <div class="voting-header"><%= labels.voting_results %></div>
-            <div class="voting-date"><%= meta.votingDate %></div>
-            
-        <div id="hemicycle-container">
-                <% 
-                    const vFor = doc.votesFor || 0;
-                    const vAgainst = doc.votesAgainst || 0;
-                    const vAbstain = doc.votesAbstain || 0;
-                    const totalVotes = vFor + vAgainst + vAbstain;
-                    
-                    let badgePercent = "0%";
-                    let badgeColor = "var(--vote-abstain)";
+        <% 
+        const vFor = doc.votesFor || 0;
+        const vAgainst = doc.votesAgainst || 0;
+        const vAbstain = doc.votesAbstain || 0;
+        const totalVotes = vFor + vAgainst + vAbstain;
+        
+        if (totalVotes > 0) { 
+            let badgePercent = "0%";
+            let badgeColor = "var(--vote-abstain)";
 
-                    if (totalVotes > 0) {
-                        if (vFor >= vAgainst) {
-                            badgePercent = Math.round((vFor / totalVotes) * 100) + "%";
-                            badgeColor = "var(--vote-for)";
-                        } else {
-                            badgePercent = Math.round((vAgainst / totalVotes) * 100) + "%";
-                            badgeColor = "var(--vote-against)";
-                        }
-                    } else {
-                        badgePercent = "N/A";
-                    }
-                %>
-
+            if (vFor >= vAgainst) {
+                badgePercent = Math.round((vFor / totalVotes) * 100) + "%";
+                badgeColor = "var(--vote-for)";
+            } else {
+                badgePercent = Math.round((vAgainst / totalVotes) * 100) + "%";
+                badgeColor = "var(--vote-against)";
+            }
+        %>
+        <div class="voting-section-stack">
+            <div id="hemicycle-container">
                 <div class="percentage-badge" id="percent-badge" style="color: <%= badgeColor %>">
                     <%= badgePercent %>
                 </div>
             </div>
-
-            <div class="vote-counts">
-                <div class="vote-count-item">
+            
+            <div class="voting-floating-stats">
+                <div class="voting-header"><%= labels.voting_results %></div>
+                <div class="voting-date"><%= meta.votingDate %></div>
+                
+                <div class="vote-count-row">
                     <span class="vote-label"><%= labels.vote_for %></span>
-                    <span class="vote-number" style="color: var(--vote-for);"><%= doc.votesFor || 0 %></span>
+                    <span class="vote-number" style="color: #4CAF50;"><%= vFor %></span>
                 </div>
-                <div class="vote-count-item">
+                <div class="vote-count-row">
                     <span class="vote-label"><%= labels.vote_against %></span>
-                    <span class="vote-number" style="color: var(--vote-against);"><%= doc.votesAgainst || 0 %></span>
+                    <span class="vote-number" style="color: #F44336;"><%= vAgainst %></span>
                 </div>
-                <div class="vote-count-item">
+                <div class="vote-count-row">
                     <span class="vote-label"><%= labels.vote_abstained %></span>
-                    <span class="vote-number" style="color: var(--vote-abstain);"><%= doc.votesAbstain || 0 %></span>
+                    <span class="vote-number" style="color: #9E9E9E;"><%= vAbstain %></span>
                 </div>
             </div>
         </div>
@@ -738,60 +723,75 @@
         </a>
         <% } %>
 
-        <div class="status-container" style="display: flex; flex-direction: column; align-items: center; text-align: center; margin: 0 0 24px 0;">
+        <div class="status-row">
             <% 
-                const statusKey = doc.status;
-                const translatedStatus = (labels.status && labels.status[statusKey]) ? labels.status[statusKey] : statusKey;
+                const statusKey = doc.status ? doc.status.trim() : "";
+                const translatedStatus = (labels.status && labels.status[statusKey]) ? labels.status[statusKey] : (doc.status || "");
             %>
-            <span style="font-size: 14px; color: var(--text-med); margin-bottom: 4px;"><%= labels.current_status %></span>
-            <span style="font-size: 22px; font-weight: 600; color: #000000;"><%= translatedStatus %></span>
+            <div class="status-prev-col">
+                <% if (doc.lastStatus) { 
+                    const cleanLastStatus = doc.lastStatus.trim();
+                    const lastStatusTrans = (labels.status && labels.status[cleanLastStatus]) ? labels.status[cleanLastStatus] : doc.lastStatus;
+                %>
+                <div class="status-prev-text">
+                    <div class="status-prev-label"><%= labels.previous_status %></div>
+                    <div class="status-prev-value"><%= lastStatusTrans %></div>
+                </div>
+                <span class="material-icons" style="color: #E0E0E0; font-size: 14px; margin-left: 12px;">arrow_forward_ios</span>
+                <% } %>
+            </div>
+            
+            <div class="status-current-col">
+                <span class="material-icons" style="font-size: 48px; color: #BDBDBD;">gavel</span>
+                <div>
+                    <div class="status-current-label"><%= labels.current_status %></div>
+                    <div class="status-current-value"><%= translatedStatus %></div>
+                </div>
+            </div>
+            
+            <div class="status-spacer"></div>
         </div>
 
-        <div class="citizen-poll">
-            <div class="poll-title"><%= labels.citizen_poll %></div>
-            
+        <div class="citizen-poll-modern">
             <% 
                 const cLikes = doc.likes || 0;
                 const cDislikes = doc.dislikes || 0;
                 const cTotal = cLikes + cDislikes;
             %>
-
-            <div class="poll-bar-container">
-                <% if (cTotal > 0) { 
-                    const cLikePct = Math.round((cLikes / cTotal) * 100);
-                    const cDislikePct = 100 - cLikePct; 
-                %>
-                    <div class="poll-segment" style="width: <%= cLikePct %>%; background-color: var(--vote-for);">
-                        <%= cLikePct >= cDislikePct ? cLikePct + '% ' + labels.supported : '' %>
-                    </div>
-                    <div class="poll-segment" style="width: <%= cDislikePct %>%; background-color: var(--vote-against);">
-                        <%= cDislikePct > cLikePct ? cDislikePct + '% ' + labels.opposed : '' %>
-                    </div>
-                <% } else { %>
-                    <div class="poll-segment" style="width: 100%; background-color: #EEEEEE; color: #212121; font-weight: 500;">
-                        <%= labels.no_votes_cast %>
-                    </div>
-                <% } %>
+            
+            <% if (cTotal > 0) { 
+                const cLikePct = (cLikes / cTotal) * 100;
+                const cDislikePct = (cDislikes / cTotal) * 100;
+            %>
+            <div class="poll-civic-will">
+                <div class="poll-civic-dot"></div>
+                <div class="poll-civic-text"><%= labels.civic_will_record %></div>
             </div>
-
-            <div style="display: flex; justify-content: center; align-items: center; gap: 16px; margin: 16px 0;">
-                
-                <div style="display: flex; flex-direction: column; align-items: center; color: #616161;">
-                    <svg xmlns="http://www.w3.org/2000/svg" height="28" viewBox="0 -960 960 960" width="28" fill="currentColor"><path d="M720-120H280v-520l280-280 50 50q7 7 11.5 19t4.5 23v14l-44 174h258q32 0 56 24t24 56v80q0 7-2 15t-4 15L794-168q-9 20-30 34t-44 14Zm-360-80h360l120-280v-80H480l54-220-174 174v406Zm0-406v406-406Zm-80-34v80H160v360h120v80H80v-520h200Z"/></svg>
-                    <span style="font-size: 11px; margin-top: 4px; font-weight: 500;"><%= labels.i_support %></span>
+            
+            <div class="poll-bar-wrapper">
+                <div class="poll-bar-labels">
+                    <span class="poll-pct-for"><%= Math.round(cLikePct) %>% <%= labels.supported %></span>
+                    <span class="poll-pct-against"><%= Math.round(cDislikePct) %>% <%= labels.opposed %></span>
                 </div>
+                <div class="poll-bar-track">
+                    <div class="poll-bar-for" style="flex: <%= cLikes %>;"></div>
+                    <div class="poll-bar-against" style="flex: <%= cDislikes %>;"></div>
+                </div>
+                <div class="poll-total-votes"><%= cTotal %> <%= labels.total_votes_recorded %></div>
+            </div>
+            <div style="height: 1px; background-color: #E0E0E0; margin: 0 0 20px 0; width: 100%;"></div>
+            <% } %>
 
+            <div class="poll-action-subtitle"><%= labels.record_your_position_for_audit %></div>
+            
+            <div style="display: flex; justify-content: center; width: 100%;">
                 <a href="https://lustra.news/#/login?next=/<%= lang %>/<%= institutionSlug %>/<%= term %>/<%= typeSlug %>/<%= doc.id %>/" class="poll-login-btn">
                     <span class="material-icons-outlined">login</span>
                     <%= labels.login_to_vote %>
                 </a>
-
-                <div style="display: flex; flex-direction: column; align-items: center; color: #616161;">
-                    <svg xmlns="http://www.w3.org/2000/svg" height="28" viewBox="0 -960 960 960" width="28" fill="currentColor"><path d="M240-840h440v520L400-40l-50-50q-7-7-11.5-19t-4.5-23v-14l44-174H120q-32 0-56-24t-24-56v-80q0-7 2-15t4-15l120-280q9-20 30-34t44-14Zm360 80H240L120-480v80h360l-54 220 174-174v-406Zm0 406v-406 406Zm80 34v-80h120v-360H680v-80h200v520H680Z"/></svg>
-                    <span style="font-size: 11px; margin-top: 4px; font-weight: 500;"><%= labels.i_oppose %></span>
-                </div>
             </div>
-           <div style="height: 1px; background-color: #E0E0E0; margin: 24px 0 16px 0; width: 100%;"></div>
+            
+            <div style="height: 1px; background-color: #E0E0E0; margin: 24px 0 16px 0; width: 100%;"></div>
             <div style="text-align: center; font-size: 13px; color: var(--text-med); line-height: 1.6;">
                 
                 <!-- TYTUŁ -->
@@ -805,7 +805,6 @@
                     </a> 
                     <span style="margin-left: 4px;"><%= labels.proof_cta %></span>
                 </div>
-            </div>
             </div>
         </div>
 
@@ -923,8 +922,8 @@
 
                 <!-- Q: STATUS DETAIL -->
                 <% if (doc.status) { 
-                    const sKey = doc.status;
-                    const sTrans = (labels.status && labels.status[sKey]) ? labels.status[sKey] : sKey;
+                    const sKey = doc.status.trim();
+                    const sTrans = (labels.status && labels.status[sKey]) ? labels.status[sKey] : doc.status;
                 %>
                 <details style="margin-bottom: 12px; cursor: pointer;">
                     <summary style="font-size: 14px; color: var(--primary); font-weight: 500;"><%= labels.faq_status %></summary>
@@ -1019,7 +1018,7 @@
         <footer class="seo-footer" style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #E0E0E0; display: flex; flex-direction: column; align-items: center; text-align: center;">    
             <a href="/<%= lang %>/<%= institutionSlug %>/<%= term %>/" style="display: inline-flex; align-items: center; text-decoration: none; color: var(--text-med); font-size: 13px; font-weight: 500; margin-bottom: 16px;">
                 <span class="material-icons" style="font-size: 16px; margin-right: 6px;">grid_view</span>
-                <%= term %> <%= labels.nav_index %>
+                <%= term %> <%= institutionName %>
             </a>
             <p style="font-size: 11px; color: var(--text-low); margin: 0; max-width: 600px; line-height: 1.4;">
                 Lustra.news &copy; 2026. Civic Intelligence Data Node.<br>

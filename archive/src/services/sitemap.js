@@ -44,7 +44,7 @@ function generateSitemaps(catalog) {
                 url.ele('priority').txt('0.8');
             });
 
-            const fileName = `sitemap-${lang}-${term}.xml`;
+            const fileName = `sitemap-${config.TARGET_INSTITUTION}-${lang}-${term}.xml`;
             outputFiles.push({
                 path: `${config.PATHS.SITEMAPS_DIR}${fileName}`,
                 content: root.doc().end({ prettyPrint: true })

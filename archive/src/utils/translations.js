@@ -26,6 +26,10 @@ module.exports = {
         key_points: "Key points",
         official_text: "Official text",
         process_page: "Process page",
+        previous_status: "Previous:",
+        civic_will_record: "CIVIC WILL RECORD",
+        total_votes_recorded: "VOTES RECORDED",
+        record_your_position_for_audit: "Record your position for audit.",
         
         // --- HUB & BREADCRUMBS ---
         term_label: "Term",
@@ -98,6 +102,11 @@ module.exports = {
         ans_origin: "This legislation was initiated in the",
         unit_house: "House of Representatives",
         unit_senate: "Senate",
+        // --- UI: NEW POLLS & STATUSES ---
+        previous_status: "Previous:",
+        civic_will_record: "CIVIC WILL RECORD",
+        total_votes_recorded: "VOTES RECORDED",
+        record_your_position_for_audit: "Record your position for audit.",
 
         // --- DICTIONARIES (LOOKUPS) ---
         categories: {
@@ -151,6 +160,20 @@ module.exports = {
             "Initiative": "Initiative",
             "Adopted": "Adopted",
             "Expired": "Expired",
+            "W procesie": "In Progress",
+            "Uchwalono i przekazano do Senatu": "Passed Sejm to Senate",
+            "Odrzucono": "Rejected",
+            "Odrzucono przez Senat": "Rejected by Senate",
+            "Przekazano Prezydentowi": "Transmitted to President",
+            "VETO Prezydenta": "Presidential Veto",
+            "Skierowano do TK": "Referred to Constitutional Tribunal",
+            "Podpisano przez Prezydenta": "Signed by President",
+            "W mocy": "Enacted",
+            "Przedawniono": "Expired",
+            "Uchwalono": "Adopted",
+            "Natychmiastowe odrzucenie": "Immediate Rejection",
+            "Wycofano": "Withdrawn",
+            "Nadchodzące głosowanie": "Upcoming Vote"
         }
     },
 
@@ -181,6 +204,7 @@ module.exports = {
         key_points: "Kluczowe punkty",
         official_text: "Oficjalny tekst",
         process_page: "Strona procesu",
+        
 
         term_label: "Kadencja",
         topic_label: "Temat",
@@ -253,6 +277,12 @@ module.exports = {
         unit_house: "Izbie Reprezentantów",
         unit_senate: "Senacie",
 
+        // --- UI: NEW POLLS & STATUSES ---
+        previous_status: "Poprzedni:",
+        civic_will_record: "REJESTR WOLI OBYWATELI",
+        total_votes_recorded: "ODDANYCH GŁOSÓW",
+        record_your_position_for_audit: "Zapisz swoje stanowisko do audytu.",
+
         // --- DICTIONARIES (LOOKUPS) ---
         categories: {
             "Health": "Zdrowie",
@@ -304,6 +334,20 @@ module.exports = {
             "Initiative": "Inicjatywa",
             "Adopted": "Przyjęto",
             "Expired": "Wygasło",
+            "W procesie": "W procesie",
+            "Uchwalono i przekazano do Senatu": "Uchwalono i przekazano do Senatu",
+            "Odrzucono": "Odrzucono",
+            "Odrzucono przez Senat": "Odrzucono przez Senat",
+            "Przekazano Prezydentowi": "Przekazano Prezydentowi",
+            "VETO Prezydenta": "VETO Prezydenta",
+            "Skierowano do TK": "Skierowano do TK",
+            "Podpisano przez Prezydenta": "Podpisano przez Prezydenta",
+            "W mocy": "W mocy",
+            "Przedawniono": "Przedawniono",
+            "Uchwalono": "Uchwalono",
+            "Natychmiastowe odrzucenie": "Natychmiastowe odrzucenie",
+            "Wycofano": "Wycofano",
+            "Nadchodzące głosowanie": "Nadchodzące głosowanie"
         }
     },
     de: {
@@ -386,6 +430,12 @@ module.exports = {
         ans_origin: "Diese Gesetzgebung wurde eingeleitet im",
         unit_house: "Repräsentantenhaus",
         unit_senate: "Senat",
+        // --- UI: NEW POLLS & STATUSES ---
+        previous_status: "Bisheriger:",
+        civic_will_record: "BÜRGERWILLE REGISTRIERT",
+        total_votes_recorded: "ERFASSTE STIMMEN",
+        record_your_position_for_audit: "Erfassen Sie Ihre Position für das Audit.",
+
         categories: {
             "Health": "Gesundheit",
             "Family": "Familie",
@@ -435,6 +485,20 @@ module.exports = {
             "Initiative": "Initiative",
             "Adopted": "Angenommen",
             "Expired": "Abgelaufen",
+            "W procesie": "In Bearbeitung",
+            "Uchwalono i przekazano do Senatu": "Vom Sejm an den Senat weitergeleitet",
+            "Odrzucono": "Abgelehnt",
+            "Odrzucono przez Senat": "Vom Senat abgelehnt",
+            "Przekazano Prezydentowi": "An den Präsidenten übermittelt",
+            "VETO Prezydenta": "Veto des Präsidenten",
+            "Skierowano do TK": "An das Verfassungsgericht verwiesen",
+            "Podpisano przez Prezydenta": "Vom Präsidenten unterzeichnet",
+            "W mocy": "In Kraft getreten",
+            "Przedawniono": "Abgelaufen",
+            "Uchwalono": "Angenommen",
+            "Natychmiastowe odrzucenie": "Sofortige Ablehnung",
+            "Wycofano": "Zurückgezogen",
+            "Nadchodzące głosowanie": "Bevorstehende Abstimmung"
         }
     },
     fr: {
@@ -517,6 +581,11 @@ module.exports = {
         ans_origin: "Cette législation a été initiée par",
         unit_house: "la Chambre des représentants",
         unit_senate: "le Sénat",
+        // --- UI: NEW POLLS & STATUSES ---
+        previous_status: "Précédent :",
+        civic_will_record: "REGISTRE DE LA VOLONTÉ CITOYENNE",
+        total_votes_recorded: "VOTES ENREGISTRÉS",
+        record_your_position_for_audit: "Enregistrez votre position pour l'audit.",
         categories: {
             "Health": "Santé",
             "Family": "Famille",
@@ -566,6 +635,20 @@ module.exports = {
             "Initiative": "Initiative",
             "Adopted": "Adopté",
             "Expired": "Expiré",
+            "W procesie": "En cours",
+            "Uchwalono i przekazano do Senatu": "Adopté par la Diète et transmis au Sénat",
+            "Odrzucono": "Rejeté",
+            "Odrzucono przez Senat": "Rejeté par le Sénat",
+            "Przekazano Prezydentowi": "Transmis au Président",
+            "VETO Prezydenta": "Veto présidentiel",
+            "Skierowano do TK": "Renvoyé au Tribunal Constitutionnel",
+            "Podpisano przez Prezydenta": "Signé par le Président",
+            "W mocy": "Promulgué",
+            "Przedawniono": "Expiré",
+            "Uchwalono": "Adopté",
+            "Natychmiastowe odrzucenie": "Rejet immédiat",
+            "Wycofano": "Retiré",
+            "Nadchodzące głosowanie": "Vote à venir"
         }
     },
     es: {
@@ -648,6 +731,12 @@ module.exports = {
         ans_origin: "Esta legislación se inició en",
         unit_house: "la Cámara de Representantes",
         unit_senate: "el Senado",
+        // --- UI: NEW POLLS & STATUSES ---
+        previous_status: "Anterior:",
+        civic_will_record: "REGISTRO DE VOLUNTAD CÍVICA",
+        total_votes_recorded: "VOTOS REGISTRADOS",
+        record_your_position_for_audit: "Registre su posición para la auditoría.",
+
         categories: {
             "Health": "Salud",
             "Family": "Familia",
@@ -697,6 +786,20 @@ module.exports = {
             "Initiative": "Iniciativa",
             "Adopted": "Adoptado",
             "Expired": "Expirado",
+            "W procesie": "En proceso",
+            "Uchwalono i przekazano do Senatu": "Aprobado por el Sejm y enviado al Senado",
+            "Odrzucono": "Rechazado",
+            "Odrzucono przez Senat": "Rechazado por el Senado",
+            "Przekazano Prezydentowi": "Transmitido al Presidente",
+            "VETO Prezydenta": "Veto Presidencial",
+            "Skierowano do TK": "Remitido al Tribunal Constitucional",
+            "Podpisano przez Prezydenta": "Firmado por el Presidente",
+            "W mocy": "Promulgado",
+            "Przedawniono": "Expirado",
+            "Uchwalono": "Aprobado",
+            "Natychmiastowe odrzucenie": "Rechazo inmediato",
+            "Wycofano": "Retirado",
+            "Nadchodzące głosowanie": "Próxima votación"
         }
     },
     pt: {
@@ -779,6 +882,12 @@ module.exports = {
         ans_origin: "Esta legislação foi iniciada na",
         unit_house: "Câmara dos Representantes",
         unit_senate: "Senado",
+        // --- UI: NEW POLLS & STATUSES ---
+        previous_status: "Anterior:",
+        civic_will_record: "REGISTO DA VONTADE CÍVICA",
+        total_votes_recorded: "VOTOS REGISTADOS",
+        record_your_position_for_audit: "Registe a sua posição para a auditoria.",
+
         categories: {
             "Health": "Saúde",
             "Family": "Família",
@@ -828,6 +937,20 @@ module.exports = {
             "Initiative": "Iniciativa",
             "Adopted": "Adotado",
             "Expired": "Expirado",
+            "W procesie": "Em curso",
+            "Uchwalono i przekazano do Senatu": "Aprovado pelo Sejm e enviado ao Senado",
+            "Odrzucono": "Rejeitado",
+            "Odrzucono przez Senat": "Rejeitado pelo Senado",
+            "Przekazano Prezydentowi": "Transmitido ao Presidente",
+            "VETO Prezydenta": "Veto Presidencial",
+            "Skierowano do TK": "Remetido ao Tribunal Constitucional",
+            "Podpisano przez Prezydenta": "Assinado pelo Presidente",
+            "W mocy": "Promulgado",
+            "Przedawniono": "Expirado",
+            "Uchwalono": "Aprovado",
+            "Natychmiastowe odrzucenie": "Rejeição Imediata",
+            "Wycofano": "Retirado",
+            "Nadchodzące głosowanie": "Próxima votação"
         }
     },
     nl: {
@@ -910,6 +1033,12 @@ module.exports = {
         ans_origin: "Deze wetgeving is geïnitieerd in",
         unit_house: "het Huis van Afgevaardigden",
         unit_senate: "de Senaat",
+        // --- UI: NEW POLLS & STATUSES ---
+        previous_status: "Vorige:",
+        civic_will_record: "BURGERWIL GEREGISTREERD",
+        total_votes_recorded: "GEREGISTREERDE STEMMEN",
+        record_your_position_for_audit: "Registreer uw standpunt voor de audit.",
+
         categories: {
             "Health": "Gezondheid",
             "Family": "Familie",
@@ -959,6 +1088,20 @@ module.exports = {
             "Initiative": "Initiatief",
             "Adopted": "Aangenomen",
             "Expired": "Verlopen",
+            "W procesie": "In behandeling",
+            "Uchwalono i przekazano do Senatu": "Aangenomen door de Sejm en naar de Senaat gestuurd",
+            "Odrzucono": "Verworpen",
+            "Odrzucono przez Senat": "Verworpen door de Senaat",
+            "Przekazano Prezydentowi": "Doorgestuurd naar de President",
+            "VETO Prezydenta": "Veto van de President",
+            "Skierowano do TK": "Verwezen naar het Constitutioneel Hof",
+            "Podpisano przez Prezydenta": "Ondertekend door de President",
+            "W mocy": "Van kracht",
+            "Przedawniono": "Verlopen",
+            "Uchwalono": "Aangenomen",
+            "Natychmiastowe odrzucenie": "Onmiddellijke afwijzing",
+            "Wycofano": "Ingetrokken",
+            "Nadchodzące głosowanie": "Aankomende stemming"
         }
     },
     it: {
@@ -1041,6 +1184,12 @@ module.exports = {
         ans_origin: "Questa legislazione è stata avviata presso",
         unit_house: "la Camera dei Rappresentanti",
         unit_senate: "il Senato",
+        // --- UI: NEW POLLS & STATUSES ---
+        previous_status: "Precedente:",
+        civic_will_record: "REGISTRO DELLA VOLONTÀ CIVICA",
+        total_votes_recorded: "VOTI REGISTRATI",
+        record_your_position_for_audit: "Registra la tua posizione per l'audit.",
+
         categories: {
             "Health": "Salute",
             "Family": "Famiglia",
@@ -1090,6 +1239,20 @@ module.exports = {
             "Initiative": "Iniziativa",
             "Adopted": "Adottato",
             "Expired": "Scaduto",
+            "W procesie": "In corso",
+            "Uchwalono i przekazano do Senatu": "Approvato dal Sejm e trasmesso al Senato",
+            "Odrzucono": "Respinto",
+            "Odrzucono przez Senat": "Respinto dal Senato",
+            "Przekazano Prezydentowi": "Trasmesso al Presidente",
+            "VETO Prezydenta": "Veto Presidenziale",
+            "Skierowano do TK": "Rinviato alla Corte Costituzionale",
+            "Podpisano przez Prezydenta": "Firmato dal Presidente",
+            "W mocy": "Promulgato",
+            "Przedawniono": "Scaduto",
+            "Uchwalono": "Approvato",
+            "Natychmiastowe odrzucenie": "Reiezione immediata",
+            "Wycofano": "Ritirato",
+            "Nadchodzące głosowanie": "Prossima votazione"
         }
     }
 };

@@ -3,11 +3,52 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../services/cache/parliament_cache_manager.dart';
+import '../services/cache/cache_service.dart';
 
-class InteractionProvider with ChangeNotifier {
+class InteractionProvider with ChangeNotifier, WidgetsBindingObserver {
   final ApiService _apiService = ApiService();
   String? _lastUserId;
   String? _lastPrefix;
+  int _lastFetchTimestamp = 0;
+
+  InteractionProvider() {
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && _lastPrefix != null && _lastUserId != null) {
+      _checkCrossTabSync();
+    }
+  }
+
+  Future<void> _checkCrossTabSync() async {
+    await CacheService().reload();
+    
+    final cache = ParliamentCacheManager(_lastPrefix!);
+    final syncData = await cache.getInteractionSyncData();
+    
+    if (syncData != null) {
+      final mutationTime = syncData['timestamp'] as int? ?? 0;
+      final mutationUserId = syncData['userId'] as String?;
+
+      if (mutationTime > _lastFetchTimestamp && mutationUserId == _lastUserId) {
+        developer.log('Cross-tab mutation detected for current user. Syncing & Invalidating Cache...', name: 'InteractionProvider');
+        
+        await cache.clearTrackedItems(); 
+        
+        notifyTrackedListUpdatedInDb(); 
+        
+        fetchInteractions(_lastPrefix!);
+      }
+    }
+  }
 
   void updateDependencies(String? userId, String? prefix) {
     if (_lastUserId != userId || _lastPrefix != prefix) {
@@ -43,7 +84,14 @@ class InteractionProvider with ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
-    int get trackedCount => _trackedBills.length + _trackedCivic.length;
+  int get trackedCount => _trackedBills.length + _trackedCivic.length;
+  int _trackedDbUpdateStamp = 0;
+  int get trackedDbUpdateStamp => _trackedDbUpdateStamp;
+  
+  void notifyTrackedListUpdatedInDb() {
+    _trackedDbUpdateStamp++;
+    notifyListeners();
+  }
 
   bool isTracked(String billId, {String docType = 'bill'}) {
     if (docType == 'civic') {
@@ -56,33 +104,58 @@ class InteractionProvider with ChangeNotifier {
     return _votes.containsKey(voteKey);
   }
 
-  Future<void> fetchInteractions(String prefix) async {
+  Future<void> fetchInteractions(String prefix, {int maxRetries = 3}) async {
     _isLoading = true;
     notifyListeners();
+    
+    int attempt = 0;
+    final cacheManager = ParliamentCacheManager(prefix);
 
-    try {
-      developer.log('Pobieram zunifikowany stan dla: $prefix...', name: 'InteractionProvider');
-      final response = await _apiService.callFunction('getUserInteractions', params: {
-        'prefix': prefix,
-      });
+    while (attempt < maxRetries) {
+      try {
+        developer.log('Pobieram zunifikowany stan dla: $prefix...', name: 'InteractionProvider');
+        final response = await _apiService.callFunction('getUserInteractions', params: {
+          'prefix': prefix,
+        });
 
-      final billsList = (response['trackedBills'] as List?)?.map((e) => e.toString()).toList() ?? [];
-      final civicList = (response['trackedCivic'] as List?)?.map((e) => e.toString()).toList() ?? [];
-      
-      _trackedBills = Set.from(billsList);
-      _trackedCivic = Set.from(civicList);
-      _votes = Map<String, dynamic>.from(response['votes'] ?? {});
+        final billsList = (response['trackedBills'] as List?)?.map((e) => e.toString()).toList() ?? [];
+        final civicList = (response['trackedCivic'] as List?)?.map((e) => e.toString()).toList() ?? [];
+        
+        _trackedBills = Set.from(billsList);
+        _trackedCivic = Set.from(civicList);
+        _votes = Map<String, dynamic>.from(response['votes'] ?? {});
+        _lastFetchTimestamp = DateTime.now().millisecondsSinceEpoch;
 
-      developer.log('Załadowano do RAM z Firebase: ${_trackedBills.length} śledzonych, ${_votes.length} głosów. Przeczytane lokalnie (dysk): ${_viewedThisSession.length}', name: 'InteractionProvider');
-    } catch (e) {
-      developer.log('Błąd pobierania interakcji: $e', name: 'InteractionProvider');
-    } finally {
-      _isLoading = false;
-      notifyListeners();
+        await cacheManager.saveTrackedItems({
+          'trackedBills': billsList,
+          'trackedCivic': civicList,
+          'votes': _votes
+        }, 'all');
+
+        developer.log('Załadowano do RAM z Firebase: ${_trackedBills.length} śledzonych, ${_votes.length} głosów.', name: 'InteractionProvider');
+        break;
+      } catch (e) {
+        attempt++;
+        developer.log('Błąd pobierania interakcji (próba $attempt/$maxRetries): $e', name: 'InteractionProvider');
+        
+        if (attempt >= maxRetries) {
+          developer.log('Próba odzyskania interakcji z lokalnego cache...', name: 'InteractionProvider');
+          final cachedData = await cacheManager.getTrackedItems('all');
+          if (cachedData != null) {
+            _trackedBills = Set.from((cachedData['trackedBills'] as List?)?.map((e) => e.toString()) ?? []);
+            _trackedCivic = Set.from((cachedData['trackedCivic'] as List?)?.map((e) => e.toString()) ?? []);
+            _votes = Map<String, dynamic>.from(cachedData['votes'] ?? {});
+          }
+        } else {
+          await Future.delayed(Duration(milliseconds: 500 * attempt));
+        }
+      }
     }
+    
+    _isLoading = false;
+    notifyListeners();
   }
 
-  // Optimistic UI
   void toggleTrackingLocally(String billId, bool isNowTracked, {String docType = 'bill'}) {
     if (docType == 'civic') {
       isNowTracked ? _trackedCivic.add(billId) : _trackedCivic.remove(billId);

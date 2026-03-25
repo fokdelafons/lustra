@@ -17,6 +17,7 @@ import '../services/voting_service.dart';
 import '../services/parliament_service_interface.dart';
 import '../services/parliament_manager.dart';
 import '../services/api_service.dart';
+import '../services/cache/parliament_cache_manager.dart';
 
 class CitizenPollWidget extends StatefulWidget {
   final String targetType;
@@ -175,6 +176,9 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
         
         if (mounted) {  setState(() { _pollCounters = countersToDisplay; });  }
         widget.onVoteSuccess?.call(countersToDisplay);
+        
+        // Trigger cross-tab / background interaction sync for current user
+        await ParliamentCacheManager(countryPrefix).markInteractionChanged(user.uid);
       } 
     } on FirebaseFunctionsException catch (e) {
       if (mounted) setState(() => _isVoteProcessing = false);

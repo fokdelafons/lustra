@@ -13,6 +13,11 @@ class CacheService {
     _prefs ??= await SharedPreferences.getInstance();
   }
 
+  Future<void> reload() async {
+    await init();
+    await _prefs?.reload();
+  }
+
   Future<Map<String, dynamic>?> get(String key, {String? validationKey}) async {
     await init();
     try {
@@ -81,8 +86,7 @@ class CacheService {
     final userKeys = [
       '_cached_tracked_items', 
       '_curated_list', 
-      '_my_curated_lists', 
-      '_local_viewed_bills'
+      '_my_curated_lists'
     ];
     
     final toRemove = keys.where((k) => userKeys.any((uk) => k.contains(uk))).toList();

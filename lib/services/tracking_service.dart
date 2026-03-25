@@ -1,4 +1,5 @@
 import 'dart:developer' as developer;
+import 'package:firebase_auth/firebase_auth.dart';
 import 'api_service.dart';
 import 'cache/parliament_cache_manager.dart';
 
@@ -15,6 +16,11 @@ class TrackingService {
       
       final cacheManager = ParliamentCacheManager(prefix);
       await cacheManager.clearTrackedItems();
+      
+      final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+      if (currentUserId != null) {
+        await cacheManager.markInteractionChanged(currentUserId);
+      }
       
       return response['isTracked'] as bool? ?? false;
     } catch (e) {

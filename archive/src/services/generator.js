@@ -200,11 +200,17 @@ async function generateBills(docs) {
              }
         }
 
+        const fallbackTitles = {};
+        config.LANGUAGES.forEach(l => {
+            fallbackTitles[l] = doc[`${l}_ai_title`] || doc['eng_ai_title'] || null;
+        });
+
         catalogUpdates.push({
             id: doc.id,
             term: term,
             date: isoDate,
-            title: doc.titleOfficial,
+            title: doc.titleOfficial, 
+            titles: fallbackTitles,
             categories: doc.category || []
         });
     }
@@ -245,7 +251,7 @@ async function generateHubs(catalog, uploadBatchCallback) {
                 
                 const billsForView = chunk.map(item => ({
                     id: item.id,
-                    title: item.title || item.id,
+                    title: item.title || (item.titles && item.titles[lang]) || item.id,
                     date: new Date(item.date).toLocaleDateString(lang),
                     url: buildBillUrl(lang, item.id, item.term || term),
                 }));
@@ -317,7 +323,7 @@ async function generateHubs(catalog, uploadBatchCallback) {
                 
                 const billsForView = chunk.map(item => ({
                     id: item.id,
-                    title: item.title || item.id,
+                    title: item.title || (item.titles && item.titles[lang]) || item.id,
                     date: new Date(item.date).toLocaleDateString(lang),
                     url: buildBillUrl(lang, item.id, item.term || config.URL_PREFIX.term),
                 }));

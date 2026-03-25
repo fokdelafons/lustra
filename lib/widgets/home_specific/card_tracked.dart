@@ -29,7 +29,7 @@ class _TrackedCardState extends State<TrackedCard> {
   bool _playAnimation = true;
   bool _isQrHovered = false;
   List<Legislation> _trackedBills = [];
-  int? _lastTrackedCount;
+  int? _lastDbUpdateStamp;
 
   @override
   void initState() {
@@ -41,12 +41,12 @@ class _TrackedCardState extends State<TrackedCard> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final interactionProvider = context.watch<InteractionProvider>();
-    final currentCount = interactionProvider.trackedCount;
+    final currentStamp = interactionProvider.trackedDbUpdateStamp;
     
-    if (_lastTrackedCount != null && _lastTrackedCount != currentCount) {
+    if (_lastDbUpdateStamp != null && _lastDbUpdateStamp != currentStamp) {
       _fetchTracked();
     }
-    _lastTrackedCount = currentCount;
+    _lastDbUpdateStamp = currentStamp;
   }
 
   Future<void> _fetchTracked() async {

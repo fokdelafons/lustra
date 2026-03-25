@@ -1174,25 +1174,71 @@ const sendCuratedListPush = async (req, res) => {
         return res.status(429).json({ error: { message: `Cooldown active. Try again in ${hoursLeft}h.`, status: 'RESOURCE_EXHAUSTED' } });
     }
 
-    const topicName = `list_${listId}`;
-    const message = {
-        notification: {
-            title: `Updates in: ${listData.listName || 'Curated List'}`,
-            body: 'The list curator has added new items or changes. Tap to check!'
-        },
-        data: {
-            type: 'curated_list_update',
-            listId: listId,
-            prefix: prefix
-        },
-        topic: topicName
+    const usersSnapshot = await db.collection('users')
+        .where('subscribedLists', 'array-contains', listId)
+        .get();
+
+    if (usersSnapshot.empty) {
+        await listRef.update({ lastNotifiedAt: admin.firestore.FieldValue.serverTimestamp() });
+        return res.status(200).json({ data: { success: true, sent: 0 } });
+    }
+
+    const tokensByLang = {};
+    usersSnapshot.forEach(doc => {
+        const data = doc.data();
+        if (data.fcmToken) {
+            const lang = data.preferredLanguage || 'en';
+            if (!tokensByLang[lang]) tokensByLang[lang] = [];
+            tokensByLang[lang].push(data.fcmToken);
+        }
+    });
+
+    if (Object.keys(tokensByLang).length === 0) {
+        await listRef.update({ lastNotifiedAt: admin.firestore.FieldValue.serverTimestamp() });
+        return res.status(200).json({ data: { success: true, sent: 0 } });
+    }
+
+    const translations = {
+        en: { title: `Activity in: {listName}`, body: `New items added or bills moved forward. Tap to see what changed!` },
+        pl: { title: `Nowości na liście: {listName}`, body: `Kurator dodał nowe pozycje lub ustawy przeszły dalej. Sprawdź szczegóły!` },
+        de: { title: `Aktivität in: {listName}`, body: `Neue Artikel hinzugefügt oder Gesetze sind vorangekommen. Tippen, um Änderungen zu sehen!` },
+        fr: { title: `Activité dans : {listName}`, body: `Nouveaux éléments ajoutés ou projets de loi avancés. Appuyez pour voir les changements !` },
+        es: { title: `Actividad en: {listName}`, body: `Nuevos elementos agregados o proyectos de ley avanzaron. ¡Toca para ver los cambios!` },
+        it: { title: `Attività in: {listName}`, body: `Nuovi elementi aggiunti o disegni di legge avanzati. Tocca per vedere cosa è cambiato!` },
+        pt: { title: `Atividade em: {listName}`, body: `Novos itens adicionados ou projetos de lei avançaram. Toque para ver o que mudou!` },
+        nl: { title: `Activiteit in: {listName}`, body: `Nieuwe items toegevoegd of wetsvoorstellen zijn gevorderd. Tik om te zien wat er is veranderd!` }
     };
 
-    await admin.messaging().send(message);
+    const chunkArray = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
+    let totalSuccess = 0;
+    const listNameStr = listData.listName || 'Curated List';
+
+    for (const [lang, tokens] of Object.entries(tokensByLang)) {
+        const textData = translations[lang] || translations['en'];
+        const tokenChunks = chunkArray(tokens, 500);
+
+        for (const chunk of tokenChunks) {
+            const message = {
+                notification: {
+                    title: textData.title.replace('{listName}', listNameStr),
+                    body: textData.body
+                },
+                data: {
+                    type: 'curated_list_update',
+                    listId: listId,
+                    prefix: prefix
+                },
+                tokens: chunk
+            };
+
+            const response = await admin.messaging().sendEachForMulticast(message);
+            totalSuccess += response.successCount;
+        }
+    }
 
     await listRef.update({ lastNotifiedAt: admin.firestore.FieldValue.serverTimestamp() });
 
-    return res.status(200).json({ data: { success: true } });
+    return res.status(200).json({ data: { success: true, sent: totalSuccess } });
 
   } catch (error) {
     console.error('Błąd w sendCuratedListPush:', error);

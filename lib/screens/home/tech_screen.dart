@@ -28,22 +28,22 @@ class TechStackScreen extends StatelessWidget {
 
   Widget _buildSectionTitle(BuildContext context, String title) {
     return Padding(
-      padding: const EdgeInsets.only(top: 40.0, bottom: 16.0),
-      child: SelectableText(title, style: _headerStyle(context)),
+      padding: const EdgeInsets.only(top: 20.0, bottom: 16.0),
+      child: Text(title, style: _headerStyle(context)),
     );
   }
 
   Widget _buildSubsectionTitle(BuildContext context, String title) {
     return Padding(
       padding: const EdgeInsets.only(top: 24.0, bottom: 8.0),
-      child: SelectableText(title, style: _subHeaderStyle(context)),
+      child: Text(title, style: _subHeaderStyle(context)),
     );
   }
 
   Widget _buildBodyText(BuildContext context, String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
-      child: SelectableText(text, style: _bodyStyle(context)),
+      child: Text(text, style: _bodyStyle(context)),
     );
   }
 
@@ -57,7 +57,7 @@ class TechStackScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(12.0),
         border: Border.all(color: Colors.grey.shade800),
       ),
-      child: SelectableText.rich(
+      child: Text.rich(
         TextSpan(children: _parseCode(code)),
         style: const TextStyle(
           fontFamily: 'monospace',
@@ -198,7 +198,7 @@ class TechStackScreen extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
-      child: SelectableText.rich(
+      child: Text.rich(
         TextSpan(
           style: style,
           children: [
@@ -279,20 +279,22 @@ class TechStackScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.techTitle),
-        backgroundColor: Theme.of(context).primaryColor,
-        foregroundColor: Colors.white,
-        centerTitle: false,
-      ),
+      appBar: (MediaQuery.of(context).size.width > 1140)
+          ? null
+          : AppBar(
+              title: Text(l10n.techTitle),
+              backgroundColor: Theme.of(context).primaryColor,
+              foregroundColor: Colors.white,
+              centerTitle: false,
+            ),
       body: SingleChildScrollView( 
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
+        child: SelectionArea(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 800),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+              padding: const EdgeInsets.only(left: 24.0, right: 24.0, top: 4.0, bottom: 32.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -389,8 +391,8 @@ class TechStackScreen extends StatelessWidget {
             ),
           ),
         ),
+          ),
       ),
-    )
-    );
+    ));
   }
 }

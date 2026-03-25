@@ -226,7 +226,7 @@ Future<void> _loadBills({bool forceRefresh = false}) async {
       final response = await activeService.getLegislations(
        context,
        limit: _limit,
-       lastVisibleId: null,
+       lastVisibleId: _nextCursor,
        searchQuery: _searchQuery,
        sortBy: apiSortBy,
        status: _selectedStatusFilter == 'all' ? null : 'exact:$_selectedStatusFilter',

@@ -82,8 +82,8 @@ class TrackedLegislationScreenState extends State<TrackedLegislationScreen> with
       }
 
       combined.sort((a, b) {
-        final dateA = a.processStartDate ?? a.documentDate ?? DateTime.now();
-        final dateB = b.processStartDate ?? b.documentDate ?? DateTime.now();
+        final dateA = a.lastUpdated ?? a.processStartDate ?? a.documentDate ?? DateTime.now();
+        final dateB = b.lastUpdated ?? b.processStartDate ?? b.documentDate ?? DateTime.now();
         return dateB.compareTo(dateA);
       });
 

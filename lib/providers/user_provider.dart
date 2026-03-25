@@ -83,34 +83,60 @@ class UserProvider with ChangeNotifier {
     }
   }
 
-  Future<void> _fetchUserProfile() async {
+  Future<void> _fetchUserProfile({int maxRetries = 3}) async {
     developer.log("Pobieranie profilu użytkownika (UserProvider)...", name: 'UserProvider');
-    try {
-      final result = await _apiService.callFunction('checkUserProfile');
-      _profileExists = result['exists'] ?? false;
+    int attempt = 0;
+    
+    while (attempt < maxRetries) {
+      try {
+        final result = await _apiService.callFunction('checkUserProfile');
+        _profileExists = result['exists'] ?? false;
 
-      if (result['exists'] == true && result['profile'] != null) {
-        final profile = result['profile'] as Map<String, dynamic>;
-        
-        _marketingConsent = profile['marketingConsent'] ?? false;
-        _notificationsTrackedBills = profile['notificationsTrackedBills'] ?? false;
-        _subscribedParliaments = List<String>.from(profile['subscribedParliaments'] ?? []);
-        _primaryParliamentId = profile['primaryParliamentId'];
+        if (result['exists'] == true && result['profile'] != null) {
+          final profile = result['profile'] as Map<String, dynamic>;
+          
+          _marketingConsent = profile['marketingConsent'] ?? false;
+          _notificationsTrackedBills = profile['notificationsTrackedBills'] ?? false;
+          _subscribedParliaments = List<String>.from(profile['subscribedParliaments'] ?? []);
+          _primaryParliamentId = profile['primaryParliamentId'];
 
-        if (profile.containsKey('votes')) {
-          _votes = Map<String, dynamic>.from(profile['votes']);
-          developer.log("Pobrano ${_votes.length} głosów.", name: 'UserProvider');
-        } else {
-          _votes = {};
+          if (profile.containsKey('votes')) {
+            _votes = Map<String, dynamic>.from(profile['votes']);
+            developer.log("Pobrano ${_votes.length} głosów.", name: 'UserProvider');
+          } else {
+            _votes = {};
+          }
+          _subscribedLists = List<String>.from(profile['subscribedLists'] ?? []);
+          _createdLists = List<String>.from(profile['createdLists'] ?? []);
+          _isCurator = profile['isCurator'] ?? false;
+          
+          await CacheService().save('_cached_user_profile', profile);
         }
-        _subscribedLists = List<String>.from(profile['subscribedLists'] ?? []);
-        _createdLists = List<String>.from(profile['createdLists'] ?? []);
-        _isCurator = profile['isCurator'] ?? false;
+        _isInitialized = true;
+        notifyListeners();
+        return;
+      } catch (e) {
+        attempt++;
+        developer.log("Błąd pobierania profilu (próba $attempt/$maxRetries): $e", name: 'UserProvider');
+        
+        if (attempt >= maxRetries) {
+          final cachedProfile = await CacheService().get('_cached_user_profile');
+          if (cachedProfile != null) {
+            _marketingConsent = cachedProfile['marketingConsent'] ?? false;
+            _notificationsTrackedBills = cachedProfile['notificationsTrackedBills'] ?? false;
+            _subscribedParliaments = List<String>.from(cachedProfile['subscribedParliaments'] ?? []);
+            _primaryParliamentId = cachedProfile['primaryParliamentId'];
+            _subscribedLists = List<String>.from(cachedProfile['subscribedLists'] ?? []);
+            _createdLists = List<String>.from(cachedProfile['createdLists'] ?? []);
+            _isCurator = cachedProfile['isCurator'] ?? false;
+            developer.log("Załadowano profil awaryjnie z cache.", name: 'UserProvider');
+          }
+          _isInitialized = true;
+          notifyListeners();
+        } else {
+          await Future.delayed(Duration(milliseconds: 500 * attempt));
+        }
       }
-      _isInitialized = true;
-      notifyListeners();
-    } catch (e) {
-      developer.log("Błąd pobierania profilu: $e", name: 'UserProvider');
     }
   }
 

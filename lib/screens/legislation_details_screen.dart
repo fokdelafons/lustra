@@ -150,8 +150,9 @@ Future<void> _toggleTracking() async {
   try {
     await _trackingService.toggleTrackBill(activeService, _bill!.id, docType: currentDocType);
     
+    interactionProvider.notifyTrackedListUpdatedInDb();
+    
     if (mounted) {
-      // ARCHITECTURE: Contextual feedback based on platform capabilities (Push Notifications promo on Web)
       String successMessage;
       if (!isCurrentlyTracked) {
         successMessage = kIsWeb ? l10n.snackbarAddedToListWebPromo : l10n.snackbarAddedToList;
@@ -744,100 +745,119 @@ void _reportError() {
           ]),
         ],
 
-        const SizedBox(height: 32),
+        const SizedBox(height: 6),
         Builder(builder: (context) {
           final activeService = context.read<ParliamentServiceInterface>();
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.center, 
-            children: [
-              Expanded(
-                child: _bill!.lastStatus != null
-                    ? Padding(
-                        padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Flexible(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    l10n.previousStatusLabel,
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: Colors.grey[400],
-                                      letterSpacing: 0.5,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    activeService.translateStatus(context, _bill!.lastStatus!),
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey[500],
-                                      fontWeight: FontWeight.w500,
-                                      height: 1.2,
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    textAlign: TextAlign.left,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Icon(Icons.arrow_forward_ios, color: Colors.grey[300], size: 14),
-                          ],
-                        ),
-                      )
-                    : const SizedBox.shrink(),
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final bool isDesktop = constraints.maxWidth >= 600;
+              final bool showLastStatus = isDesktop && _bill!.lastStatus != null;
+
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.center, 
                 children: [
-                  Icon(
-                    (_bill!.documentType == 'civic' || widget.listType == 'civic')
-                        ? Icons.history_edu 
-                        : Icons.gavel,
-                    size: (_bill!.documentType == 'civic' || widget.listType == 'civic') ? 62.0 : 48.0,
-                    color: Colors.grey[400],
+                  Expanded(
+                    child: showLastStatus
+                        ? Padding(
+                            padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Flexible(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        l10n.previousStatusLabel,
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          color: Colors.grey[400],
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        activeService.translateStatus(context, _bill!.lastStatus!),
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.grey[500],
+                                          fontWeight: FontWeight.w500,
+                                          height: 1.2,
+                                        ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        textAlign: TextAlign.left,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Icon(Icons.arrow_forward_ios, color: Colors.grey[300], size: 14),
+                              ],
+                            ),
+                          )
+                        : const SizedBox.shrink(),
                   ),
-                  const SizedBox(width: 16),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        l10n.statusLabel,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[500],
-                          height: 1.0,
+                  
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: constraints.maxWidth * (isDesktop ? 0.6 : 0.8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          (_bill!.documentType == 'civic' || widget.listType == 'civic')
+                              ? Icons.history_edu 
+                              : Icons.gavel,
+                          size: (_bill!.documentType == 'civic' || widget.listType == 'civic') ? 62.0 : 48.0,
+                          color: Colors.grey[400],
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        activeService.translateStatus(context, _bill!.status),
-                        style: const TextStyle(
-                          fontSize: 26,
-                          color: Colors.black87,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: -0.5,
-                          decoration: TextDecoration.underline,
-                          decorationColor: Colors.black87,
-                          height: 1.0,
+                        const SizedBox(width: 16),
+                        Flexible(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                l10n.statusLabel,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[500],
+                                  height: 1.0,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                activeService.translateStatus(context, _bill!.status),
+                                softWrap: true,
+                                style: const TextStyle(
+                                  fontSize: 26,
+                                  color: Colors.black87,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: -0.5,
+                                  decoration: TextDecoration.underline,
+                                  decorationColor: Colors.black87,
+                                  height: 1.15,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
+                  ),
+                  
+                  // PRAWA STRONA (Balans)
+                  const Expanded(
+                    child: SizedBox.shrink(),
                   ),
                 ],
-              ),
-              const Expanded(
-                child: SizedBox.shrink(),
-              ),
-            ],
+              );
+            },
           );
         }),
         const SizedBox(height: 24),

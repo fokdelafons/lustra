@@ -16,6 +16,10 @@ import '../screens/home/terms_screen.dart';
 import '../screens/home/tech_screen.dart';
 import '../screens/home/support_project_screen.dart';
 import '../screens/home/get_involved_screen.dart';
+import '../screens/home/about_screen.dart';
+import '../screens/home/blueprint_screen.dart';
+import '../screens/home/civic_audit_screen.dart';
+import '../screens/home/curated_lists_screen.dart';
 import '../screens/mp_details_screen.dart';
 import '../screens/legislation_details_screen.dart';
 import '../screens/civic_project_rules.dart';
@@ -55,7 +59,8 @@ final GoRouter router = GoRouter(
           builder: (context, state) => const InfoScreen(),
           routes: [
             GoRoute(path: 'terms', builder: (context, state) => const TermsScreen()),
-            GoRoute(path: 'privacy', builder: (context, state) => const TermsScreen()),
+            GoRoute(path: 'privacy-policy', builder: (context, state) => const TermsScreen()),
+            GoRoute(path: 'governance', builder: (context, state) => const AboutGovernanceScreen()),
             GoRoute(path: 'tech', builder: (context, state) => const TechStackScreen()),
           ],
         ),
@@ -70,6 +75,11 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: '/future',
           builder: (context, state) => const FutureFeaturesScreen(),
+          routes: [
+            GoRoute(path: 'blueprint', builder: (context, state) => const BlueprintScreen()),
+            GoRoute(path: 'audit', builder: (context, state) => const CivicAuditScreen()),
+            GoRoute(path: 'watchlists', builder: (context, state) => const CuratedListsScreen()),
+          ],
         ),
       ],
     ),
@@ -267,7 +277,10 @@ class RouteContextGuard extends StatelessWidget {
         termMatch = true; 
       } else {
         parsedTerm = int.tryParse(targetTerm!);
-        if (sourceMatch && parsedTerm != null && pManager.currentTerm != parsedTerm) {
+        if (parsedTerm == null) {
+          termMatch = false;
+          parsedTerm = pManager.currentTerm;
+        } else if (sourceMatch && pManager.currentTerm != parsedTerm) {
           termMatch = false;
         }
       }

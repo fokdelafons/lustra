@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:developer' as developer;
 
+//Only optimistic voting logic. Refactor social polls widget and transfer logic here in a future.
+
 class VotingService {
   static const String _optimisticCountersPrefix = 'optimistic_poll_counters_';
   static const String _optimisticTimestampPrefix = 'optimistic_poll_timestamp_';

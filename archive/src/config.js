@@ -25,37 +25,55 @@ const INSTITUTION_LABELS = {
         it: 'Congresso USA', nl: 'Amerikaans Congres', pt: 'Congresso dos EUA' 
     },
     'sejm': { 
-        en: 'Sejm', pl: 'Sejm RP', de: 'Sejm', /* ... */ 
+        en: 'Sejm', pl: 'Sejm RP', de: 'Sejm', fr: 'Diète', es: 'Dieta', it: 'Dieta', nl: 'Sejm', pt: 'Dieta'
     }
 };
+
+const TARGET_INSTITUTION = process.env.TARGET_INSTITUTION || 'us-congress';
+
+const PREFIX_MAP = {
+    'us-congress': 'us',
+    'sejm': 'pl',
+    'bundestag': 'de',
+    'eu-parliament': 'eu'
+};
+const DB_PREFIX = PREFIX_MAP[TARGET_INSTITUTION] || 'us';
+
+const DEFAULT_TERMS_MAP = {
+    'us-congress': ['117', '118', '119', 'civic'],
+    'sejm': ['10', 'civic']
+};
+
+const ENV_TERMS = process.env.ALLOWED_TERMS ? process.env.ALLOWED_TERMS.split(',') : DEFAULT_TERMS_MAP[TARGET_INSTITUTION];
 
 module.exports = {
     PROJECT_ID: process.env.PROJECT_ID,
     BUCKET_NAME: process.env.BUCKET_NAME || 'lustra-web-prod',
     
+    TARGET_INSTITUTION: TARGET_INSTITUTION,
+
     FIRESTORE: {
-        COLLECTION: 'us_legislations', 
-        CIVIC_COLLECTION: 'us_civic'
+        COLLECTION: `${DB_PREFIX}_legislations`, 
+        CIVIC_COLLECTION: `${DB_PREFIX}_civic`
     },
 
     LANGUAGES: ['pl', 'en', 'de', 'fr', 'es', 'it', 'nl', 'pt'],
     
     // --- SEO CONTROL TOWER ---
     SITEMAP_POLICY: {
-        allowedTerms: ['117', '118', '119', 'civic'], 
+        allowedTerms: ENV_TERMS, 
         allowedLanguages: ['en', 'de', 'fr', 'es', 'it', 'nl', 'pt', 'pl'] 
     },
 
-    // URL: /{lang}/us-congress/{term}/legislations/{id}
     URL_PREFIX: {
-        institution: 'us-congress',
+        institution: TARGET_INSTITUTION,
         type: 'legislations'
     },
 
     PATHS: {
-        CATALOG: 'meta/catalog-us.json',
-        SITEMAPS_DIR: 'sitemaps/',
-        SITEMAP_INDEX: 'sitemap.xml'
+        CATALOG: `meta/catalog-${TARGET_INSTITUTION}.json`,
+        SITEMAPS_DIR: `sitemaps/${TARGET_INSTITUTION}/`,
+        SITEMAP_INDEX: `sitemaps/sitemap-${TARGET_INSTITUTION}.xml`
     },
 
     LABELS: {

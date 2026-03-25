@@ -161,7 +161,7 @@ class ShareableImage extends StatelessWidget {
         children: [
           Expanded(
             child: Padding(
-              padding: EdgeInsets.fromLTRB(outerPadding, outerPadding, outerPadding, 0),
+              padding: EdgeInsets.fromLTRB(outerPadding, outerPadding, outerPadding, outerPadding),
               child: Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -193,6 +193,15 @@ class ShareableImage extends StatelessWidget {
                               style: TextStyle(fontSize: isSquare ? 28 : 36, fontWeight: FontWeight.bold, color: Colors.grey[700]),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          SvgPicture.asset(
+                            'assets/logo_solo.svg',
+                            height: isSquare ? 36 : 48,
+                            colorFilter: ColorFilter.mode(
+                              const Color(0xFF005A9C).withAlpha(128),
+                              BlendMode.srcIn,
                             ),
                           ),
                         ],
@@ -258,7 +267,6 @@ class ShareableImage extends StatelessWidget {
               ),
             ),
           ),
-          _buildBrandingFooter(isSquare: isSquare),
         ],
       ),
     );
@@ -330,7 +338,20 @@ final attendancePercentage = deputy!.attendancePercentage ?? 0.0;
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(fullName, style: TextStyle(fontSize: isSquare ? 60 : 60, fontWeight: FontWeight.bold), maxLines: 2, overflow: TextOverflow.ellipsis),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(fullName, style: TextStyle(fontSize: isSquare ? 60 : 60, fontWeight: FontWeight.bold), maxLines: 2, overflow: TextOverflow.ellipsis),
+                        ),
+                        const SizedBox(width: 16),
+                        SvgPicture.asset(
+                          'assets/logo_solo.svg',
+                          height: isSquare ? 48 : 60,
+                          colorFilter: const ColorFilter.mode(Color(0xFF005A9C), BlendMode.srcIn),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 14),
                     _buildParliamentInfo(parliamentName, flagAssetPath, isSquare),
                     _buildDeputyRichTextInfo(clubInfo, deputy!.parliamentaryHistory, isSquare),
@@ -460,7 +481,6 @@ final attendancePercentage = deputy!.attendancePercentage ?? 0.0;
             useDeputyStyle: true,
           ),
         ),
-        _buildBrandingFooter(isSquare: isSquare),
       ],
     );
   }
@@ -586,41 +606,6 @@ Widget _buildParliamentInfo(String parliamentName, String flagAssetPath, bool is
   );
 }
 
-  Widget _buildBrandingFooter({required bool isSquare}) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.only(
-        top: isSquare ? 24.0 : 32.0,
-        bottom: isSquare ? 32.0 : 40.0,
-        left: isSquare ? 30.0 : 50.0,
-        right: isSquare ? 30.0 : 50.0,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SvgPicture.asset(
-            'assets/logo_full.svg',
-            height: isSquare ? 24 : 28, 
-            colorFilter: const ColorFilter.mode(
-              Color(0xFF005A9C),
-              BlendMode.srcIn,
-            ),
-          ),
-          const SizedBox(width: 12.0), 
-          Text(
-            l10n.appMotto,
-            style: TextStyle(
-              fontSize: isSquare ? 18 : 22,
-              color: Colors.grey[800],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
 // NEW FOOTER ARCHITECTURE
   Widget _buildLegislationFooter({
     required BuildContext context,
@@ -666,40 +651,47 @@ Widget _buildParliamentInfo(String parliamentName, String flagAssetPath, bool is
     final double labelSize = isSquare ? 20 : 28;
     final double statusSize = isSquare ? 36 : 48;
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Icon(Icons.gavel, size: iconSize, color: Colors.grey[400]),
-        const SizedBox(width: 16),
-        Flexible(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                l10n.statusLabel,
-                style: TextStyle(fontSize: labelSize, color: Colors.grey[500], height: 1.0),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                status,
-                style: TextStyle(
-                  fontSize: statusSize,
-                  color: Colors.black87,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: -0.5,
-                  decoration: TextDecoration.underline,
-                  decorationColor: Colors.black87,
-                  height: 1.1,
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        // Tarcza: Chronimy wariant Column przed wymuszeniem nieskończonej szerokości
+        maxWidth: isSquare ? double.infinity : size.width * 0.85,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(Icons.gavel, size: iconSize, color: Colors.grey[400]),
+          const SizedBox(width: 16),
+          Flexible( // Tarcza: Teraz to zadziała, bo ConstrainedBox zapiął pasy
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  l10n.statusLabel,
+                  style: TextStyle(fontSize: labelSize, color: Colors.grey[500], height: 1.0),
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+                const SizedBox(height: 8),
+                Text(
+                  status,
+                  softWrap: true,
+                  style: TextStyle(
+                    fontSize: statusSize,
+                    color: Colors.black87,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: -0.5,
+                    decoration: TextDecoration.underline,
+                    decorationColor: Colors.black87,
+                    height: 1.15, // Tarcza: Zwiększono dystans dla podkreślenia
+                  ),
+                  maxLines: 3, // Tarcza: Zwiększono margines błędu dla długich statusów
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

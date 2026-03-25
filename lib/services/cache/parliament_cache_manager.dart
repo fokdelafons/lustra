@@ -152,6 +152,21 @@ Future<HomeScreenData?> getHomeScreenData(String lang, int term, {bool ignoreTim
      await _storage.save(key, data);
   }
 
+  // --- INTERACTION SYNC (CROSS-TAB / BACKGROUND) ---
+  
+  /// Saves timestamp of last interaction mutation with User ID
+  Future<void> markInteractionChanged(String userId) async {
+    await _storage.save('${prefix}_interaction_sync', {
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+      'userId': userId,
+    });
+  }
+
+  /// Retrieves interaction sync data map
+  Future<Map<String, dynamic>?> getInteractionSyncData() async {
+    return await _storage.get('${prefix}_interaction_sync');
+  }
+
   // --- TRACKED BILLS (USER PRIVATE LIST) ---
   Future<Map<String, dynamic>?> getTrackedItems(String lang) async {
      final key = '${prefix}_cached_tracked_items_lang_$lang';
