@@ -71,16 +71,25 @@ class AppLocalizationsNl extends AppLocalizations {
       'Geen gegevens beschikbaar voor de geselecteerde zittingsperiode.';
 
   @override
-  String get sectionPopularVotes => 'Populaire stemmingen';
+  String get sectionPopularVotes => 'Wetgevende stemmingen';
 
   @override
-  String get sectionUpcoming => 'Binnenkort';
+  String get sectionUpcoming => 'Geplande debatten';
 
   @override
-  String get sectionLegislationInProcess => 'Wetgeving in behandeling';
+  String get sectionLegislationInProcess => 'In behandeling';
 
   @override
-  String get sectionMpProfiles => 'Profielen van afgevaardigden';
+  String get civicProjectsSectionTitle => 'Burgerinitiatieven';
+
+  @override
+  String get sectionMpProfiles => 'Populaire politici';
+
+  @override
+  String get votingSourceTooltip => 'Bekijk de stembron';
+
+  @override
+  String get legislationSponsorLabel => 'Sponsor';
 
   @override
   String get buttonBrowseVotes => 'Stemmingenoverzicht';
@@ -181,7 +190,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get votingAbstainShort => 'Onth.';
 
   @override
-  String get citizenPollTitle => 'Burgerpeiling';
+  String get citizenPollTitle => 'Burgerwil';
 
   @override
   String get pollTemporarilyUnavailable =>
@@ -195,7 +204,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get pollNoForAgainstVotes => 'Geen voor-/tegenstemmen';
 
   @override
-  String get pollNoVotesCast => 'Geen stemmen uitgebracht';
+  String get pollNoVotesCast => 'Wees de eerste die stemt.';
 
   @override
   String pollTotalVotes(int count) {
@@ -221,32 +230,32 @@ class AppLocalizationsNl extends AppLocalizations {
   String get infoScreenTitle => 'Informatie';
 
   @override
-  String get infoTitle1 => 'Politiek scheiden van de media';
+  String get infoTitle1 => 'Burgers Boven Politiek';
 
   @override
   String get infoParagraph1 =>
-      'Lustra is een applicatie om de politiek te volgen met behulp van officiële gegevens. Met AI-technologie worden samenvattingen van wetsvoorstellen en stemresultaten beknopt, duidelijk en onpartijdig gepresenteerd. Het volgen van de politiek kost geen moeite of tijd meer - slechts een paar klikken.';
+      'Media informeren niet alleen – ze cureren de realiteit. Naar schatting 95% van de wetgeving verdwijnt in een \"zwart gat\" omdat het te complex is om advertenties te verkopen. Lustra omzeilt de tussenpersonen. Wij verwerken bureaucratische taal tot toegankelijke feiten, zodat je ziet wat de overheid werkelijk besluit, niet alleen waarover ze willen praten.';
 
   @override
-  String get infoTitle2 => 'Gemeenschappelijke belangen boven verdeeldheid';
+  String get infoTitle2 => 'Feiten, Geen Marketing';
 
   @override
   String get infoParagraph2 =>
-      'Als samenleving delen we gemeenschappelijke doelen zoals vrijheid, veiligheid en welvaart. Verschillen in opvattingen zijn een natuurlijk onderdeel van de democratie - ze vormen het debat en maken verschillende perspectieven mogelijk. Met toegang tot betrouwbare informatie kunnen we beter geïnformeerde beslissingen nemen en deelnemen aan het openbare leven op basis van feiten, niet op emoties of mediaverhalen.';
+      'Politiek is vandaag de dag 80% marketing en 20% wetgeving. Wij scheiden die twee. We passen een proces van \"context-sterilisatie\" toe: we verwijderen emotionele taal en partijdige spin, zodat alleen de juridische feiten overblijven. Dit is geen \"ander standpunt\". Het is ruisonderdrukking, zodat jij je eigen mening kunt vormen bij de bron.';
 
   @override
-  String get infoTitle3 => 'Daden, geen woorden';
+  String get infoTitle3 => 'Macht Zonder Tussenpersonen';
 
   @override
   String get infoParagraph3 =>
-      'U hoeft niet langer op verkiezingsbeloften te vertrouwen - u kunt de stemgeschiedenis van individuele parlementsleden bekijken en hun beslissingen analyseren. Het profiel van elke politicus bevat een puntsgewijze lijst, wat een snelle en onafhankelijke beoordeling van hun staat van dienst mogelijk maakt. De volledige werkgeschiedenis wordt uitgebreid naarmate de applicatie zich ontwikkelt.';
+      'Grote platforms optimaliseren content voor jouw woede, omdat dat je aan het scrollen houdt. Wij optimaliseren voor jouw inzicht. De hiërarchie van onderwerpen in de app hangt volledig af van de stemmen van de community. Jullie bepalen wat belangrijk is en nemen de macht terug van uitgevers en lobbyisten.';
 
   @override
-  String get infoTitle4 => 'Mensen, geen partijen';
+  String get infoTitle4 => 'Architecten van Verandering';
 
   @override
   String get infoParagraph4 =>
-      'Parlementsleden moeten de belangen van hun kiezers in overweging nemen en niet alleen stemmen volgens de partijlijn. Het partijsysteem verdeelt de samenleving, maar alles kan met kleine stapjes worden veranderd. De eerste is het publieke bewustzijn. Gebruik de app, praat, deel stemmingen, neem deel aan peilingen en blijf op de hoogte. Politiek beïnvloedt bijna elk aspect van ons leven, dus er is geen reden waarom enkelen over alles zouden moeten beslissen.';
+      'Democratie is geen kijksport. We introduceren een mechanisme waarbij burgerinitiatieven op gelijke voet worden getoond met wetsvoorstellen van de overheid. We bieden de infrastructuur om van passieve toeschouwer naar Architect van Verandering te gaan – om echte steun op te bouwen voor zaken die ertoe doen. We tillen de democratie naar een nieuw niveau.';
 
   @override
   String get linkHowTechnologyWorks => 'Hoe werkt de technologie?';
@@ -255,53 +264,45 @@ class AppLocalizationsNl extends AppLocalizations {
   String get linkTermsAndPrivacy => 'Voorwaarden en Privacybeleid';
 
   @override
-  String get supportScreenTitle => 'Ondersteun het project';
+  String get supportScreenTitle => 'Publieke Infrastructuur';
 
   @override
   String get supportParagraph1 =>
-      'Lustra is mijn persoonlijke pro bono project. De applicatie zal altijd gratis zijn, zonder betaalde functies, extensies, advertenties of beperkingen. Ik geloof dat iedereen onbeperkte toegang moet hebben tot toegankelijke informatie - zonder opiniërende commentaren of filters. Als u het eens bent met de missie, moedig ik u aan om deze te ondersteunen met een donatie van elk bedrag. Elke bijdrage, hoe klein ook, zal me helpen de app te onderhouden en verder te ontwikkelen.';
+      'Lustra is een digitale openbare voorziening. Maar vrijheid heeft een prijs. We hebben kapitaal afgewezen om 100% onpartijdigheid te garanderen, omdat we geloven dat dit de enige weg naar verandering is. Het onderhoud van infrastructuur en servers hangt volledig af van vrijwillige bijdragen. Het equivalent van \$10 financiert de toegang tot het platform voor enkele duizenden mensen per maand. Jouw steun garandeert de continuïteit van de missie.';
 
   @override
-  String get buttonSupportFinancially => 'Financieel ondersteunen';
+  String get buttonSupportFinancially => 'Steun ons';
 
   @override
-  String get supportThankYou =>
-      'Bedankt voor uw vertrouwen en elke vorm van betrokkenheid';
+  String get supportThankYou => 'Dank je. Je houdt het systeem in leven.';
 
   @override
   String get creatorName => 'Jacek Michałowski';
 
   @override
-  String get creatorTitle => 'Maker van de applicatie';
+  String get creatorTitle => 'Oprichter';
 
   @override
-  String get leaderboardTitle => 'Topdonateurs (Afgelopen maand)';
+  String get futureFeaturesScreenTitle => 'Community Roadmap';
 
   @override
-  String get futureFeaturesScreenTitle => 'Toekomstige functies';
+  String get futureFeaturesHeader => 'Jij Bepaalt de Richting';
 
   @override
-  String get futureFeaturesHeader => 'Geplande functionaliteiten';
+  String get futureFeatureSenate => 'Senatoren Integratie';
 
   @override
-  String get futureFeatureReferendum => 'Een referendum uitschrijven';
+  String get futureFeatureCitizenInitiative => 'Burgerreferenda';
 
   @override
-  String get futureFeatureSenate => 'Senaat en senatoren';
+  String get futureFeaturesDescription =>
+      'Dit is geen gesloten verlanglijst. Lustra is infrastructuur in handen van burgers, dus we hebben allemaal invloed op de ontwikkeling. Sluit je aan bij de Civic Evolution community op Reddit, dien ideeën in en stem over de volgende functies. Laten we samen het volgende hoofdstuk van de democratie schrijven!';
 
   @override
-  String get futureFeatureCitizenInitiative =>
-      'Burgerinitiatief - wetsvoorstellen';
+  String get futureFeaturesVoteButton => 'Stem op Roadmap';
 
   @override
-  String get futureFeatureIndependentCandidates =>
-      'Onafhankelijke kandidaten voor het parlement';
-
-  @override
-  String get futureFeaturePetitions => 'Petities aan het parlement';
-
-  @override
-  String get comingSoon => 'Binnenkort';
+  String get comingSoon => 'Voorstel';
 
   @override
   String legislationScreenTitle(String parliamentName) {
@@ -309,7 +310,7 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
-  String get refreshDataTooltip => 'Gegevens vernieuwen';
+  String get refreshDataTooltip => 'Cache vernieuwen';
 
   @override
   String get advancedSearchHint => 'Geavanceerd zoeken...';
@@ -436,6 +437,9 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get categoryEconomy => 'Economie';
+
+  @override
+  String get lustraClubLabel => 'Lustra Club';
 
   @override
   String get categoryOther => 'Overig';
@@ -729,16 +733,16 @@ class AppLocalizationsNl extends AppLocalizations {
   String get dataSourceLabel => 'Gegevensbron: Sejm RP API';
 
   @override
-  String get mandateStatusActive => 'Mandaat van afgevaardigde: actief';
+  String get mandateStatusActive => 'Mandaat: actief';
 
   @override
-  String get mandateStatusFulfilled => 'Mandaat van afgevaardigde: vervuld';
+  String get mandateStatusFulfilled => 'Mandaat: vervuld';
 
   @override
-  String get mandateStatusCancelled => 'Mandaat van afgevaardigde: geannuleerd';
+  String get mandateStatusCancelled => 'Mandaat: geannuleerd';
 
   @override
-  String get mandateStatusInactive => 'Mandaat van afgevaardigde: inactief';
+  String get mandateStatusInactive => 'Mandaat: inactief';
 
   @override
   String get followingAddedSnackbar => 'Toegevoegd aan gevolgd';
@@ -848,7 +852,7 @@ class AppLocalizationsNl extends AppLocalizations {
   }
 
   @override
-  String get pollResultNoVotes => 'geen stemmen';
+  String get pollResultNoVotes => 'Wees de eerste die stemt.';
 
   @override
   String get pollResultOverwhelmingMajority => 'overweldigende meerderheid';
@@ -905,6 +909,9 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get statusToPresident => 'Doorgestuurd naar de President';
+
+  @override
+  String get votingResultsUSMotionToReferTitle => 'RESULTATEN: VERWIJZING';
 
   @override
   String get statusVetoPresident => 'VETO van de President';
@@ -1172,7 +1179,10 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get morePointsInApp =>
-      '...volledige informatie is beschikbaar in de Lustra-app';
+      '...volledige informatie is beschikbaar in Lustra';
+
+  @override
+  String get civicRulesAction => 'Maak je project aan';
 
   @override
   String get pollVotingViaApp => 'Stemmen beschikbaar in de app!';
@@ -1293,74 +1303,161 @@ class AppLocalizationsNl extends AppLocalizations {
   String get dialogDelete => 'Verwijderen';
 
   @override
+  String get termsAndPrivacyTitle => 'Grondwet & Privacy';
+
+  @override
+  String get termsOfServiceTab => 'Regels';
+
+  @override
+  String get privacyPolicyTab => 'Privacybeleid';
+
+  @override
   String get termsOfServiceContent =>
-      '<b>Gebruiksvoorwaarden van de \"Lustra\" App</b>\n\nLaatst bijgewerkt: 10 augustus 2025\n\nHoi! Hier de maker van de Lustra app.\nIk ben blij dat je er bent. Ik heb Lustra gemaakt omdat ik geloof dat iedereen recht heeft op eenvoudige en transparante toegang tot informatie over hoe de wetten die ons leven beïnvloeden, tot stand komen.\n\nDit document bevat de gebruiksvoorwaarden – een soort overeenkomst tussen jou en mij. Ik heb het in eenvoudige taal geschreven, zodat je precies weet wat de regels van de app zijn. Lees het alsjeblieft rustig door. Door Lustra te gebruiken, bevestig je dat je deze regels accepteert.\n\n<b>1. Woordenlijst, oftewel over wie en wat we het hebben</b>\n•\t<b>Ik, mijn, mij</b> – dat ben ik, Jacek, de maker van de app, handelend onder de naam van het bedrijf FO&WO VENTURES SP. Z O.O. gevestigd in Wrocław.\n•\t<b>Jij, jouw, je</b> – dat ben jij, de persoon die de app gebruikt.\n•\t<b>App</b> of <b>Lustra</b> – de mobiele applicatie \"Lustra\" die je nu gebruikt.\n•\t<b>Account</b> – je persoonlijke account in de app, die je kunt aanmaken om extra functies te gebruiken.\n•\t<b>Voorwaarden</b> – dit document.\n\n<b>2. Waar gaat Lustra over? (Hoofdprincipes)</b>\n•\tLustra is een gratis app die tot doel heeft je toegankelijke informatie te verschaffen over wetgevingsprocessen in geselecteerde parlementen. Je vindt hier onder andere samenvattingen van wetsvoorstellen, stemresultaten en gegevens over parlementsleden.\n•\tJe moet minstens 16 jaar oud zijn om de app te gebruiken. Als je een Account aanmaakt, bevestig je dat je aan deze voorwaarde voldoet.\n•\tVoor het gebruik van de basisinformatiefuncties is het niet nodig om een Account aan te maken.\n\n<b>3. Je Account in de app</b>\n•\tJe kunt een Account aanmaken met je e-mailadres. Hiermee kun je extra functies gebruiken, zoals stemmen in peilingen of gepersonaliseerde meldingen ontvangen.\n•\tOnthoud alsjeblieft dat je maar één Account kunt hebben.\n•\tJe bent verantwoordelijk voor het geheimhouden van je wachtwoord en voor alles wat er op je Account gebeurt.\n\n<b>4. Hoe mag je de inhoud gebruiken? (Licentie)</b>\n•\tAlle brongegevens (bijv. volledige wetteksten, stemresultaten, gegevens van parlementsleden) zijn afkomstig van officiële, openbare bronnen en zijn openbare informatie.\n•\tDe content die ik creëer met mijn eigen systeem en AI-technologie (d.w.z. samenvattingen, vereenvoudigde titels, kernpunten) stel ik je vrij ter beschikking voor informatieve, educatieve en privédoeleinden. Je mag het lezen en delen als schermafbeeldingen.\n•\tIk vraag je met klem – kopieer deze gegevens niet machinaal (niet scrapen). Het creëren en onderhouden van dit systeem kost me tijd en geld. Om dit project te beschermen, verbieden de Voorwaarden je daarom om:\n\t\to\tAutomatisch een eigen database aan te leggen op basis van de in de app gegenereerde content.\n\t\to\tDe content van de app voor commerciële doeleinden te gebruiken.\n\t\to\tPogingen te doen om de beveiliging te doorbreken, de app te decompileren of de werking ervan te verstoren.\n•\tHeb je een idee om de data van Lustra op een interessante manier te gebruiken? Ik sta open voor samenwerking! Schrijf me op jacek@lustra.dev – ik praat er graag over.\n\n<b>5. Peilingen en betrouwbaarheid van gegevens</b>\n•\tEen van de functies van de app zijn peilingen waarin je je steun voor een bepaald wetsvoorstel kunt uitspreken. Om de resultaten van deze peilingen zo betrouwbaar mogelijk te maken, selecteer je in de instellingen het parlement van het land waarvan je staatsburger bent (indien beschikbaar in de lijst).\n\n<b>6. Mijn aansprakelijkheid (of liever het gebrek daaraan)</b>\n•\tIk lever de app \"zoals hij is\" (Engels: \"as is\"). Ik doe mijn uiterste best om de gegevens actueel en correct te houden, but ze zijn afkomstig van externe, overheids-API\'s, waarin fouten kunnen voorkomen. Daarom kan ik niet verantwoordelijk worden gehouden voor eventuele onnauwkeurigheden in de brongegevens.\n•\tLustra is een pro bono project dat ik met eigen middelen onderhoud. Ik zal mijn best doen om het ononderbroken te laten werken, maar ik moet een voorbehoud maken voor technische onderbrekingen. Ik behoud me ook het recht voor om de dienst te beëindigen, bijvoorbeeld als ik geen middelen meer heb om het te onderhouden.\n•\tDe inhoud in de app, met name die gegenereerd door AI, is voor informatieve en educatieve doeleinden. Het vormt geen juridisch advies.\n\n<b>7. Lustra Support Club</b>\n•\tJe kunt lid worden van de \"Lustra Support Club\" door afzonderlijke, vrijwillige toestemming te geven. Dit betekent dat ik je e-mails kan sturen over de ontwikkeling van de app, nieuwe functies, en ook om steun kan vragen in discussies over de toekomst van het project of om financiële hulp indien nodig. Meer details hierover vind je in het Privacybeleid.\n\n<b>8. Beëindiging van onze overeenkomst</b>\n•\tJij kunt deze op elk moment beëindigen. Gebruik gewoon de optie \"Account verwijderen\" in de instellingen van de app. Dit leidt tot de onomkeerbare verwijdering van je Account en de bijbehorende gegevens.\n•\tIk kan je Account blokkeren of verwijderen als je deze Voorwaarden op flagrante wijze schendt, bijvoorbeeld door te proberen de werking van de app te schaden.\n\n<b>9. Wijzigingen in de Voorwaarden</b>\n•\tDe wereld verandert, en de app dus ook. Ik behoud me het recht voor om deze Voorwaarden te wijzigen. Ik zal je van elke belangrijke wijziging van tevoren op de hoogte stellen, bijvoorbeeld via een bericht in de app. Voortgezet gebruik van Lustra na de invoering van de wijzigingen betekent acceptatie ervan.\n\n<b>10. Contact en slotbepalingen</b>\n•\tAls je vragen hebt, schrijf dan gerust naar: jacek@lustra.dev.\n•\tOp alle zaken die niet in deze Voorwaarden zijn geregeld, is het Poolse recht van toepassing.\n\nBedankt dat je er bent en helpt een transparante staat te creëren!';
-
-  @override
-  String get termsAndPrivacyTitle => 'Voorwaarden & Privacy';
-
-  @override
-  String get termsOfServiceTab => 'Voorwaarden';
-
-  @override
-  String get privacyPolicyTab => 'Privacy';
+      'LUSTRA GEMEENSCHAPSREGELS\nDatum: 6 december 2025\n\n1. OPERATOR EN MISSIE\nLustra is digitale publieke infrastructuur. De juridische operator (Bewaarder) is FO&WO VENTURES SP. Z O.O. (LLC). Het bedrijf fungeert als incubator: geen dividenden, geen externe investeerders, herinvestering in infrastructuur.\n\n2. CODE EN LICENTIE (SOURCE AVAILABLE)\nCode is gemeenschappelijk goed.\n• Model: PolyForm Noncommercial.\n• Toegestaan: Educatief, onderzoek, non-profit.\n• Verboden: Bedrijven mogen niet profiteren zonder toestemming.\n\n3. BESTUURSROADMAP\nDoel: decentralisatie.\n• Huidig: Oprichter (Jacek) is Hoofdarchitect.\n• Binnenkort: Burgerraad gekozen door gebruikers.\n• Doel: Mechanismen voor gemeenschapscontrole bij verraad van de missie.\n\n4. BURGERPROJECTEN\nWetsincubator.\n• Procedure: Indiening via formulier, formele verificatie.\n• CC0 Licentie: Je geeft het project vrij in het Publiek Domein.\n• Vrijheid van meningsuiting: We beoordelen geen meningen. We weigeren alleen strafrechtelijke schendingen.\n• Verificatie: Je moet burger zijn van het betreffende land.\n\n5. AI EN BRONNEN\n• AI Rol: Helpt navigeren maar kan fouten maken.\n• Bron: De uiteindelijke autoriteit is altijd de originele PDF.\n\n6. VEILIGHEID\n• Leeftijd: Gebruikers 16+.\n• Verboden: Aanvallen op infrastructuur en commerciële scraping.\n\n7. SLOTBEPALINGEN\nPools recht is van toepassing.';
 
   @override
   String get privacyPolicyContent =>
-      '<b>Privacybeleid van de \"Lustra\" App</b>\n\nLaatst bijgewerkt: 10 augustus 2025\n\nDit document is het Privacybeleid. Ik weet dat dergelijke teksten lang en ingewikkeld kunnen zijn, daarom heb ik mijn best gedaan om het eenvoudig te schrijven.\nJouw privacy en vertrouwen zijn mijn absolute prioriteit. In dit beleid leg ik uit welke gegevens ik verzamel, waarom ik dat doe en hoe ik ze bescherm.\n\n<b>1. Wie zorgt voor jouw gegevens? (Verwerkingsverantwoordelijke)</b>\nDe verwerkingsverantwoordelijke voor jouw persoonsgegevens ben ik, Jacek, handelend onder de firma FO&WO VENTURES SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ (ul. Wapienna 13/7, 50-518 Wrocław, NIP: 6343002817).\nAls je vragen hebt over je gegevens, schrijf me dan rechtstreeks op: jacek@lustra.dev.\n\n<b>2. Welke gegevens verzamel ik en waarom?</b>\nIk verzamel alleen gegevens die nodig zijn voor de werking van de app of waarvoor je afzonderlijke, vrijwillige toestemming geeft. Hier is een gedetailleerde lijst:\n•\t<b>Wanneer je een Account aanmaakt:</b>\n\to\t<b>Je e-mailadres:</b> Ik heb dit nodig om je Account aan te maken en veilig te beheren, je te laten inloggen en je wachtwoord te laten resetten als je het vergeet.\n\to\t<b>Unieke Gebruikers-ID (UID):</b> Dit is een willekeurige tekenreeks die automatisch wordt toegewezen door het Firebase-systeem, waardoor ik je gegevens veilig kan koppelen aan je Account.\n•\t<b>Wanneer je de functies van de app gebruikt (als ingelogde gebruiker):</b>\n\to\t<b>Je stemmen in peilingen (\"steun\" / \"tegen\"):</b> Ik sla deze op om geaggregeerde, volledig anonieme statistieken te maken over de steun voor individuele wetten, die je in de app ziet. Je individuele stem wordt nooit ergens openbaar weergegeven.\n\to\t<b>Je lijst met gevolgde wetgeving:</b> Ik bewaar deze zodat je er gemakkelijk toegang toe hebt en ik je (in de toekomst) meldingen kan sturen over hun voortgang.\n\to\t<b>Je gekozen parlement:</b> Ik sla deze informatie op zodat je kunt deelnemen aan de relevante peilingen en (in de toekomst) meldingen kunt ontvangen voor het juiste land.\n•\t<b>Wanneer je lid wordt van de Lustra Support Club (volledig vrijwillig):</b>\n\to\t<b>Informatie over je toestemming (waar/onwaar):</b> Ik sla dit op om te weten of je extra berichten van mij wilt ontvangen. Ik schrijf meer over de Club in sectie 5.\n•\t<b>Wanneer je een bug meldt:</b>\n\to\tAls je besluit een foutrapport over gegevens te sturen, sla ik de inhoud van je rapport op om het probleem te analyseren en op te lossen.\nWat ik <b>NIET</b> verzamel: Ik gebruik geen externe analysetools (zoals Google Analytics) om je activiteit in de app te volgen.\n\n<b>3. Aan wie vertrouw ik je gegevens toe? (Mijn technologiepartners)</b>\nOm Lustra te laten werken, maak ik gebruik van de diensten van vertrouwde technologiepartners aan wie ik de verwerking van sommige gegevens toevertrouw. Dit zijn:\n•\t<b>Google (als onderdeel van de Firebase-dienst):</b> Dit is de technologische ruggengraat van de hele app. Google levert mij de infrastructuur voor:\n\to\t<b>Authenticatie (Firebase Authentication):</b> Veilig inloggen en beheren van je Account.\n\to\t<b>Database (Cloud Firestore):</b> Opslag van gegevens die verband houden met je Account (bijv. stemmen in peilingen, lijst met gevolgde wetgeving).\n•\t<b>Google (als onderdeel van de Gemini AI-dienst):</b> Dit is de tool die ik gebruik om wetgevingsteksten te analyseren. Ik wil absoluut duidelijk zijn: ik stuur alleen openbaar beschikbare teksten van wetten en documenten naar de AI. Je persoonlijke gegevens (zoals e-mail of UID) worden daar nooit naartoe gestuurd.\nAlle gegevens worden opgeslagen op servers van Google binnen de Europese Economische Ruimte.\n\n<b>4. Hoe lang bewaar ik je gegevens?</b>\nKort en bondig: ik bewaar je gegevens zolang je een Account bij mij hebt. Als je besluit het te verwijderen, worden al je persoonsgegevens permanent gewist.\n\n<b>5. De Lustra Support Club – wat is dat?</b>\nDit is een speciale plek voor mensen die dichter bij het project willen staan. Deelname is volledig vrijwillig en vereist het aanvinken van een afzonderlijke toestemming. Als je lid wordt, ga je ermee akkoord dat ik je af en toe e-mails stuur over:\n•\tapp-ontwikkeling en geplande nieuwe functies,\n•\tspeciale evenementen, bijv. discussiepanels over de toekomst van Lustra,\n•\tandere, vergelijkbare missiegedreven projecten die ik in de toekomst zou kunnen opzetten,\n•\tverzoeken om financiële steun als het project in een moeilijke situatie terechtkomt.\nJe kunt je toestemming op elk moment intrekken in de instellingen van de app.\n\n<b>6. Jouw rechten – je hebt de volledige controle</b>\nDe AVG geeft je een reeks rechten, en ik wil dat je die gemakkelijk kunt uitoefenen. Je hebt het recht op:\n•\tToegang tot je gegevens: Weten welke gegevens ik over je bewaar.\n•\tRectificatie (correctie) van je gegevens.\n•\tWissing van je gegevens (recht om vergeten te worden): Dit kun je op elk moment doen via de optie \"Account verwijderen\" in de instellingen van de app.\n•\tBeperking van de verwerking van je gegevens.\n•\tGegevensoverdraagbaarheid.\n•\tBezwaar tegen de verwerking van je gegevens.\n•\tIntrekking van toestemming (bijv. voor lidmaatschap van de Lustra Support Club).\n•\tEen klacht indienen bij de Voorzitter van de Autoriteit voor de Bescherming van Persoonsgegevens (UODO) als je van mening bent dat ik je gegevens onrechtmatig verwerk.\nOm de meeste van deze rechten uit te oefenen, hoef je me alleen maar te schrijven op jacek@lustra.dev.\n\n<b>7. Beveiliging van je gegevens</b>\nIk neem beveiliging zeer serieus. Ik maak gebruik van de oplossingen van Google Firebase, die moderne beveiligingsnormen hanteren, inclusief gegevensversleuteling zowel tijdens de overdracht (SSL-protocol) als bij opslag op servers.\n\n<b>8. Gegevens van kinderen</b>\nZoals vermeld in de Gebruiksvoorwaarden, is de app bedoeld voor personen van 16 jaar en ouder. Ik verzamel of verwerk niet bewust gegevens van jongere personen.\n\n<b>9. Wijzigingen in dit beleid</b>\nIk kan dit beleid in de toekomst bijwerken. Ik zal je van belangrijke wijzigingen van tevoren informeren in de app.\n\nBedankt voor je vertrouwen.\nJacek';
+      'PRIVACYBELEID: MINIMALISATIE\nDatum: 6 december 2025\n\nWe handelen niet in jouw aandacht. Minimale verzameling.\n\n1. GEGEVENSBEHEERDER\nFO&WO VENTURES SP. Z O.O. Contact: jacek@lustra.dev\n\n2. WAT WE VERZAMELEN\n• Account (E-mail/UID): Nodig voor login.\n• Stemmen: Gekoppeld aan account tegen manipulatie (bots). Openbaar ALLEEN anonieme totalen.\n• Bewaartermijn: Stemgegevens bewaard gedurende zittingstermijn + 5 jaar (archief). Daarna geanonimiseerd.\n• Communicatie (Support Club): Met toestemming (instellingen) sturen we updates. Intrekken kan altijd.\n• Burgerprojecten: Inhoud is openbaar.\n\n3. WAT WE NIET DOEN\n• GEEN dataverkoop.\n• GEEN advertentie-tracking.\n• GEEN commerciële politieke profilering.\n\n4. INFRASTRUCTUUR & VEILIGHEID\n• Locatie: Google Cloud, Europe-West9 (Parijs).\n• Anti-Bot: Gebruik van Firebase App Check.\n• AI: Je privégegevens gaan NOOIT naar AI.\n\n5. KINDEREN\nDienst voor 16+. Geen gegevensverzameling van kinderen.\n\n6. VERWIJDERING\nKnop \"Account verwijderen\" in instellingen voor directe verwijdering.\n\n7. JOUW RECHTEN\nInzage, correctie, verwijdering, bezwaar. Contact: jacek@lustra.dev';
 
   @override
-  String get techPageTitle => 'Over technologie en onpartijdigheid';
+  String get techTitle => 'Lustra AI Protocol v1.1';
 
   @override
-  String get techPageIntro =>
-      'Achter elke vereenvoudigde titel en samenvatting van een wet schuilt een taalmodel. Hier wil ik u in alle transparantie uitleggen hoe het werkt en hoe ik ervoor zorg dat de informatie die u ontvangt altijd zuiver en onpartijdig is.';
+  String get techIntroTitle =>
+      '1. COMPLETE WERKMETHODOLOGIE (LUSTRA AI PROTOCOL)';
 
   @override
-  String get techPageWhyAiTitle => 'Waarom gebruik ik AI?';
+  String get techIntroBody =>
+      'Hieronder presenteren we de volledige pijplijn van AI-agenten die worden gebruikt voor het genereren van samenvattingen van juridische teksten en het detecteren van hallucinaties daarin. Het doel was om het \"wetgevende zwarte gat\" onschadelijk te maken en tegelijkertijd zoveel mogelijk objectiviteit te benaderen. We moeten echter benadrukken dat we niet geloven in totale neutraliteit. Elke datacompressie (samenvatting) is een vorm van keuze. In plaats van het \"monopolie op de waarheid\" van de media voor te wenden, hebben we één expliciete bias aangenomen – het \"burgerperspectief\" binnen context sterilization. Modellen worden geïnstrueerd om politiek theater te negeren en zich te concentreren op de portemonnee, vrijheden en plichten. Dit is een technische ontwerpbeslissing, geen politieke.';
 
   @override
-  String get techPageWhyAiBody =>
-      'Wetteksten en parlementaire documenten zijn geschreven in ingewikkeld juridisch jargon. Zelfs het lezen en begrijpen van een korte wet is een uitdaging, zelfs voor een jurist.\n\nMijn doel was om een tool te creëren die deze hermetische taal vertaalt \'van juridisch naar menselijk\'. Het handmatig analyseren van honderden documenten per dag zou voor één persoon onmogelijk zijn. Daarom heb ik AI ingeschakeld - als een krachtig hulpmiddel voor tekstanalyse en vereenvoudiging, waarmee u snel en in een toegankelijke vorm informatie krijgt.';
+  String get techDiagramTitle => '2. STROOMSCHEMA GENERALIZER-JUDGE-SURGEON';
 
   @override
-  String get techPageWhatForTitle => 'Waarvoor gebruik ik AI precies?';
+  String get techDiagramIntro =>
+      'Het systeem werkt in een verificatielus. We vertrouwen generatieve modellen niet – we vertrouwen controleprocessen en een iteratieve aanpak bij het uitbreiden van systemen.';
 
   @override
-  String get techPageWhatForBody =>
-      'Kunstmatige Intelligentie voert drie specifieke taken uit:\n  • Het vereenvoudigt officiële titels tot titels die direct zeggen waar het document over gaat.\n  • Het maakt korte samenvattingen van 2-3 zinnen die zich richten op de impact van de veranderingen op het dagelijks leven van burgers.\n  • Het haalt uit de wirwar van tekst een paar kernpunten, oftewel de belangrijkste veranderingen en oplossingen.\n\nAlle overige gegevens, zoals stemresultaten of informatie over parlementsleden, komen rechtstreeks van officiële, gouvernementele API\'s.';
+  String get techDiagramOutro =>
+      'In de toekomst zijn we van plan het systeem uit te breiden met extra rollen, zoals een onderzoeksjournalist of een analist voor juridische risico\'s.';
 
   @override
-  String get techPageBiasTitle =>
-      'Hoe waarborg ik onpartijdigheid? Instructie voor de AI';
+  String get techPromptsTitle => '3. VOLLEDIGE INSTRUCTIES VOOR AGENTEN';
 
   @override
-  String get techPageBiasBody =>
-      'Dit is het belangrijkste onderdeel. De AI voert specifieke opdrachten uit. Deze opdrachten (in de informatica \'prompt\' genoemd) zijn een soort zeer precieze instructie die de basis vormt voor de onpartijdigheid van de hele applicatie.\n\nDit zijn de belangrijkste principes die ik in mijn AI-systeem heb ingebouwd:\n  • <b>Rol van neutrale expert:</b> Ik geef de AI de opdracht om de rol aan te nemen van een apolitieke juridische expert, wiens enige doel het is om te analyseren en uit te leggen, niet om te oordelen of te becommentariëren.\n  • <b>Alleen feiten, geen meningen:</b> De instructie verbiedt de AI expliciet om eigen meningen te uiten, te waarderen en taal te gebruiken die zou kunnen suggereren of een bepaalde verandering \'goed\' of \'slecht\' is. Het moet zich uitsluitend op feiten richten.\n  • <b>Perspectief van de gewone burger:</b> In plaats van een wet te analyseren vanuit het perspectief van een jurist, heeft de AI de taak om de vraag te beantwoorden: \'Wat betekent deze verandering voor mij, een gewone burger? Hoe zal het mijn financiën, gezondheid, rechten en plichten beïnvloeden?\'.';
+  String get techPromptsIntro =>
+      'Hieronder staan de volledige prompts die de modellen ontvangen, samen met verklarende opmerkingen voor de lezer. Antwoorden worden direct in 8 talen geretourneerd voor volledige lokalisatie van Lustra, dus we hebben de hele JSON-antwoordstructuur weggelaten voor de leesbaarheid.';
 
   @override
-  String get techPagePromiseTitle =>
-      'Volledige, transparante instructie ter inzage';
+  String get techGeneralizerTitle => 'A) Generalizer';
 
   @override
-  String get techPagePromiseBody =>
-      'Geloof me niet op mijn woord. Hieronder vindt u de exacte inhoud van de instructie (prompt) die ik aan het AI-model (Google Gemini) doorgeef bij de analyse van elk document, waarbij ik ervoor zorg dat de creativiteitsparameters ook op 0 zijn ingesteld (zodat de AI niets verzint tijdens de analyse). Dit is het \'brein\' van de operatie.\n\n(Let op: Deze prompt zal in de loop van de tijd evolueren en worden verbeterd, zodat de kwaliteit van de samenvattingen steeds hoger wordt.)';
+  String get techGeneralizerBody =>
+      'Model: Gemini Flash (standaard) / Pro (voor <20k tokens)';
 
   @override
-  String techPagePromptCode(Object DOCUMENT_TEXT, Object country) {
-    return 'U bent een expert in het recht van $country die als taak heeft om wetsdocumenten, resoluties en andere wetgevende documenten te analyseren en daaruit op een toegankelijke manier informatie voor burgers voor te bereiden. Uw doel is om informatie zo te presenteren dat burgers zelf de impact van de wetgeving op hun leven kunnen beoordelen, zelfs zonder gespecialiseerde wetgevende kennis. Concentreer u op de feiten en de gevolgen van de ingevoerde wijzigingen en vermijd waardeoordelen en persoonlijke meningen. Alle juridische jargon is verboden. Presenteer de informatie op een duidelijke, beknopte en boeiende manier, zodat deze begrijpelijk is voor iemand zonder juridische opleiding. Vermijd lange, complexe zinnen. In plaats van te schrijven \'het project heeft tot doel de richtlijn betreffende afvalscheiding te implementeren...\', schrijft u \'Nieuwe regels voor afvalscheiding: gebruik van speciale zakken, enz....\'. Ga door met uw werk totdat u uw taak hebt opgelost. Als u niet zeker bent over de gegenereerde inhoud, analyseer het document dan opnieuw - ga niet gissen. Plan uw taak goed voordat u begint. Benadruk in de samenvatting en de kernpunten, indien mogelijk en gerechtvaardigd, welke concrete voordelen of gevolgen (positief of negatief) de wet heeft voor het dagelijks leven van burgers, hun rechten en plichten, hun persoonlijke financiën, hun veiligheid en andere belangrijke kwesties.\n\nUw antwoord MOET in JSON-formaat zijn - en de volgende sleutels bevatten.\nVoordat u het antwoord retourneert, controleer zorgvuldig of de volledige JSON-structuur 100% correct is, inclusief alle komma\'s, accolades, vierkante haken en aanhalingstekens. Onjuiste JSON is onaanvaardbaar en verhindert de verwerking van uw werk.\n\nAnalyseer de volgende tekst van het juridische document zorgvuldig. Dit is de inhoud op basis waarvan u de samenvatting en de kernpunten moet genereren:\n--- BEGIN DOCUMENT ---\n$DOCUMENT_TEXT\n--- EINDE DOCUMENT ---\n\nONTHOUD: Uw antwoord MOET uitsluitend een geldig JSON-object zijn. Voeg geen extra tekens, opmerkingen of tekst toe voor de \'OPEN_BRACE\'-tag of na de \'CLOSE_BRACE\'-tag. Het volledige antwoord moet als JSON kunnen worden geparseerd.\nVul op basis van het BOVENSTAANDE document de volgende JSON-structuur in:\nDit is de JSON-structuur die ik verwacht (vul deze met inhoud):\n__OPEN_BRACE__\n  \"ai_title\": \"Een nieuwe, korte titel voor de rechtshandeling in het Nederlands, die de essentie van de ingevoerde wijzigingen weergeeft (bijv. maximaal 10-12 woorden).\",\n  \"summary\": \"Een beknopte samenvatting van 2-3 zinnen van de inhoud van de rechtshandeling in het Nederlands, geschreven vanuit het perspectief van de impact op het dagelijks leven van burgers.\",\n  \"key_points\": [\n    \"Eerste korte punt in het Nederlands over de belangrijkste ingevoerde oplossingen of wijzigingen.\",\n    \"Tweede korte punt in het Nederlands...\"\n  ],\n \"category\": [\"Categoriseer het document standaard in één categorie, op basis van het domein dat het voornamelijk behandelt. Kies er maximaal 3 als het document ook BELANGRIJKE kwesties uit andere categorieën behandelt. U MOET categorieën UITSLUITEND uit de volgende lijst kiezen: Gezondheid, Onderwijs, Gezin, Belastingen, Werk, Veiligheid, Milieu, Rechtbanken en Recht, Vervoer, Uitkeringen, Onroerend goed, Media en Cultuur, Lokaal bestuur, Migratie, Landbouw, Openbare investeringen, Informatisering, Economie. Als het document beslist niet in een van deze past, MOET u \'Overig\' gebruiken. Als u \'Overig\' gebruikt, moet dit de ENIGE geselecteerde categorie zijn. Maak GEEN nieuwe categorieën aan. Het antwoord moet een array van strings zijn, bijv. [\\\"Belastingen\\\", \\\"Gezin\\\"].\", \"Tweede categorie (optioneel)\", \"Derde categorie (optioneel)\"]\n__CLOSE_BRACE__';
-  }
+  String get techGeneralizerCode =>
+      '// MODELINSTELLING\n// De roldefinitie is cruciaal. \"[country]\" is een variabele die het model stabiliseert.\n// Het perspectief van een burger van Oekraïne (land in oorlog) is voor modellen anders dan het perspectief van een burger van België (die bijvoorbeeld meer aandacht kan besteden aan bureaucratie).\n// Dit bepaalt de hele context voor de interpretatie van de \"belangrijkheid\" van een bepaling.\nJe bent een expert in het recht van [country], [...]\n\n// KERNMETHODOLOGIE\n// Dit is geen \"vriendelijk verzoek\". Het is een harde instructie om ruis te filteren.\n// Het model moet politiek negeren en zoeken naar impact op de portemonnee en het leven.\n[...] die als taak heeft documenten van wetten, resoluties en andere wetgevende documenten te analyseren en daaruit informatie op een toegankelijke manier voor burgers voor te bereiden. Jouw doel is om informatie zo te presenteren dat burgers zelf de impact van wetgeving op hun leven kunnen beoordelen, zelfs zonder specialistische wetgevende kennis. Focus op feiten en objectieve gevolgen van de ingevoerde wijzigingen, vermijd waardepalen en persoonlijke meningen. Elk juridisch jargon is verboden. Presenteer informatie op een duidelijke, beknopte en boeiende manier, zodat deze begrijpelijk is voor iemand zonder juridische opleiding. Vermijd lange, complexe zinnen. In plaats van te schrijven \"het ontwerp beoogt de wijziging van het belastingwetboek...\", schrijf \"Belastingwijzigingen: nieuwe verlichting en verplichtingen voor...\". Ga door met je werk totdat je je taak hebt opgelost. Als je niet zeker bent van de gegenereerde inhoud, analyseer het document dan opnieuw – gok niet. Plan je taak goed voordat je begint. Benadruk in de samenvatting en kernpunten, indien mogelijk en gerechtvaardigd, welke concrete voordelen of gevolgen (positief of negatief) de wet introduceert voor het dagelijks leven van burgers, hun rechten en plichten, persoonlijke financiën, veiligheid en andere belangrijke kwesties (bijv. categorische verboden en geboden of de belangrijkste concrete financiële en territoriale toewijzingen).\n// TECHNISCHE JSON-STRENGHEID\n// De backend-container is meedogenloos. Hij accepteert geen \"gebabbel\".\n// Het moet schone JSON zijn. Eén kommafout = fail en afwijzing van het geheel.\nVoordat je het antwoord retourneert, verifieer zorgvuldig of de hele JSON-structuur 100% correct is, inclusief alle komma\'s, accolades, vierkante haken en aanhalingstekens. Foute JSON is onacceptabel en voorkomt de verwerking van je werk.\nAnalyseer zorgvuldig de tekst van het juridische document hieronder.\nDit is de inhoud op basis waarvan je de samenvatting en kernpunten moet genereren:\n--- BEGIN DOCUMENT ---\n[DOCUMENT_TEXT]\n--- EINDE DOCUMENT --\n\n// OUTPUTSTRUCTUUR (voor 8 talen)\n// Moet perfect worden ingevuld. Elke sleutel wordt gevalideerd.\n// Als het model bijv. \"fr_summary\" overslaat -> gaat alles de prullenbak in.\nONTHOUD: Je antwoord MOET uitsluitend een geldig JSON-object zijn. Voeg geen extra tekens, opmerkingen of tekst toe voor de tag \'OPEN_BRACE\' of na de tag \'CLOSE_BRACE\'. Het hele antwoord moet parseerbaar zijn als JSON.\nOp basis van het BOVENSTAANDE document, vul de onderstaande JSON-structuur in: (...)';
 
   @override
-  String get techPageFlawlessTitle => 'Is AI onfeilbaar?';
+  String get techJudgeTitle => 'B) Judge';
 
   @override
-  String get techPageFlawlessBody =>
-      'Natuurlijk niet. Zoals elke technologie kan het een fout maken of iets verkeerd interpreteren. Daarom vindt u in de applicatie een mechanisme om een fout in de gegevens te melden - elke dergelijke melding is voor mij uiterst waardevol en helpt me het systeem te verbeteren.\n\nMijn langetermijndoel is om deze technologie verder te ontwikkelen en zelfs een eigen, lokaal model zonder enige beperking te gebruiken om de precisie en onafhankelijkheid van de applicatie verder te vergroten.';
+  String get techJudgeBody => 'Model: Flash Lite';
 
   @override
-  String get techPageOutro =>
-      'Bedankt voor uw vertrouwen. Ik hoop dat het gebruik van Lustra dankzij deze transparantie nog waardevoller voor u zal zijn.';
+  String get techJudgeCode =>
+      '// MODELINSTELLING\n// Dit is een eenvoudig heuristisch model, dus zijn rol moet ook eenvoudig zijn. Hij hoeft de wet niet te \"begrijpen\". Hij moet alleen twee datasets vergelijken. ÉÉN TAAK!\nROL: Fact Checker.\nTAAK: Vergelijk SOURCE (origineel) en SUMMARY (samenvatting voorbereid door een andere AI).\nJouw doel is het detecteren van \"VERZONNEN ENTITEITEN\" (Fabricated Entities) in de SUMMARY.\nSOURCE:\n[SOURCE_TEXT]\nSUMMARY TO EVALUATE:\nTitle: [AI_TITLE]\nSummary: [AI_SUMMARY]\nKey Points: [AI_KEY_POINTS]\n// EVALUATIEMETHODOLOGIE\n// We moesten starre regels definiëren, omdat Flash Lite verdwaalde bij abstractie, dus kreeg hij een checklist.\n// Concrete instructies verminderen de beslissingsruis van het model.\nEVALUATIEREGELS:\n1. Controleer alle GETALLEN, DATA en BEDRAGEN in de SUMMARY. Als er een ontbreekt in de SOURCE -> is_valid: false.\n2. Controleer alle NAMEN, ORGANISATIES en PLAATSEN in de SUMMARY. Als er een ontbreekt in de SOURCE -> is_valid: false.\n3. Controleer alle concrete JURIDISCHE ACTIES. Als dit mechanisme niet in de SOURCE zit -> is_valid: false.\n// UITZONDERING VOOR ABSTRACTIE\n// Dit is cruciaal. Abstracte concepten (bijv. \"toename van bureaucratie\") gaven vaak false positives.\n// We moesten ze uitsluiten van de beoordeling \"fabricated entity\", omdat de Rechter correcte logische conclusies afwees.\nBELANGRIJK: Abstracte begrippen (bijv. \"transparantie\", \"vertrouwen\") zijn toegestaan als conclusies.\n\n// OUTPUTSTRUCTUUR en opmaakvereisten voor het structureren van het antwoord.\nOUTPUT (JSON):\n(\n\"is_valid\": true/false,\n\"issue\": \"fabricated_entity\" / \"contradiction\" / \"none\"\n)\nOPMAAKVEREISTEN:\n1. Antwoord UITSLUITEND met een ruw JSON-object.\n2. Gebruik GEEN Markdown-codeblokken.\n3. Voeg GEEN inleidingen of uitleg toe voor of na de JSON.\n4. De JSON moet correct en klaar voor parsen zijn.';
+
+  @override
+  String get techSurgeonTitle => 'C) Surgeon';
+
+  @override
+  String get techSurgeonBody => 'Model: Gemini Pro';
+
+  @override
+  String get techSurgeonCode =>
+      '// MODELINSTELLING\n// De Chirurg is er niet om te schrijven. Hij is er om de kanker (hallucinaties) weg te snijden.\n// Moet consistentie behouden met de \"Citizen Bias\" opgelegd door de Generalizer.\n// Om deze reden moeten we overschakelen naar agressieve grounding.\nJe bent een LEGISLATIVE SURGEON.\nJouw taak is de audit en reparatie van de samenvatting (JSON) wat betreft conformiteit met de brontekst (SOURCE).\n// MEGA BELANGRIJK. Hij mag geen informatie toevoegen. Als hij dat zou doen – verhogen we het risico op hallucinaties, en heeft hij geen rechter meer boven zich. Beter onvolledige samenvattingen dan onware.\nFUNDAMENTELE REGEL: \"NO NEW INFORMATION\" (geen nieuwe informatie).\nDe samenvatting mag alleen informatie transformeren die in de SOURCE staat (inkorten, vertalen, sommeren). Hij mag geen nieuwe informatie genereren die niet in de SOURCE staat.\n// VERIFICATIEPROCEDURE (WORKFLOW)\n// We dwingen het model tot een \"Zin-voor-Zin\" denkproces.\nVERIFICATIEPROCEDURE (voer uit voor elke zin in de JSON):\nVraag jezelf af: \"Kan ik in de SOURCE een concreet fragment aanwijzen dat deze bewering bevestigt?\"\nALS HET ANTWOORD \"JA\" IS:\nDe informatie is bevestigd door een citaat, synoniem of wiskundig resultaat uit data in de tekst.\nBESLISSING: Laat ongewijzigd.\nALS HET ANTWOORD \"NEE\" IS:\nDe informatie staat niet in de tekst (het is een hallucinatie, externe kennis van het model, overinterpretatie of onnodige extrapolatie).\nBESLISSING: Verwijder deze informatie of wijzig deze zodat deze gedekt is in de tekst.\nALS HET ANTWOORD \"DAT HANGT ERVAN AF\" IS:\nDe tekst is onduidelijk en de samenvatting \"gokt\" (bijv. door een concreet voorbeeld te geven voor een algemene term).\nBESLISSING: Speel op zeker. Verwijder het gokken. Gebruik terminologie uit de tekst.\n// RISICOCATEGORIEËN\n// Geschat op basis van eerdere fouten van de Generalizer.\n// We geven hem een \"wegenkaart\" van waar meestal de mijnen liggen.\nRISICOCATEGORIEËN (speciale aandacht):\nData (start geldigheid vs start financiering).\nGetallen (concrete bedragen moeten uit de tekst voortvloeien).\nSubjecten (wie doet wat).\nBereik (wat de wet dekt en wat niet).\n\nINPUT:\n--- SOURCE_TEXT START ---\n[SOURCE_TEXT]\n--- SOURCE_TEXT END ---\n\n--- FLAGGED_JSON START ---\n[FLAGGED_JSON]\n--- FLAGGED_JSON END ---\n\nOUTPUT:\nUitsluitend het gerepareerde JSON-object conform de structuur: (...)';
+
+  @override
+  String get techConclusionsTitle => '4. EMPIRISCHE CONCLUSIES';
+
+  @override
+  String get techConclusionsIntro =>
+      'Naarmate het systeem zich ontwikkelde, was het noodzakelijk om beslissingen te nemen op basis van observaties en niet op basis van modelparameters. Dit leverde enkele vrij interessante inzichten op.';
+
+  @override
+  String get techConclusionATitle =>
+      'A) Waarom een \"dommer\" model gebruiken?';
+
+  @override
+  String get techConclusionABody =>
+      'Initiële tests op Pools recht, geaudit door Claude en ChatGPT, toonden aan dat Gemini Flash de beste samenvattingen genereerde. Vlak daarachter zat het Pro-model, dat soms een iets lagere beoordeling kreeg vanwege het trekken van vergaande conclusies of het weglaten van sommige details. Paradoxaal genoeg droeg het \"denken\" van het model bij aan een iets slechtere inhoudelijke kwaliteit. Conclusie? Wanneer Pro een korte en eenvoudige tekst krijgt, begint hij te filosoferen. Als gevolg daarvan kan hij sleutelfeiten weglaten die hij te voor de hand liggend vindt. Hij verliest ook veel vaker de JSON-structuur (vergeet de accolade te sluiten). Voor eenvoudige samenvattingen is de keuze duidelijk.';
+
+  @override
+  String get techConclusionBTitle => 'B) Waarvoor dan Pro?';
+
+  @override
+  String get techConclusionBBody =>
+      'De problemen beginnen bij langere documenten. Hier gaat het Pro-model definitief aan kop, terwijl zwakkere modellen een veel grotere neiging tot hallucinaties hebben. Deze observaties worden ook bevestigd door wetenschappelijk onderzoek (Lost in the Middle). Dit dwingt de noodzaak af om bij langere documenten direct het Pro-model te gebruiken.';
+
+  @override
+  String get techConclusionCTitle => 'C) Effectiviteit';
+
+  @override
+  String get techConclusionCBody =>
+      'Gebaseerd op empirische ervaringen (honderden proeven, verschillende parlementen), is de anti-hallucination rate >99%. Om de coëfficiënt met grotere precisie te schatten, zouden extra financiële uitgaven nodig zijn (duizenden of tienduizenden tests met de sterkste modellen van concurrerende AI-bedrijven). Men kan dit dus met een korreltje zout nemen. De meeste hallucinaties zijn kleine fouten, bijv. het gebruik van het woord \"mens\" in plaats van \"kamerlid\" in de samenvatting. Het grootste probleem van het systeem zijn dus niet zij, maar een te grote veralgemening. Soms creëert de Generalizer een correcte samenvatting, maar laat een kritiek punt weg dat zeer belangrijk is voor het publieke debat. Dit is echter een compromis dat het systeem op dit moment accepteert, gericht op de totale eliminatie van hallucinaties. Verveling is veiliger dan een leugen.';
+
+  @override
+  String get techFooterDate => 'Datum update Q1 2026';
+
+  @override
+  String get techFooterLicense => 'PolyForm Noncommercial License';
+
+  @override
+  String get techGraphSource => 'Legislation Source';
+
+  @override
+  String get techGraphDecisionLength => 'Lengte > 20k tokens?';
+
+  @override
+  String get techGraphNo => 'NEE';
+
+  @override
+  String get techGraphYes => 'JA';
+
+  @override
+  String get techGraphFlash => 'Flash (System 1)';
+
+  @override
+  String get techGraphPro => 'Pro (System 2)';
+
+  @override
+  String get techGraphJudge => 'The Judge (Flash Lite)';
+
+  @override
+  String get techGraphDecisionPass => 'Resultaat: Pass?';
+
+  @override
+  String get techGraphPublishFirestore => 'HTML Ready';
+
+  @override
+  String get techGraphNoRetry => 'NEE (Retry)';
+
+  @override
+  String get techGraphRepairLoop => 'Reparatielus';
+
+  @override
+  String get techGraphRetryFlash => '< 2 fouten: Flash';
+
+  @override
+  String get techGraphRetrySurgeon => '> 2 fouten: Surgeon';
+
+  @override
+  String get techGraphSurgeon => 'The Surgeon (Pro)';
+
+  @override
+  String get techGraphHtmlReady => 'HTML Ready';
 
   @override
   String get votingResultsPL1stReadingTitle => 'STEMMING OVER VERWERPING';
@@ -1476,12 +1573,12 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String shareLegislationText(Object deepLink) {
-    return 'Bekijk de details van dit wetsvoorstel in de Lustra-app! $deepLink';
+    return 'Stemmen is een keuze. Maak de jouwe hier: $deepLink';
   }
 
   @override
   String shareDeputyText(Object deepLink) {
-    return 'Bekijk en beoordeel het werk van dit parlementslid in de Lustra-app! $deepLink';
+    return 'Profiel en stemgedrag: $deepLink';
   }
 
   @override
@@ -1533,4 +1630,1675 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get supportCampaignsButtonInactive => 'Campagne inactief';
+
+  @override
+  String get authErrorAppleFailed =>
+      'Inloggen met Apple is mislukt. Probeer opnieuw.';
+
+  @override
+  String get continueWithApple => 'Doorgaan met Apple';
+
+  @override
+  String get homeSearchHint => 'Voer een zoekterm in...';
+
+  @override
+  String get homeSearchButtonDeputies => 'Kamerleden';
+
+  @override
+  String get homeSearchButtonLegislations => 'Wetten';
+
+  @override
+  String get actionSeeAll => 'Alles bekijken';
+
+  @override
+  String get notificationsEnabledForOtherParliament =>
+      'Actief voor een ander parlement';
+
+  @override
+  String get votingResultsUSMotionToTableTitle =>
+      'RESULTATEN: MOTIE VAN VERWERPING';
+
+  @override
+  String get crowdfundingLabel =>
+      'Steun Lustra om een onafhankelijke bron te blijven:';
+
+  @override
+  String get hashtagLaw => 'Wet';
+
+  @override
+  String get hashtagPolitician => 'Politicus';
+
+  @override
+  String get statusIntroduced => 'Ingediend';
+
+  @override
+  String get statusPassedHouse => 'Aangenomen in het Huis';
+
+  @override
+  String get statusPassedSenate => 'Aangenomen in de Senaat';
+
+  @override
+  String get statusBecameLaw => 'Werd wet';
+
+  @override
+  String get statusVetoed => 'Gevetood';
+
+  @override
+  String get statusFailed => 'Verworpen';
+
+  @override
+  String get statusPlacedOnCalendar => 'Geplaatst op kalender';
+
+  @override
+  String get actionBack => 'Terug';
+
+  @override
+  String get actionViewSourceJson => 'AI-werklogboeken voor dit document';
+
+  @override
+  String get manualEmailDialogTitle => 'Bericht handmatig verzenden';
+
+  @override
+  String get manualEmailDialogDescription =>
+      'Geen e-mailclient gedetecteerd. Kopieer de onderstaande gegevens en verstuur ze zelf.';
+
+  @override
+  String get labelRecipient => 'Ontvanger';
+
+  @override
+  String get labelSubject => 'Onderwerp';
+
+  @override
+  String get labelBody => 'Berichtinhoud';
+
+  @override
+  String get actionCopy => 'Kopiëren';
+
+  @override
+  String get copiedToClipboard => 'Gekopieerd naar klembord';
+
+  @override
+  String get webBannerDownloadMessage =>
+      'Om volledig gebruik te maken van alle mogelijkheden, download de app!';
+
+  @override
+  String get webBannerDownloadButton => 'Downloaden';
+
+  @override
+  String get supportStripeButton => 'Steunen (Stripe)';
+
+  @override
+  String get supportFounderMessage =>
+      'Er zit geen groot bedrijf achter dit project, alleen ik en mijn laptop. Ik heb dit gebouwd omdat ik geloof dat dergelijke technologie moet bestaan en 100% onafhankelijk moet blijven van kapitaal, dat altijd het narratief dicteert. Dit is mijn geschenk aan de wereld.';
+
+  @override
+  String get civicProjectTitle => 'Burgerproject';
+
+  @override
+  String get drafterAuthRequired =>
+      'Authenticatie vereist. Log eerst in bij Lustra.';
+
+  @override
+  String get drafterLaunchError => 'Kan Drafter Gateway niet starten:';
+
+  @override
+  String get drafterButtonTitle =>
+      'GEBRUIK LUSTRA DRAFTER OM IN 5 MINUTEN EEN WET TE MAKEN VAN EEN IDEE';
+
+  @override
+  String get submitCivicProjectButton => 'Maak je project aan';
+
+  @override
+  String get civicThresholdCandidate => 'Ter herziening.';
+
+  @override
+  String get statusInitiative => 'Initiatief';
+
+  @override
+  String get civicTitle => 'Burgerprojecten';
+
+  @override
+  String get civicIncubatorTitle => 'Incubator Burgerprojecten';
+
+  @override
+  String get civicSubtitle => 'Samen de toekomst van de democratie ontwerpen.';
+
+  @override
+  String get civicSection1Title => '1. Programmaregels & Bestuur';
+
+  @override
+  String get civicSection1Intro =>
+      'Lustra biedt burgers wetgevende infrastructuur. We behandelen uw ideeën met dezelfde ernst als wetsvoorstellen van de overheid. Om kwaliteit te waarborgen, gelden strikte regels:';
+
+  @override
+  String get civicProcessTitle => 'Het Proces';
+
+  @override
+  String get civicRuleSubmissionTitle => 'Indiening:';
+
+  @override
+  String get civicRuleSubmissionText =>
+      'U dient een concept in via e-mail/formulier.';
+
+  @override
+  String get civicRuleReviewTitle => 'Formele Beoordeling (Mens):';
+
+  @override
+  String get civicRuleReviewText =>
+      'We controleren naleving van de LDS-1 Standaard. We filteren strikt op haatzaaien, spam, duplicaten en niet-wetgevende inhoud.';
+
+  @override
+  String get civicRuleAiTitle => 'AI-Sterilisatie:';
+
+  @override
+  String get civicRuleAiText =>
+      'Goedgekeurde concepten worden verwerkt door onze AI om emotioneel taalgebruik te verwijderen en feiten te extraheren.';
+
+  @override
+  String get civicRulePublicationTitle => 'Publicatie:';
+
+  @override
+  String get civicRulePublicationText =>
+      'Het project krijgt een \"Burgerwetskaart\" in de app, visueel gelijk aan overheidswetgeving.';
+
+  @override
+  String get civicWarningTitle => 'Projectintegriteit';
+
+  @override
+  String get civicWarningText =>
+      'De basistekst is onveranderlijk. Je kunt alleen amendementen toevoegen om de tekst te verfijnen zonder de oorspronkelijke kern te wijzigen. Alle wijzigingen zijn transparant en worden als bijlage toegevoegd.';
+
+  @override
+  String get civicPoliciesTitle => 'Kritieke Beleidslijnen';
+
+  @override
+  String get civicPolicyPublicDomainTitle => 'Publiek Domein (CC0):';
+
+  @override
+  String get civicPolicyPublicDomainText =>
+      'Door een project in te dienen, doet u afstand van alle auteursrechten. De wet is van iedereen.';
+
+  @override
+  String get civicPolicyAstroturfingTitle => 'Anti-Astroturfing:';
+
+  @override
+  String get civicPolicyAstroturfingText =>
+      'U moet verklaren of u een organisatie vertegenwoordigt. Verborgen lobbyen leidt tot een permanente verbanning.';
+
+  @override
+  String get civicPolicyAdPersonamTitle => 'Ad Personam:';
+
+  @override
+  String get civicPolicyAdPersonamText =>
+      'Projecten gericht op specifieke individuen (smaad) worden onmiddellijk afgewezen.';
+
+  @override
+  String get civicPolicyTrashTitle => 'Geen Prullenbak:';
+
+  @override
+  String get civicPolicyTrashText =>
+      'Lustra is geen forum. Concepten van lage kwaliteit, duplicaten en manifesten worden aan de poort geweigerd.';
+
+  @override
+  String get civicSection2Title => '2. Lustra Wetgevingsstandaard (LDS-1)';
+
+  @override
+  String get civicSection2Intro =>
+      'Uw concept moet deze structuur volgen. Als het op een blogpost lijkt, wordt het afgewezen.';
+
+  @override
+  String get civicStructureTitle => 'Vereiste Structuur:';
+
+  @override
+  String get civicStructureTitleItem => 'Titel:';
+
+  @override
+  String get civicStructureTitleText => 'Beschrijvend en neutraal.';
+
+  @override
+  String get civicStructureArticlesItem => 'Artikelen:';
+
+  @override
+  String get civicStructureArticlesText =>
+      'Tekst verdeeld in genummerde eenheden (Art. 1, Art. 2...) met specifieke mechanismen (verboden, mandaten).';
+
+  @override
+  String get civicStructureExposeItem => 'Memorie van Toelichting (Exposé):';
+
+  @override
+  String get civicStructureExposeText => 'Verplichte sectie die uitlegt:';
+
+  @override
+  String get civicExposePoint1 => '• (1) Diagnose van het probleem.';
+
+  @override
+  String get civicExposePoint2 => '• (2) Doel van de regeling.';
+
+  @override
+  String get civicExposePoint3 => '• (3) Verwachte maatschappelijke impact.';
+
+  @override
+  String get civicSection3Title => '3. Lustra Gereedheidsscore';
+
+  @override
+  String get civicSection3Intro =>
+      'We beoordelen uw politieke opvattingen niet. We beoordelen de kwaliteit van de constructie. Onze AI analyseert elk concept op een schaal van 0-100:';
+
+  @override
+  String get civicScoreStructureTitle => 'Structuur (30 ptn):';
+
+  @override
+  String get civicScoreStructureText =>
+      'Correcte juridische opmaak en nauwkeurig taalgebruik.';
+
+  @override
+  String get civicScoreExposeTitle => 'Volledigheid Exposé (30 ptn):';
+
+  @override
+  String get civicScoreExposeText =>
+      'Duidelijkheid van de probleem/oplossing definitie.';
+
+  @override
+  String get civicScoreLogicTitle => 'Interne Logica (20 ptn):';
+
+  @override
+  String get civicScoreLogicText => 'Afwezigheid van tegenstrijdigheden.';
+
+  @override
+  String get civicScoreImpactTitle => 'Impactanalyse (20 ptn):';
+
+  @override
+  String get civicScoreImpactText =>
+      'Haalbaarheid en identificatie van getroffen groepen.';
+
+  @override
+  String get civicThresholdsTitle => 'Drempels:';
+
+  @override
+  String get civicThresholdRejected => 'Afgewezen / Geretourneerd.';
+
+  @override
+  String get civicThresholdReady => 'Prioritaire publicatie.';
+
+  @override
+  String get civicSection4Title =>
+      '4. Toolkit voor Makers (Kopiëren & Plakken)';
+
+  @override
+  String get civicSection4Intro =>
+      'Gebruik dit sjabloon om ervoor te zorgen dat uw project voldoet aan de LDS-1 Standaard.';
+
+  @override
+  String get civicTemplateCode =>
+      'TITEL: [Voeg Hier Beschrijvende Titel In]\n\nPREAMBULE: [Optioneel: Erkennende dat...]\n\nHOOFDSTUK I: ALGEMENE BEPALINGEN\nArt. 1. Het doel van deze Wet is [Voeg Doel In].\nArt. 2. Deze Wet is van toepassing op [Voeg Reikwijdte In].\n\nHOOFDSTUK II: [HOOFDMECHANISME / VERBODEN]\nArt. 3. \n1. Het is verboden om [Actie].\n2. Entiteiten zijn verplicht om [Actie].\n\nHOOFDSTUK III: SANCTIES & SLOTBEPALINGEN\nArt. X. Overtreding van Art. 3 wordt bestraft met [Sanctie].\nArt. Y. Deze Wet treedt in werking op [Datum].\n\n---\nMEMORIE VAN TOELICHTING (EXPOSÉ)\n\n1. HET PROBLEEM\n[Beschrijf de huidige situatie en waarom deze faalt.]\n\n2. HET DOEL\n[Leg uit wat deze wet oplost en hoe.]\n\n3. VERWACHTE IMPACT\n[Beschrijf de sociale, economische of juridische gevolgen.]';
+
+  @override
+  String get civicSubmitButton => 'CONCEPT INDIENEN (E-MAIL)';
+
+  @override
+  String get civicFooterCopyright =>
+      '© 2025 Lustra Initiatief.\nInfrastructuur voor het Burgerlijke Tijdperk.';
+
+  @override
+  String civicEmailSubject(Object parliamentName) {
+    return '[LDS-1 Inzending] Projecttitel - $parliamentName';
+  }
+
+  @override
+  String get civicEmailBodyPlaceholder =>
+      '[PLAK UW SJABLOON HIER]\n\nAuteur / Organisatie:\nContactinfo:\n';
+
+  @override
+  String get civicEmailDialogTitle => 'E-mailclient Niet Gevonden';
+
+  @override
+  String get civicEmailDialogIntro =>
+      'Kopieer de details hieronder en verstuur handmatig:';
+
+  @override
+  String get civicEmailDialogRecipient => 'Ontvanger';
+
+  @override
+  String get civicEmailDialogSubject => 'Onderwerp';
+
+  @override
+  String get civicEmailDialogBody => 'Inhoud';
+
+  @override
+  String get civicCopiedToClipboard => 'Gekopieerd naar klembord';
+
+  @override
+  String get civicTemplateCopied => 'Sjabloon gekopieerd!';
+
+  @override
+  String get supportMegaTitle => 'Burgereigendom';
+
+  @override
+  String get verificationRequiredTitle => 'Verificatie vereist';
+
+  @override
+  String get verificationRequiredContent =>
+      'Om uw stem in de ranglijst mee te tellen, moeten we bevestigen dat u een mens bent.\n\nControleer uw inbox (inclusief SPAM-map).';
+
+  @override
+  String get verificationResendLink => 'Link opnieuw verzenden';
+
+  @override
+  String get verificationLinkSentSuccess => 'Link opnieuw verzonden!';
+
+  @override
+  String get verificationAlreadyConfirmed => 'Ik heb bevestigd';
+
+  @override
+  String get verificationSuccessVotingUnlocked => 'Bedankt! U kunt nu stemmen.';
+
+  @override
+  String get verificationStillNotVerified =>
+      'Nog geen bevestiging gevonden. Probeer het zo nog eens.';
+
+  @override
+  String get cancel => 'Annuleren';
+
+  @override
+  String get pollVoteSignificance => 'Jouw stem is pas het begin.';
+
+  @override
+  String get pollShareImpact =>
+      'Algoritmes leggen ons vaak het zwijgen op. Jouw ene keer delen bereikt gemiddeld 50-300 mensen. Help ons de sociale media bubbel te doorbreken.';
+
+  @override
+  String get pollShareAction => 'Deel en versterk de stem van de burgers';
+
+  @override
+  String get listRefreshed => 'Lijst vernieuwd!';
+
+  @override
+  String get errorNoDataReturned => 'Geen gegevens geretourneerd';
+
+  @override
+  String get errorMustBeLoggedInToSubscribe =>
+      'Je moet ingelogd zijn om je te abonneren.';
+
+  @override
+  String get subscribedToList => 'Geabonneerd op lijst!';
+
+  @override
+  String get unsubscribedFromList => 'Abonnement opgezegd.';
+
+  @override
+  String get errorListRemovedByOwner => 'Lijst verwijderd door de eigenaar...';
+
+  @override
+  String get errorFailedToUpdateSubscription =>
+      'Abonnement kon niet worden bijgewerkt.';
+
+  @override
+  String get notificationSentCooldownActive =>
+      'Melding naar abonnees verzonden!...';
+
+  @override
+  String get errorCooldownActiveNotification =>
+      'Afkoelperiode actief. Je kunt verzenden in...';
+
+  @override
+  String get errorFailedToSendNotification =>
+      'Melding kon niet worden verzonden.';
+
+  @override
+  String get nameYourCuratorList => 'Geef je Auteurslijst een naam';
+
+  @override
+  String get hintCuratorListExample => 'bijv. Mijn economisch beleid';
+
+  @override
+  String listCreatedSuccess(String text) {
+    return 'Lijst \'$text\' aangemaakt!';
+  }
+
+  @override
+  String get errorFailedToCreateList => 'Lijst kon niet worden aangemaakt.';
+
+  @override
+  String get actionCreate => 'Aanmaken';
+
+  @override
+  String get unnamedList => 'Naamloze lijst';
+
+  @override
+  String get tooltipEditList => 'Lijst bewerken';
+
+  @override
+  String get addDescriptionHint => 'Voeg een beschrijving toe...';
+
+  @override
+  String subscribersCount(int subs) {
+    return '$subs abonnees';
+  }
+
+  @override
+  String get actionShareList => 'Lijst delen';
+
+  @override
+  String get actionSupportCreator => 'Steun de maker';
+
+  @override
+  String availableInHours(int hoursLeft) {
+    return 'Beschikbaar over ${hoursLeft}u';
+  }
+
+  @override
+  String get actionNotifySubscribers => 'Abonnees op de hoogte brengen';
+
+  @override
+  String get actionSubscribed => 'Geabonneerd';
+
+  @override
+  String get actionSubscribe => 'Abonneren';
+
+  @override
+  String get tooltipReportList => 'Lijst rapporteren';
+
+  @override
+  String get tooltipDeleteList => 'Lijst verwijderen';
+
+  @override
+  String get draftYourCivicProject => 'Stel uw eigen burgerproject op';
+
+  @override
+  String get draftCivicProjectDescription =>
+      'Zet uw ideeën om in echte wetsvoorstellen en verzamel steun. Lustra is klaar voor uw beleid.';
+
+  @override
+  String get createYourOwnList => 'Maak uw eigen lijst';
+
+  @override
+  String get createYourOwnListDescription =>
+      'Word een curator. Selecteer belangrijke wetsvoorstellen, nodig volgers uit en stuur meldingen naar hun apparaten om ze op de hoogte te houden van wijzigingen in uw wetgevingslijst of burgerprojecten.';
+
+  @override
+  String get editListDetails => 'Lijstdetails bewerken';
+
+  @override
+  String get listNameLabel => 'Naam van de lijst';
+
+  @override
+  String get descriptionOptionalLabel => 'Beschrijving (Optioneel)';
+
+  @override
+  String get supportCreatorOptionalLabel => 'Steun de maker (Optioneel)';
+
+  @override
+  String providerUsernameLabel(String provider) {
+    return '$provider gebruikersnaam';
+  }
+
+  @override
+  String get listUpdatedSuccess => 'Lijst bijgewerkt!';
+
+  @override
+  String get errorFailedToUpdate => 'Bijwerken mislukt.';
+
+  @override
+  String get actionSave => 'Opslaan';
+
+  @override
+  String get deleteListDialogTitle => 'Lijst verwijderen?';
+
+  @override
+  String get deleteListDialogBody =>
+      'Deze actie kan niet ongedaan worden gemaakt...';
+
+  @override
+  String get listDeletedSuccess => 'Lijst verwijderd.';
+
+  @override
+  String get errorFailedToDelete => 'Verwijderen mislukt.';
+
+  @override
+  String get actionDelete => 'Verwijderen';
+
+  @override
+  String get syncingCuratedFeed => 'AUTEURSLIJST SYNCHRONISEREN...';
+
+  @override
+  String get actionTryAgain => 'Opnieuw proberen';
+
+  @override
+  String get tooltipSetAsListCover => 'Instellen als omslagfoto';
+
+  @override
+  String get coverUpdatedSuccess => 'Omslagfoto bijgewerkt!';
+
+  @override
+  String get errorUpdatingCover => 'Fout bij bijwerken omslagfoto.';
+
+  @override
+  String get loaderLoadingProfile => 'PROFIEL LADEN...';
+
+  @override
+  String get loaderRetrievingVoteLogs => 'STEMREGISTERS OPHALEN...';
+
+  @override
+  String get loaderLoadingRecentVotes => 'RECENTE STEMMINGEN LADEN...';
+
+  @override
+  String get loaderFetchingData => 'GEGEVENS OPHALEN...';
+
+  @override
+  String get loaderLoadingTrackedBills => 'GEVOLGDE WETTEN LADEN...';
+
+  @override
+  String get emptyTrackedBills => 'Je volgt nog geen wetten.';
+
+  @override
+  String get notificationsMobileOnly =>
+      'Meldingen alleen beschikbaar in de app.';
+
+  @override
+  String get titleYourTrackedBills => 'Gevolgde Wetten';
+
+  @override
+  String get buttonSeeAllTracked => 'Bekijk alles';
+
+  @override
+  String get titleNameYourList => 'Geef je lijst een naam';
+
+  @override
+  String get hintEgMySocialPolicies => 'bijv. Mijn sociale beleid';
+
+  @override
+  String snackbarListCreated(String text) {
+    return 'Lijst \'$text\' aangemaakt!';
+  }
+
+  @override
+  String get snackbarFailedToCreateList => 'Mislukt om lijst te maken.';
+
+  @override
+  String get buttonCreate => 'Aanmaken';
+
+  @override
+  String get titleRenameYourList => 'Lijst hernoemen';
+
+  @override
+  String get snackbarListRenamed => 'Lijst hernoemd!';
+
+  @override
+  String get snackbarFailedToRenameList => 'Hernoemen mislukt.';
+
+  @override
+  String get buttonSave => 'Opslaan';
+
+  @override
+  String get titleYourLists => 'Jouw Lijsten';
+
+  @override
+  String get emptyNoListsYet => 'Je hebt nog geen lijsten.';
+
+  @override
+  String get tooltipRename => 'Hernoemen';
+
+  @override
+  String get snackbarErrorUpdatingList => 'Fout bij bijwerken.';
+
+  @override
+  String get tooltipShareList => 'Lijst delen';
+
+  @override
+  String get buttonCreateNewList => 'Nieuwe Lijst Aanmaken';
+
+  @override
+  String get errorLimitOf3ListsReached => 'Limiet van 3 lijsten bereikt.';
+
+  @override
+  String get snackbarFailedToDelete => 'Verwijderen mislukt.';
+
+  @override
+  String get loaderFetchingMirrorParliamentData =>
+      'GEGEVENS SPIEGELPARLEMENT OPHALEN...';
+
+  @override
+  String get loaderSecuringSafeChannel => 'VERBINDING VERSLEUTELEN...';
+
+  @override
+  String get snackbarAddedToList => 'Toegevoegd aan je lijst.';
+
+  @override
+  String get snackbarRemovedFromList => 'Verwijderd uit je lijst.';
+
+  @override
+  String get loaderLoadingData => 'GEGEVENS LADEN...';
+
+  @override
+  String get buttonAddToList => 'Toevoegen aan lijst';
+
+  @override
+  String get previousStatusLabel => 'Voorheen:';
+
+  @override
+  String get statusLabel => 'Status:';
+
+  @override
+  String get loaderEstablishingConnection => 'VERBINDING MAKEN...';
+
+  @override
+  String get loaderFetchingInitiatives => 'INITIATIEVEN OPHALEN...';
+
+  @override
+  String get loaderLoadingMoreInitiatives => 'MEER INITIATIEVEN LADEN...';
+
+  @override
+  String get loaderLoadingMore => 'MEER LADEN...';
+
+  @override
+  String get errorMustBeLoggedInToTrack =>
+      'Log in om te volgen. Maak een account aan.';
+
+  @override
+  String get loaderLoadingYourTrackedList => 'JE VOLGLIJST LADEN...';
+
+  @override
+  String get emptyNotTrackingAnything => 'Je volgt nog niets.';
+
+  @override
+  String get loaderLoadingLegislativeData => 'WETGEVENDE GEGEVENS LADEN...';
+
+  @override
+  String get loaderAuthorizing => 'AUTORISEREN...';
+
+  @override
+  String get loaderLoading => 'LADEN...';
+
+  @override
+  String get snackbarLinkCopied => 'Link gekopieerd naar klembord!';
+
+  @override
+  String get civicWillRecord => 'REGISTER VAN BURGERWIL';
+
+  @override
+  String totalVotesRecorded(String totalVotes) {
+    return '$totalVotes GEREGISTREERDE STEMMEN';
+  }
+
+  @override
+  String get recordYourPositionForAudit =>
+      'Registreer je standpunt voor de audit.';
+
+  @override
+  String get privateList => 'Privé Lijst';
+
+  @override
+  String get loaderLoadingCuratedFeed => 'AUTEURSLIJST LADEN...';
+
+  @override
+  String get buttonOpenFullList => 'Volledige lijst openen';
+
+  @override
+  String get filtersLabel => 'Filters';
+
+  @override
+  String get statusFilterLabel => 'Status';
+
+  @override
+  String get onlyWithSourceTextLabel => 'Alleen met brontekst';
+
+  @override
+  String get trackedBillsTitle => 'Gevolgde Wetten';
+
+  @override
+  String get curatedListTitle => 'Privé Lijst';
+
+  @override
+  String get loaderLoadingProfiles => 'PROFIELEN LADEN...';
+
+  @override
+  String get loaderLoadingMoreProfiles => 'MEER PROFIELEN LADEN...';
+
+  @override
+  String get loaderInitializingMirrorParliament =>
+      'SPIEGELPARLEMENT INITIALISEREN...';
+
+  @override
+  String get loaderSyncingVectors => 'VECTOREN SYNCHRONISEREN...';
+
+  @override
+  String get reportIncludeDiagnosticsTitle => 'Voeg systeemdiagnostiek toe';
+
+  @override
+  String get reportIncludeDiagnosticsSubtitle =>
+      'Voegt actieve status toe (Parlement, Termijn, Doel) om ons te helpen de fout op te lossen.';
+
+  @override
+  String get loaderSendingReport => 'RAPPORT VERZENDEN...';
+
+  @override
+  String primaryParliamentLabel(String parliament) {
+    return 'Primair: $parliament';
+  }
+
+  @override
+  String get buttonCreateAnotherList => 'Nog een lijst maken';
+
+  @override
+  String get buttonCreateTrackingList => 'Volglijst maken';
+
+  @override
+  String get errorMissingListId => 'Fout: Lijst ID ontbreekt';
+
+  @override
+  String get actionTracked => 'Gevolgd';
+
+  @override
+  String get actionTrack => 'Volgen';
+
+  @override
+  String pollSupportPercent(String percent) {
+    return 'VOOR $percent%';
+  }
+
+  @override
+  String get pollSyncing => 'SYNCHRONISEREN...';
+
+  @override
+  String pollOpposePercent(String percent) {
+    return 'TEGEN $percent%';
+  }
+
+  @override
+  String get pollPositionRecorded => 'STANDPUNT GEREGISTREERD';
+
+  @override
+  String get pollRestrictedToCitizens => 'BEPERKT TOT BURGERS';
+
+  @override
+  String yourListsForCountry(String countryName) {
+    return 'Jouw Lijsten ($countryName)';
+  }
+
+  @override
+  String get bottomNavGetInvolved => 'Doe Mee';
+
+  @override
+  String get errorLaunchUrl => 'Kan link niet openen';
+
+  @override
+  String get infoTechTitle => 'Hoe de Technologie Werkt';
+
+  @override
+  String get infoTechSubtitle =>
+      'Lees over onze architectuur, datasterilisatie en civic tech-principes.';
+
+  @override
+  String get infoGovTitle => 'Transparantie & Bestuur';
+
+  @override
+  String get infoGovSubtitle =>
+      'Wie dit bouwt, wie het betaalt en waar we naartoe gaan.';
+
+  @override
+  String get infoPrivacyTitle => 'Grondwet & Privacy';
+
+  @override
+  String get infoPrivacySubtitle =>
+      'Radicale transparantie. Welke gegevens we verzamelen en waarom.';
+
+  @override
+  String get manualTitle => 'Open Burgerhandboek';
+
+  @override
+  String get manualSubtitle =>
+      'Leer hoe je de regie in de democratie terugneemt.';
+
+  @override
+  String get howToActTitle => 'Hoe te handelen met Lustra';
+
+  @override
+  String get actAuditTitle => 'Burger Audit';
+
+  @override
+  String get actAuditSubtitle =>
+      'Stem op wetten om de onderwerphiërarchie vorm te geven en laat tastbaar bewijs van de Burgerwil achter. Laat de media het gesprek niet meer sturen.';
+
+  @override
+  String get actWatchlistTitle => 'Gecureerde Volglijsten';
+
+  @override
+  String get actWatchlistSubtitle =>
+      'Maak aangepaste lijsten van wetsvoorstellen om abonnees te verzamelen en bewustzijn te creëren. Gebruik sociale media als lobbykracht.';
+
+  @override
+  String get actDraftTitle => 'Stel Burgerwetten Op';
+
+  @override
+  String get actDraftSubtitle =>
+      'Dien je eigen initiatieven in bij Lustra. De samenleving heeft behoefte aan nieuwe ideeën die niet door kapitaal worden tegengehouden.';
+
+  @override
+  String get joinCommunityTitle => 'Word lid van de Community';
+
+  @override
+  String get subscribedLists => 'Geabonneerd';
+
+  @override
+  String get snackbarAddedToListWebPromo =>
+      'Toegevoegd! Download de app om pushmeldingen over dit wetsvoorstel te ontvangen.';
+
+  @override
+  String get aboutGovAppBar => 'Governance';
+
+  @override
+  String get aboutGovTitle => 'Transparantie & Governance';
+
+  @override
+  String get aboutGovSubtitle =>
+      'Wie dit bouwt, wie het betaalt en waar we heen gaan.';
+
+  @override
+  String get aboutGovFounderName => 'Jacek (Fons)';
+
+  @override
+  String get aboutGovFounderBadge => 'SOLO-ARCHITECT / OPRICHTER';
+
+  @override
+  String get aboutGovFounderP1 =>
+      'Ik ben geen politicus, advocaat of academicus. Ik heb geen formele geloofsbrieven. 18 maanden geleden werkte ik als schoonmaker. Ik was heel 2025 werkloos en bouwde dit systeem vanaf de grond af op een laptop uit 2016.';
+
+  @override
+  String get aboutGovFounderP2 =>
+      'Waarom? Omdat ik gefrustreerd was dat miljardairs en grote bedrijven betere datatools hebben dan burgers. Ik was gefrustreerd door de drempels die burgers weghouden van de wet en de narratiefoorlogen die door de media worden gevoerd, waardoor mensen ofwel vervreemden van de politiek, ofwel gedwongen worden een kamp te kiezen. Ik heb mezelf alles aangeleerd om een Spiegelparlement (Mirror Parliament) te bouwen. Ik geloof niet in online petities; ik geloof in keiharde, op data gebaseerde transparantie en toegankelijkheid. En dat de democratie een update nodig heeft.';
+
+  @override
+  String get aboutGovFounderP3 =>
+      'Je vraagt je misschien af: \"Waarom zou ik je vertrouwen?\" Vertrouw niemand, vooral niet in de politiek - begin met auditen.';
+
+  @override
+  String get aboutGovSec1Title => '1. Financiering & Infrastructuur';
+
+  @override
+  String get aboutGovSec1Intro =>
+      'Er is geen VC (durfkapitaal). Er is geen zwart geld. Er is geen crypto. Momenteel is deze operatie volledig uit eigen middelen gefinancierd (bootstrapped).';
+
+  @override
+  String get aboutGovSec1Bullet1Title => 'Infrastructuur:';
+
+  @override
+  String get aboutGovSec1Bullet1Text =>
+      'Gedekt door een subsidie van \$2.000 in de vorm van credits van het Google For Startups-programma. We hebben momenteel nog ongeveer \$1.200 over, wat ons een serverlooptijd (runway) van ongeveer 12 maanden geeft.';
+
+  @override
+  String get aboutGovSec1Bullet2Title => 'Levensonderhoud:';
+
+  @override
+  String get aboutGovSec1Bullet2Text =>
+      'Volledig ondersteund door mijn persoonlijke spaargeld, mijn verloofde en mijn familie.';
+
+  @override
+  String get aboutGovSec1Bullet3Title => 'Tech Stack:';
+
+  @override
+  String get aboutGovSec1Bullet3Text =>
+      'Alleen gebouwd (Flutter, Firebase, Vertex AI-pijplijn, Node.js) om de operationele kosten dicht bij nul te houden.';
+
+  @override
+  String get aboutGovSec2Title => '2. Huidige Rechtsvorm & De Transitie';
+
+  @override
+  String get aboutGovSec2P1 =>
+      'Lustra incubeert momenteel onder mijn oude Poolse BV (FO&WO VENTURES SP. Z O.O.). Dit is een juridische noodzaak. Om in de Apple/Google App Stores te publiceren en de Google Startup-credits te ontvangen, is een geregistreerd bedrijf met een DUNS-nummer vereist. Ik kan de juridische kosten om een stichting op te richten nog niet betalen (meer dan \$500 opstartkosten en maandelijkse boekhouding), dus gebruik ik de meest efficiënte (lean) opzet mogelijk.';
+
+  @override
+  String get aboutGovSec2BoxTitle => 'De Roadmap naar Non-Profit:';
+
+  @override
+  String get aboutGovSec2BoxText =>
+      'Zodra we financiële liquiditeit en een kritische massa (ca. 100k maandelijkse gebruikers) bereiken, ben ik van plan een formele Non-Profit Organisatie op te richten en alle intellectuele eigendommen en infrastructuur daarnaartoe over te dragen.';
+
+  @override
+  String get aboutGovSec2P2 =>
+      'Het uiteindelijke doel is een democratische bestuursstructuur (governance). Beslissingen zullen worden genomen door een bestuur dat is gekozen door de community. Mijn rol zal strikt beperkt blijven tot het technisch onderhoud van de backend. Ik zie geen andere toekomst voor Lustra dan een non-profit operatie met volledige transparantie van alle financiële documenten.';
+
+  @override
+  String get aboutGovSec3Title => '3. Veiligheid & Broncode';
+
+  @override
+  String get aboutGovSec3Bullet1Title => 'Authenticatie:';
+
+  @override
+  String get aboutGovSec3Bullet1Text =>
+      'We raken je wachtwoorden niet aan. We gebruiken Google/Apple Auth omdat hun beveiligingsinfrastructuur superieur is. We slaan alleen een geanonimiseerde User-ID en je Vote-ID op om botfarms te voorkomen.';
+
+  @override
+  String get aboutGovSec3Bullet2Title =>
+      'Broncode Beschikbaar (Source Available):';
+
+  @override
+  String get aboutGovSec3Bullet2Text =>
+      'De core-repositories zijn openbaar onder de PolyForm Noncommercial License. Het is beschermd tegen het klonen door bedrijven, maar de data-adapters, AI-systeemprompts en logica zijn volledig zichtbaar voor audits.';
+
+  @override
+  String get aboutGovSec3BoxTitle => 'We hebben hulp nodig.';
+
+  @override
+  String get aboutGovSec3BoxText =>
+      'Ik ben één gast met een oude laptop die alles doet. Als je een ontwikkelaar, journalist of burger bent die wil helpen bij het opzetten van lokale cellen in jouw land — neem contact op.';
+
+  @override
+  String get aboutGovSec3Contact => 'Contact: jacek@lustra.dev';
+
+  @override
+  String get aboutGovSec3Github => 'GitHub-profiel';
+
+  @override
+  String get termsAppBar => 'Grondwet & Privacy';
+
+  @override
+  String get termsTitle => 'Grondwet & Privacy';
+
+  @override
+  String get termsLastUpdated => 'Laatst bijgewerkt: 12 maart 2026';
+
+  @override
+  String get termsAlertTitle =>
+      'Radicale Transparantie: Wat we daadwerkelijk verzamelen';
+
+  @override
+  String get termsAlertP1 =>
+      'Je denkt misschien: \"Ik ga mijn data niet aan willekeurige mensen geven.\" Daar zijn we het mee eens. Daarom willen we je privéleven niet. We willen alleen verifiëren dat je een echt mens bent dat op echte wetten stemt.';
+
+  @override
+  String get termsAlertP2 =>
+      'Hier is de exacte datastructuur die we opslaan voor je gebruikersprofiel in onze Google Cloud Firestore-database. Geen verborgen velden. Geen tracking cookies.';
+
+  @override
+  String get termsAlertCode =>
+      '[\n  \'uid\': \'0A21rfdsTs1F3kYsx3252352\', // Gegenereerd door Firebase Auth\n  \'email\': \'burger@example.com\', // Jouw enige Persoonsgegevens\n  \'createdAt\': \'February 15, 2026 at 8:23:31 PM UTC\',\n  \'marketingConsent\': true, // Voor projectupdates (optioneel)\n  \'primaryParliamentId\': \'Tweede Kamer der Staten-Generaal\'\n]';
+
+  @override
+  String get termsAlertH4 =>
+      'Wacht, waar zijn mijn stemmen en gevolgde wetten?';
+
+  @override
+  String get termsAlertP3 =>
+      'Om je privacy te beschermen en ervoor te zorgen dat onze database efficiënt schaalt, zijn je interacties gescheiden (sharded) van je hoofdprofiel:';
+
+  @override
+  String get termsAlertB1Title => 'Gevolgde Wetten:';
+
+  @override
+  String get termsAlertB1Text =>
+      'Opgeslagen in een privé sub-collectie. Alleen jij (en je apparaat) kunnen de lijst opvragen van de wetten die je volgt.';
+
+  @override
+  String get termsAlertB2Title => 'Jouw Stemmen (Cryptografische Hashing):';
+
+  @override
+  String get termsAlertB2Text =>
+      'Wanneer je stemt, koppelen we je UID NIET direct aan het openbare stemregister. In plaats daarvan genereert de server een cryptografische hash (bijv. a1b2c3d4...) met behulp van een geheime server-salt. Dit pseudonimiseert je stem sterk. Als een hacker de database steelt, kunnen ze niet zien wie waarop heeft gestemd. Hoewel het wiskundig gezien een eenrichtingsfunctie is, moet je in de geest van absolute transparantie weten dat de systeembeheerders (die de geheime salt bezitten) theoretisch een stem zouden kunnen verifiëren om het systeem te controleren op fraude of om te voldoen aan een geldig gerechtelijk bevel. Je stemmen zijn echter strikt gescheiden van je dagelijkse profiel en worden nooit publiekelijk weergegeven in combinatie met je identiteit.';
+
+  @override
+  String get termsAlertP4 =>
+      'Dat is alles. De rest is anonieme analytics (Firebase Analytics) om bugs te verhelpen, en App Check om te voorkomen dat botfarms de stemmingen manipuleren. We verkopen geen data. We tonen geen advertenties.';
+
+  @override
+  String get termsTocTitle => 'Inhoudsopgave';
+
+  @override
+  String get termsPart1Title => 'Deel 1: Privacybeleid (Dataminimalisatie)';
+
+  @override
+  String get termsPart1Intro =>
+      'Wij handelen niet in jouw aandacht. We verzamelen alleen wat technisch noodzakelijk is om een veilige burgerinfrastructuur te beheren.';
+
+  @override
+  String get termsP1S1Title => '1. Verwerkingsverantwoordelijke';
+
+  @override
+  String get termsP1S1Text =>
+      'De juridische operator is tijdelijk FO&WO VENTURES SP. Z O.O. (BV), gevestigd in Wrocław, Polen. Contact: jacek@lustra.dev';
+
+  @override
+  String get termsP1S2Title => '2. Wat we verzamelen';
+
+  @override
+  String get termsP1S2B1Title => 'Account (E-mail/UID):';
+
+  @override
+  String get termsP1S2B1Text =>
+      'Noodzakelijk voor veilig inloggen via Firebase Authentication.';
+
+  @override
+  String get termsP1S2B2Title => 'Stemmen & Peilingen (Geanonimiseerd):';
+
+  @override
+  String get termsP1S2B2Text =>
+      'Jouw stemmen bouwen de statistieken op. Ze zijn uitsluitend aan je account gekoppeld om botfarms en dubbel stemmen te voorkomen. Publiekelijk worden je stemmen ALLEEN weergegeven als anonieme aggregaten (totalen). Het daadwerkelijke stemrecord wordt cryptografisch gehasht om je identiteit te scheiden van je politieke keuze.';
+
+  @override
+  String get termsP1S2B3Title => 'Gevolgde Wetten & Pushmeldingen:';
+
+  @override
+  String get termsP1S2B3Text =>
+      'Als je ervoor kiest om een wet te volgen of je te abonneren op een Samengestelde Lijst (Watchlist), gebruiken we Firebase Cloud Messaging (FCM) Topics van Google. Hierdoor kunnen we je pushmeldingen sturen over statuswijzigingen zonder voortdurend je locatie of apparaatidentiteit te volgen.';
+
+  @override
+  String get termsP1S2B4Title => 'Bewaartermijn van stemmen:';
+
+  @override
+  String get termsP1S2B4Text =>
+      'Stemgegevens worden bewaard voor de duur van de zittingstermijn van het parlement plus 5 jaar voor archiverings- en onderzoeksdoeleinden.';
+
+  @override
+  String get termsP1S2B5Title => 'Communicatie:';
+
+  @override
+  String get termsP1S2B5Text =>
+      'Als je expliciet toestemming geeft, sturen we je projectupdates via e-mail. Je kunt deze toestemming op elk moment intrekken.';
+
+  @override
+  String get termsP1S2B6Title => 'Burgerprojecten:';
+
+  @override
+  String get termsP1S2B6Text =>
+      'De inhoud van wetsvoorstellen die door jou worden ingediend, is volledig openbaar.';
+
+  @override
+  String get termsP1S2Highlight =>
+      '3. WAT WE NIET DOEN:\n\n❌ Wij verkopen GEEN data aan databrokers.\n❌ Wij gebruiken GEEN advertentietracking.\n❌ Wij profileren je NIET politiek voor commerciële doeleinden.';
+
+  @override
+  String get termsP1S3Title => '4. Infrastructuur & Veiligheid';
+
+  @override
+  String get termsP1S3B1Title => 'Locatie:';
+
+  @override
+  String get termsP1S3B1Text =>
+      'Data wordt veilig gehost op het Google Cloud Platform, Europe-West9 (Parijs).';
+
+  @override
+  String get termsP1S3B2Title => 'Anti-Bot:';
+
+  @override
+  String get termsP1S3B2Text =>
+      'We gebruiken Firebase App Check om de authenticiteit van de app te verifiëren en geautomatiseerde manipulatie te voorkomen.';
+
+  @override
+  String get termsP1S3B3Title => 'AI Privacy:';
+
+  @override
+  String get termsP1S3B3Text =>
+      'We sturen uitsluitend openbare overheidsdocumenten naar AI-modellen voor samenvattingen. Jouw privégegevens gaan NOOIT naar AI.';
+
+  @override
+  String get termsP1S4Title => '5. Kinderen & Account Verwijderen';
+
+  @override
+  String get termsP1S4P1 =>
+      'De dienst is bedoeld voor gebruikers van 16+. We verzamelen niet bewust gegevens van kinderen.';
+
+  @override
+  String get termsP1S4P2 =>
+      'Om je data te verwijderen: Gebruik de knop \"Account Verwijderen\" direct in de app-instellingen om je identificerende gegevens, e-mail en al je sub-collecties onmiddellijk van onze servers te wissen.';
+
+  @override
+  String get termsP1S5Title => '6. Jouw Rechten';
+
+  @override
+  String get termsP1S5Text =>
+      'Onder de AVG (GDPR) heb je het recht op toegang, rectificatie, verwijdering en bezwaar tegen de verwerking van je gegevens. Neem contact met ons op via het hierboven vermelde e-mailadres.';
+
+  @override
+  String get termsPart2Title => 'Deel 2: Communityregels (Servicevoorwaarden)';
+
+  @override
+  String get termsP2S1Title => '1. Operator en Missie';
+
+  @override
+  String get termsP2S1Text =>
+      'Lustra is een digitale publieke infrastructuur. Het bedrijf fungeert als een incubator: het keert geen dividenden uit, heeft geen externe investeerders en herinvesteert eventuele inkomsten direct terug in het onderhoud van de infrastructuur.';
+
+  @override
+  String get termsP2S2Title => '2. Code en Licentie (Source Available)';
+
+  @override
+  String get termsP2S2Intro =>
+      'De code van Lustra is een gemeengoed dat wordt beschermd tegen exploitatie door bedrijven.';
+
+  @override
+  String get termsP2S2B1Title => 'Model:';
+
+  @override
+  String get termsP2S2B1Text => 'PolyForm Noncommercial Licentie.';
+
+  @override
+  String get termsP2S2B2Title => 'Toegestaan:';
+
+  @override
+  String get termsP2S2B2Text =>
+      'Educatief, onderzoeks-, en non-profit/maatschappelijk gebruik.';
+
+  @override
+  String get termsP2S2B3Title => 'Verboden:';
+
+  @override
+  String get termsP2S2B3Text =>
+      'Bedrijven mogen ons werk niet gebruiken of er profijt uit trekken zonder expliciete toestemming van de community.';
+
+  @override
+  String get termsP2S3Title => '3. Roadmap voor Governance';
+
+  @override
+  String get termsP2S3Intro =>
+      'Ons langetermijndoel is volledige decentralisatie.';
+
+  @override
+  String get termsP2S3B1Title => 'Huidige staat:';
+
+  @override
+  String get termsP2S3B1Text => 'De Oprichter fungeert als Hoofdarchitect.';
+
+  @override
+  String get termsP2S3B2Title => 'Binnenkort:';
+
+  @override
+  String get termsP2S3B2Text =>
+      'Oprichting van een Burgerraad (Civic Board), direct gekozen door de gebruikers.';
+
+  @override
+  String get termsP2S3B3Title => 'Doel:';
+
+  @override
+  String get termsP2S3B3Text =>
+      'Implementatie van technische en juridische mechanismen zodat de community de controle over het platform kan overnemen in het geval van verraad aan de missie.';
+
+  @override
+  String get termsP2S4Title =>
+      '4. Programma voor Burgerwetsvoorstellen (Wet-Incubator)';
+
+  @override
+  String get termsP2S4Intro =>
+      'Wij bieden een ruimte voor burgers om de wetten te schrijven.';
+
+  @override
+  String get termsP2S4B1Title => 'Procedure:';
+
+  @override
+  String get termsP2S4B1Text =>
+      'Concepten worden ingediend via een formulier en formeel geverifieerd door de Operator.';
+
+  @override
+  String get termsP2S4B2Title => 'Publiek Domein:';
+
+  @override
+  String get termsP2S4B2Text =>
+      'Door een wetsvoorstel in te dienen, geef je het vrij onder de CC0-licentie (Publiek Domein). Het recht behoort aan iedereen toe.';
+
+  @override
+  String get termsP2S4B3Title => 'Vrijheid van Meningsuiting:';
+
+  @override
+  String get termsP2S4B3Text =>
+      'Wij oordelen niet over meningen of politieke voorkeuren. We wijzen alleen projecten af die het strafrecht schenden of aanzetten tot geweld.';
+
+  @override
+  String get termsP2S4B4Title => 'Verificatie:';
+
+  @override
+  String get termsP2S4B4Text =>
+      'Je moet staatsburger zijn van het land waar je een wetsvoorstel indient.';
+
+  @override
+  String get termsP2S5Title => '5. AI en Bronhiërarchie';
+
+  @override
+  String get termsP2S5Text =>
+      'AI is een hulpmiddel, geen orakel. AI helpt bij het navigeren door complexe juridische taal, maar kan fouten maken. De ultieme autoriteit is ALTIJD het originele PDF/XML-document waarnaar onderaan elke samenvatting in de app wordt gelinkt.';
+
+  @override
+  String get termsP2S6Title => '6. Veiligheid & Slotbepalingen';
+
+  @override
+  String get termsP2S6Text =>
+      'Aanvallen op de infrastructuur, DDoS en commerciële scraping zijn ten strengste verboden. Zaken die hierin niet zijn geregeld, vallen onder de Poolse wetgeving.';
+
+  @override
+  String get bpAppBar => 'Systeemarchitectuur';
+
+  @override
+  String get bpTitle =>
+      'Hoe we Regie in de Democratie Terugpakken met het Spiegelparlement: Handboek voor Burgers';
+
+  @override
+  String get bpIntroBig =>
+      'Het Grote Plaatje: Het huidige democratische systeem is een kapotte \"telefoon-game\" (doorfluistertje). We repareren het signaal door burgers via het Spiegelparlement (Lustra) direct aan te sluiten op het wetgevingsproces.';
+
+  @override
+  String get bpIntroSmall =>
+      'Waarom het belangrijk is: Momenteel stemmen we maar eens in de paar jaar. Tussen verkiezingen door hebben we nul controle. Lustra geeft ons elke dag een \"stoel aan tafel\".';
+
+  @override
+  String get bpS1Title => '1. HET PROBLEEM: Een Doorbroken Keten';
+
+  @override
+  String get bpS1P1 => 'Informatie stroomt één kant op en raakt vervormd.';
+
+  @override
+  String get bpS1Code =>
+      'Burgers kiezen politici\n   ↓\nPolitici vormen een Regering\n   ↓\nMedia interpreteren selectief regeringsacties\n   ↓\nBurgers krijgen feedback (vervormd)';
+
+  @override
+  String get bpS1Highlight =>
+      'Resultaat: We weten door juridisch jargon en mediaruis niet wat er echt gebeurt.';
+
+  @override
+  String get bpS2Title => '2. OPLOSSING: De Informatiestroom Repareren';
+
+  @override
+  String get bpS2P1 =>
+      'Lustra verwijdert de tussenpersonen. Het simuleert een echt machtscentrum waar je stem wordt vastgelegd over specifieke wetsvoorstellen, niet zomaar algemene peilingen.';
+
+  @override
+  String get bpS2FlowMedia => 'MEDIA (optionele waarnemer)';
+
+  @override
+  String get bpS2Flow1 => 'Burgers zien een conceptwet & beoordelen deze';
+
+  @override
+  String get bpS2Flow2 => 'Politici zien het resultaat van de burgerwil';
+
+  @override
+  String get bpS2Flow3 => 'Politici stemmen (gemonitord tegen de data)';
+
+  @override
+  String get bpS2Flow4 =>
+      'Burgers controleren: Heeft de politicus naar de data geluisterd?';
+
+  @override
+  String get bpS2Flow5 =>
+      'Burgers kiezen politici op basis van hun \"Gehoorzaamheidsscore\" (Obedience Score)';
+
+  @override
+  String get bpS2Flow6 => 'Er wordt een nieuwe Regering gevormd.';
+
+  @override
+  String get bpS2FlowLoop => 'CYCLUS HERHAALT ZICH';
+
+  @override
+  String get bpS3Title => '3. HOE HET WERKT';
+
+  @override
+  String get bpS3ATitle => 'Stap A: De Taalbarrière Slechten (Vertaling)';
+
+  @override
+  String get bpS3AP1 =>
+      'De meeste wetten zijn saai en onleesbaar. Lustra repareert de Toegankelijkheidskloof.';
+
+  @override
+  String get bpS3AP2 =>
+      'Voordeel: 20 seconden om de feiten te begrijpen. Geen jargon.';
+
+  @override
+  String get bpS3BTitle => 'Stap B: Kennisdistributie (De Fact Card)';
+
+  @override
+  String get bpS3BP1 =>
+      'Lustra heeft geen miljoenen gebruikers nodig om te werken. Het is genoeg dat Jij er bent.';
+
+  @override
+  String get bpS3BList1Title => 'Jouw actie:';
+
+  @override
+  String get bpS3BList1Text =>
+      'Je komt binnen, ziet een onderwerp en genereert met één klik een Fact Card.';
+
+  @override
+  String get bpS3BList2Title => 'Bereik:';
+
+  @override
+  String get bpS3BList2Text =>
+      'Automatisch delen op je sociale media (FB, X, IG, etc.).';
+
+  @override
+  String get bpS3BList3Title => 'Effect:';
+
+  @override
+  String get bpS3BList3Text =>
+      'Je vrienden krijgen een gefactcheckte \"kant-en-klare maaltijd\" zonder de app te hoeven hebben. Je wordt een onafhankelijke informatiebron.';
+
+  @override
+  String get bpS3BExample => 'Voorbeeld:';
+
+  @override
+  String get bpS3CTitle => 'Stap C: Regie Terugpakken (De Druk)';
+
+  @override
+  String get bpS3CP1 =>
+      'Politici en bedrijven negeren \"internetstormen\" omdat ze chaotisch zijn, makkelijk te censureren en snel weer verdwijnen.';
+
+  @override
+  String get bpS3CList1Title => 'Oplossing:';
+
+  @override
+  String get bpS3CList1Text =>
+      'Geverifieerde Sociale Peilingen. Je stem is gekoppeld aan een specifieke, officiële document-ID.';
+
+  @override
+  String get bpS3CList2Title => 'Verschil:';
+
+  @override
+  String get bpS3CList2Text =>
+      'Dit zijn geen petities die verlopen. Dit zijn harde handtekeningen van geverifieerde accounts.';
+
+  @override
+  String get bpS3CP2 =>
+      'Als 50.000 mensen tegen een wet stemmen, ontstaat er hard bewijs van een gebrek aan maatschappelijke steun. Dit kan niet worden \"toegedekt\" door een tv-narratief.';
+
+  @override
+  String get bpS4Title => '4. BURGEROFFENSIEF: Wij Schrijven de Wetten';
+
+  @override
+  String get bpS4P1 => 'Negeert de regering een probleem? Wij wachten niet.';
+
+  @override
+  String get bpS4List1Title => 'Burgerwetsvoorstellen:';
+
+  @override
+  String get bpS4List1Text =>
+      'We maken onze eigen wetsvoorstellen en verzamelen digitale handtekeningen.';
+
+  @override
+  String get bpS4List2Title => 'De Valstrik:';
+
+  @override
+  String get bpS4List2Text =>
+      'Als ze een populaire wet op technische gronden afwijzen, passen we amendementen toe en dienen we hem opnieuw in.';
+
+  @override
+  String get bpS4List3Title => 'De Keuze:';
+
+  @override
+  String get bpS4List3Text =>
+      'Het negeren van een kant-en-klare, populaire oplossing bewijst kwade trouw. Het geeft de oppositie een gratis wapen om het electoraat over te nemen.';
+
+  @override
+  String get bpS4CtaTitle => 'Steun deze Burgerwetsvoorstellen NU!';
+
+  @override
+  String get bpS4CtaP1 =>
+      'Klik hieronder om voorgestelde wetgeving te beoordelen en erop te stemmen:';
+
+  @override
+  String get bpS4Card1Title => 'Epstein-klasse Financieringsstop Wet';
+
+  @override
+  String get bpS4Card1Desc =>
+      'Snijdt publieke financiering af voor figuren die betrokken zijn bij mensenhandel en mensenrechtenschendingen.';
+
+  @override
+  String get bpS4Card2Title => 'Amendement voor Ambtstermijnlimieten';
+
+  @override
+  String get bpS4Card2Desc =>
+      'Stelt een strikte limiet in op de lengte van een carrière in het Parlement.';
+
+  @override
+  String get bpS4Card3Title => 'Wet op Parlementaire Ethiek';
+
+  @override
+  String get bpS4Card3Desc =>
+      'Implementeert een verbod op aandelenhandel voor actieve parlementsleden.';
+
+  @override
+  String get bpS5Title => '5. EINDRESULTAAT: Politieke Zuivering';
+
+  @override
+  String get bpS5P1 =>
+      'Geen verstoppertje meer. Het debat keert terug naar waar de mensen zijn: naar sociale media, maar dan met nieuwe regels. Dit is de vervulling van de oorspronkelijke belofte van het internet waar het systeem bang voor was: gedecentraliseerde controle over de macht.';
+
+  @override
+  String get bpS5P2 =>
+      'Het Spiegelparlement doet het licht aan in een donkere kamer, we dwingen TRANSPARANTIE af. Een politicus kan niet liegen dat \"de mensen dit willen\" als de data iets anders laat zien. Nieuwe wetten dienen het algemeen publiek, niet het kapitaal.';
+
+  @override
+  String get bpS5P3 =>
+      'We vragen politici niet om te veranderen. We creëren een systeem waarin liegen over publieke steun onmogelijk wordt. Dit is een datagestuurde democratie.';
+
+  @override
+  String get bpS5Highlight =>
+      'Dit is een introductie tot directe democratie, gebaseerd op een bewuste, geïnformeerde stem en niet op emoties.';
+
+  @override
+  String get caAppBar => 'Burger-Audit';
+
+  @override
+  String get caTitle =>
+      'Burger-Audit: Nieuw Systeem voor een Betere Democratie';
+
+  @override
+  String get caIntro =>
+      'Niemand evalueert het wetgevingsproces behalve een paar mensen achter gesloten deuren en af en toe een onafhankelijke journalist die corruptie blootlegt. Als gevolg daarvan raakt wetgeving vaak losgekoppeld van de behoeften van de burger, waarbij politieke of zakelijke belangen prioriteit krijgen boven maatschappelijke aanpassing. Ons einddoel is simpel: een samenleving die stemt over daadwerkelijk beleid, in plaats van alleen maar individuele politici te kiezen in de hoop dat ze hun beloften nakomen. Het Spiegelparlement is gebouwd om deze overgang makkelijk en haalbaar te maken.';
+
+  @override
+  String get caS1Title => 'Hoe verschilt de Burger-Audit van Petities?';
+
+  @override
+  String get caS1PetitionsTitle => 'Traditionele Petities';
+
+  @override
+  String get caS1PetitionsText =>
+      'Petities werken zelden vanwege hun vluchtige aard. Na het verzamelen van handtekeningen eindigt de campagne. Het is in wezen een beleefd verzoek aan een persoon met macht. Omdat dit tijdsgebonden campagnes zijn die afhankelijk zijn van een korte mediacyclus, kunnen politici ze makkelijk negeren. Ze wachten gewoon tot de media het narratief veranderen, en de petitie is vergeten.';
+
+  @override
+  String get caS1LustraTitle => 'Lustra Burgerwil';
+
+  @override
+  String get caS1LustraText =>
+      'Wij vragen niet. In Lustra is je stem niet zomaar een handtekening - hij is permanent verankerd aan een harde, officiële wetgevings-ID. Het markeert jouw exacte standpunt over specifiek beleid. Al deze stemmen vormen samen de Burgerwil (Civic Will): een real-time meter die precies laat zien hoe burgers een project beoordelen, en zo de lus van de Burger-Audit sluit.';
+
+  @override
+  String get caS2Title => 'Waarom zou dit Politici Iets Schelen?';
+
+  @override
+  String get caS2Text =>
+      'Omdat ze zich niet meer kunnen verstoppen.\n\nWe leggen elke officiële stemming in de regering vast en benchmarken deze direct met de Burgerwil. Ze kunnen niet meer liegen dat \"de mensen dit willen\" alleen omdat ze een slimme mediacampagne hebben gevoerd. Als ze stemmen over iets dat een lobbygroep ten goede komt in plaats van burgers, komen we daar direct achter. Hoe meer mensen Lustra gebruiken om deze hiaten bloot te leggen, hoe moeilijker het wordt voor politici om het narratief te manipuleren. We pakken de controle terug.';
+
+  @override
+  String get caS3Title => 'Het Mooiste Deel: Asymmetrische Macht';
+
+  @override
+  String get caS3P1 =>
+      'We hebben traditionele media niet nodig zoals lobbyisten dat hebben. We hebben niet eens 5 miljoen gebruikers in de app nodig om de democratie te updaten. We hebben alleen jou nodig.\n\nJe hebt al bereik buiten Lustra: op Facebook, TikTok, X of elders. We kunnen van sociale media eindelijk iets zinvols maken. Eén gebruiker die een wet deelt, kan met vrijwel geen moeite gemakkelijk 100-1.000 weergaven genereren. Dat is een klein stadion aan mensen dat leert over een cruciaal stuk wetgeving of een burgerinitiatief.';
+
+  @override
+  String get caS3MathSubtitle => 'WISKUNDE VAN ASYMMETRISCHE OORLOGSVOERING';
+
+  @override
+  String get caS3P2 =>
+      'Denk aan de wiskunde: een actieve zakelijke denktank of lobbygroep bestaat misschien uit 10-15 mensen met geld als enige hefboom om politieke gunsten te kopen. Jullie 10.000 geverifieerde stemmen van echte burgers kunnen hen overmeesteren. We kunnen precies doen wat lobbyisten doen, maar dan sneller, transparant en met overweldigende aantallen. De tijden zijn veranderd.';
+
+  @override
+  String get caS4Title => 'Wie Bepaalt de Feed? Jij.';
+
+  @override
+  String get caS4Text =>
+      'Traditionele media en Big Tech algoritmes optimaliseren voor verontwaardiging om advertenties te verkopen. Het algoritme van Lustra is strikt democratisch. Wij hebben geen redacteuren die bepalen wat \"belangrijk\" is. Onze hoofdfeed evalueert automatisch de laatste 30 dagen aan wetgeving, isoleert de top 5 wetten met de hoogste burgerbetrokkenheid en roteert deze in de spotlight. Jullie stemmen bepalen de informatiehiërarchie. Jij beheert het algoritme.';
+
+  @override
+  String get caS5Title => 'Het Arsenaal: Hoe gebruik je \"Fact Cards\"';
+
+  @override
+  String get caS5Intro =>
+      'Wetgeving is met opzet saai. Het is nooit bedoeld geweest voor het grote publiek. Daarom creëren de media er emotionele narratieven omheen om advertenties te verkopen. Jij kunt ook narratieven creëren - maar de jouwe zullen gebouwd zijn op ruwe, samengevatte, geverifieerde data.\n\nLustra produceert Fact Cards (Feitenkaarten). Elke keer dat je op \"Delen\" klikt, wordt er een strakke afbeelding gegenereerd op basis van officiële data. Op zichzelf is het slechts een feit. Op sociale media moeten feiten worden uitgelegd. Jij bent degene die het uitlegt. Hier is exact hoe je ze gebruikt om virale content met grote impact te creëren:';
+
+  @override
+  String get caS5A_Title => 'A/ De Hook (Creëer de Invalshoek)';
+
+  @override
+  String get caS5A_Text =>
+      'De makkelijkste optie is meestal de meest herkenbare. Heb je een nieuwe Internetcensuurwet in de app gevonden? Maak het niet te ingewikkeld. Creëer een sterke kop (een \"hook\"), vertel de mensen precies hoe het hen raakt en drop de directe link naar Lustra zodat ze kunnen stemmen.';
+
+  @override
+  String get caS5B_Title => 'B/ Het Bewijs (Voor Essays & Threads)';
+
+  @override
+  String get caS5B_Text =>
+      'Afbeeldingen zijn geweldige toevoegingen aan langere posts of threads. Wil je kritieke fouten in een wetsvoorstel aankaarten of de officiële samenvatting van de regering confronteren? Voeg de Fact Card toe als onweerlegbaar bewijs. Laat mensen de steriele data zelf in 15 seconden lezen.';
+
+  @override
+  String get caS5C_Title => 'C/ De Uitzending (TikTok/Reels)';
+
+  @override
+  String get caS5C_Text =>
+      'Gebruik de afbeelding van de Fact Card met een \"green screen\"-effect op TikTok of Instagram. Zet de data van Lustra op de achtergrond en neem jezelf op terwijl je de kwestie uitlegt. Het is de perfecte, verifieerbare short-form content.';
+
+  @override
+  String get caS5D_Title => 'D/ Het Netwerk (Direct Messaging)';
+
+  @override
+  String get caS5D_Text =>
+      'Klik simpelweg op delen en stuur de afbeelding rechtstreeks naar je vrienden en familiegroepen. Vertel ze duidelijk: \"Dit is wat er momenteel gaande is in de regering\", of \"Dit is waar de media nu over zwijgen.\"';
+
+  @override
+  String get caS5Outro =>
+      'Contentproductie is makkelijk, en Lustra is je ontdekkingsmachine. Je bent niet zomaar een gebruiker. Je bent een early adopter van het nieuwe tijdperk van democratie vrij van corruptie. Je hebt dezelfde tools als een lobbyist – gebruik ze.';
+
+  @override
+  String get caSkepticTitle => 'Sceptisch over botfarms of dataprivacy?';
+
+  @override
+  String get caSkepticText =>
+      'Goed. Vertrouw niet op onze woorden - audit ons systeem. Lees precies hoe we cryptografische hashing, Firebase App Check en de PolyForm Noncommercial Licentie gebruiken om jouw identiteit en de integriteit van de Burgerwil te beschermen.';
+
+  @override
+  String get caSkepticBtnGov => 'Transparantie & Governance';
+
+  @override
+  String get caSkepticBtnPriv => 'Grondwet & Privacy';
+
+  @override
+  String get clAppBar => 'Watchlists';
+
+  @override
+  String get clTitle => 'Gecureerde Watchlists: Gedecentraliseerde Burgermedia';
+
+  @override
+  String get clIntro =>
+      'Regeringen gebruiken de enorme hoeveelheid wetgeving als wapen. Ze nemen honderden pagina\'s aan complexe wetten aan, begraven controversiële wetgeving vaak achter saaie titels of sluizen ze via de \"achterdeur\" naar binnen terwijl de media afgeleid is door het nieuwste politieke schandaal. Burgers verliezen het grotere plaatje uit het oog omdat het fysiek onmogelijk is om alles alleen te monitoren.';
+
+  @override
+  String get clS1Title => 'Patroonherkenning & Massamobilisatie';
+
+  @override
+  String get clS1P1 =>
+      'Met Gecureerde Watchlists kun je de chaos organiseren en als onafhankelijk informatieknooppunt optreden. Je kunt officiële regeringswetten mixen met basis burgerprojecten, ze groeperen op specifieke onderwerpen en anderen uitnodigen om zich te abonneren.';
+
+  @override
+  String get clS1P2 =>
+      'Cruciaal is dat een Watchlist werkt als een vermenigvuldiger voor de Burger-Audit. Je verzamelt niet alleen steun voor één geïsoleerde wet. Door tot 80 items te groeperen, wordt je lijst een toegewijde, gefocuste feed voor je volgers. Ze kunnen je lijst openen en hun stem uitbrengen op meerdere wetten in één sessie, waardoor er massaal harde data en Burgerwil wordt gegenereerd voor een hele beleidssector.';
+
+  @override
+  String get clS2Title => 'Hoe gebruik je Watchlists als Wapen:';
+
+  @override
+  String get clS2A_Title => 'Overheidswaakhonden';
+
+  @override
+  String get clS2A_Text =>
+      'Merk je dat de regering stilletjes een reeks techwetten probeert door te drukken die de privacy schenden? Groepeer ze in een \"Digitale Surveillance Watchlist\". Laat je abonnees de verborgen agenda zien die de media heeft gemist en laat ze op één plek tegen ze allemaal stemmen. Vraag ze om het te versterken door het te delen.';
+
+  @override
+  String get clS2B_Title => 'Platform voor Hervorming';
+
+  @override
+  String get clS2B_Text =>
+      'Klaag niet alleen over de economie. Bouw een complete, uit meerdere wetten bestaande \"Economische Hervormingslijst\" die je eigen burgerprojecten mixt met officiële amendementen. Presenteer een volledig gestructureerd politiek platform.';
+
+  @override
+  String get clS2C_Title => 'In de Spotlight';
+
+  @override
+  String get clS2C_Text =>
+      'Je kunt een specifieke wet als \"Favoriet\" op je lijst vastzetten om maximale burgeraandacht en stemkracht precies daarheen te leiden waar dat het hardst nodig is.';
+
+  @override
+  String get clS3Title =>
+      'Het Mooiste Deel: Jij Bent de Eigenaar van de Uitzending';
+
+  @override
+  String get clS3Text =>
+      'Social media algoritmes onderdrukken constant externe links om gebruikers te laten scrollen. Lustra omzeilt dit. Wanneer mensen zich abonneren op jouw Watchlist, omzeil je Big Tech volledig. Je krijgt een handmatige \"Push\"-knop. Eens in de 24 uur kun je een directe mobiele notificatie sturen naar al je abonnees, om ze te waarschuwen je lijst te checken omdat er een cruciale stemming plaatsvindt of een nieuwe wet is toegevoegd. Jij beheert de distributie.';
+
+  @override
+  String get clS4Title => 'De Creator Economy voor Democratie';
+
+  @override
+  String get clS4Text =>
+      'Goede curatie is extreem waardevol. Het filteren van politieke ruis kost tijd en expertise. Daarom stelt Lustra je in staat om je persoonlijke Fooienpot (Tip Jar) direct aan je Watchlist te koppelen. Als jij het zware werk doet om de regering te monitoren en het publiek voor te lichten, kunnen je abonnees je inspanningen direct financieren. Wij pakken geen commissie.';
+
+  @override
+  String get clS5Title => 'Implementatie: Hoe te Beginnen';
+
+  @override
+  String get clS5Intro =>
+      'Dit is geen passieve feature. Je moet het actief opbouwen. Hier is de exacte instructie om je eerste Watchlist uit te rollen:';
+
+  @override
+  String get clStep1Title => 'Stap 1: Initialiseren';
+
+  @override
+  String get clStep1Text =>
+      'Navigeer naar het hoofdscherm en klik op het Tandwiel-icoon (Instellingen) in de bovenhoek. Selecteer de optie om je eerste Watchlist te maken. Geef het een duidelijke titel.';
+
+  @override
+  String get clStep2Title => 'Stap 2: Curator Modus';
+
+  @override
+  String get clStep2Text =>
+      'Zodra je lijst is geïnitialiseerd, geeft het systeem je de status van Curator. Blader nu door de hoofdfeed. In het detailscherm van elke wet of burgerproject verschijnt een nieuwe knop \"Aan lijst toevoegen\". Klik erop om die specifieke wet direct in je lijst te injecteren.';
+
+  @override
+  String get clStep3Title => 'Stap 3: Feed Injectie';
+
+  @override
+  String get clStep3Text =>
+      'Je Watchlist overspoelt de hoofdfeed niet. In plaats daarvan fungeert de ene wet die je als \"Favoriet\" hebt geselecteerd als je ambassadeur. Deze ene kaart wordt direct geïnjecteerd in de dagelijkse feed van je abonnees, naadloos verweven met officiële overheidswetgeving. Het wordt met exact dezelfde prioriteit weergegeven als officiële overheidswetten. We plaatsen burgerlijk toezicht op gelijke voet met de staat.';
+
+  @override
+  String get clLimitsTitle => 'SYSTEEMLIMIETEN (SIGNAAL BOVEN RUIS)';
+
+  @override
+  String get clLimit1Label => 'AUTEURSVERMELDING';
+
+  @override
+  String get clLimit1Desc =>
+      'Max actieve lijsten per regering (Je kunt ze op elk moment verwijderen en nieuwe uitrollen).';
+
+  @override
+  String get clLimit2Label => 'CAPACITEIT';
+
+  @override
+  String get clLimit2Desc =>
+      'Max wetten per lijst (Meer dan genoeg om een patroon bloot te leggen, strikt genoeg om informatie-overload te voorkomen).';
+
+  @override
+  String get clLimit3Label => 'ABONNEMENTEN';
+
+  @override
+  String get clLimit3Desc =>
+      'Max lijsten die je kunt volgen van andere creators.';
+
+  @override
+  String get clOutro =>
+      'Lustra is geen sociaal netwerk dat gratis algoritmisch bereik genereert voor jouw lijst. Watchlists werken alleen op uitnodiging. Je moet je unieke link extern delen. Haal je publiek van X, YouTube, TikTok of je nieuwsbrief. Wij geven je geen volgers; wij geven je de infrastructuur om je bestaande volgers om te zetten in een geverifieerde, stemmende burgerkracht - en een manier om direct gefinancierd te worden voor je harde werk. Stop met je publiek om \"likes\" te vragen. Geef ze een tool om in actie te komen.';
+
+  @override
+  String get supportFundTitle => 'Fase 1: Oprichting Non-Profit Entiteit';
+
+  @override
+  String get supportFundDesc =>
+      'Om de Lustra Foundation officieel op te richten, het intellectueel eigendom te beschermen en de juridische opstartkosten te dekken, moeten we startkapitaal verzamelen. Help ons dit systeem voor altijd onafhankelijk te maken.';
+
+  @override
+  String get supportFundDisclaimer =>
+      'Datatransparantie: Vanwege verschillende betalingsgateways en infrastructuurkosten wordt deze voortgangsbalk handmatig bijgewerkt door de oprichter (max. één keer per week).';
 }

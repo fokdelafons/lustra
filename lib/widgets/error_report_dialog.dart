@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_functions/cloud_functions.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:lustra/l10n/app_localizations.dart';
 import '../services/api_service.dart';
 import '../../widgets/osint_loader.dart';
 import 'package:provider/provider.dart';

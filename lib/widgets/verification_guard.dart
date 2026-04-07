@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lustra/services/firebase_auth.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:lustra/l10n/app_localizations.dart';
 
 Future<bool> checkVerificationOrShowDialog(BuildContext context) async {
   final authService = Provider.of<AuthService>(context, listen: false);

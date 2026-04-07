@@ -8,7 +8,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:lustra/widgets/verification_guard.dart';
 import 'package:lustra/providers/interaction_provider.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:lustra/l10n/app_localizations.dart';
 import 'package:lustra/providers/user_provider.dart';
 
 import '../models/legislation.dart';

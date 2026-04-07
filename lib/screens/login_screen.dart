@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../services/firebase_auth.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:lustra/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import '../services/parliament_manager.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';

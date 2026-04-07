@@ -1,12 +1,12 @@
 # Lustra - Mirror Parliament 🏛️
 
-[![License: PolyForm Noncommercial](https://img.shields.io/badge/License-PolyForm%20Noncommercial-blue.svg)](https://polyformproject.org/licenses/noncommercial/1.0.0/)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Flutter](https://img.shields.io/badge/Built%20with-Flutter-02569B.svg)](https://flutter.dev)
 [![Platform](https://img.shields.io/badge/Platform-Web%20%7C%20iOS%20%7C%20Android-lightgrey.svg)](https://lustra.news)
 
 **Lustra** is a digital public infrastructure designed to track legislation and empower civic oversight. It parses raw government data, uses AI to generate neutral summaries, and provides a civic platform for voting on bills and drafting citizen initiative legislation. It's meant to transform democracies from indirect to direct.
 
-👉 **Live App:** [lustra.news](https://lustra.news)
+👉 **Live:** [lustra.news](https://lustra.news)
 
 ---
 
@@ -62,11 +62,10 @@ If you have access to official APIs/JSONs for:
     ```
 
 ## 📄 License
-This project is **Source Available** under the **PolyForm Noncommercial License 1.0.0**.
-*   ✅ You are free to read, learn from, and fork this code for non-commercial, educational, or civic purposes.
-*   ❌ You may NOT use this code for commercial purposes without explicit permission.
+This project is licensed under the **GNU AGPLv3**.
 
-We chose this license to protect the project from corporate capture while keeping it open for the community.
+**Why AGPL?**
+Lustra is a "Digital Common". We chose the Affero General Public License (AGPL) to prevent private interests or large institutions from "internalizing" this civic infrastructure. If you run a modified version of Lustra as a network service, you **must** share your source code with the community. This ensures the tools of democracy remain in the hands of the people, forever.
 
 ## For AI Researchers & Civic Tech Builders
 See `/docs/` for technical specifications.

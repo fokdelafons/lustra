@@ -6,7 +6,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../models/parliament_source.dart';
 import '../../services/parliament_manager.dart';
 import '../../services/parliament_service_interface.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:lustra/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lustra/providers/language_provider.dart';
 import 'package:flutter/foundation.dart';

@@ -1,7 +1,7 @@
 name: lustra
 description: "Media reimagined"
 publish_to: 'none'
-version: 1.4.2+53
+version: 1.4.3+54
 
 environment:
   sdk: ^3.7.2
@@ -27,7 +27,7 @@ dependencies:
   flutter_svg: ^2.1.0
   transparent_image: ^2.0.1
   cloud_functions: ^6.0.6
-  intl: 0.19.0
+  intl: 0.20.2
   url_launcher: ^6.0.0
   google_sign_in: ^6.2.1
   widgets_to_image: ^2.0.1

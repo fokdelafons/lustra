@@ -6,7 +6,7 @@ import 'package:lustra/services/parliament_manager.dart';
 import 'package:lustra/services/parliament_service_interface.dart';
 import 'package:lustra/widgets/citizen_poll_widget.dart';
 import 'package:lustra/services/share_service.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:lustra/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:lustra/providers/language_provider.dart';
 import '../partially_expandable_list_widget.dart';

@@ -1,7 +1,7 @@
 // lib/screens/civic_audit_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:lustra/l10n/app_localizations.dart';
 import '../../services/app_router.dart'; // Zakładam istnienie Twojego routera (smartNavigate)
 
 class CivicAuditScreen extends StatelessWidget {

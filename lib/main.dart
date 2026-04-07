@@ -6,7 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:lustra/l10n/app_localizations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -156,7 +156,7 @@ class MyApp extends StatelessWidget {
 				appBarTheme: const AppBarTheme(
 					elevation: 0,
 				),
-				cardTheme: CardTheme(
+				cardTheme: CardThemeData(
 					shape: RoundedRectangleBorder(
 						borderRadius: BorderRadius.circular(8),
 					),
