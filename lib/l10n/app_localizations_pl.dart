@@ -1300,7 +1300,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get termsOfServiceContent =>
-      'ZASADY SPOŁECZNOŚCI LUSTRA\nData: 6 grudnia 2025\n\n1. OPERATOR I MISJA\nLustra to cyfrowa infrastruktura użyteczności publicznej. Operatorem prawnym (Opiekunem) jest FO&WO VENTURES SP. Z O.O. (LLC) z siedzibą we Wrocławiu. Spółka działa jako inkubator: nie wypłaca dywidend, nie ma zewnętrznych inwestorów, a przychody reinwestuje w infrastrukturę.\n\n2. KOD I LICENCJA (SOURCE AVAILABLE)\nKod Lustry jest dobrem wspólnym, ale chronionym przed wyzyskiem.\n• Model: PolyForm Noncommercial.\n• Co wolno: Używać kodu w celach edukacyjnych, badawczych i non-profit.\n• Czego nie wolno: Korporacje nie mogą czerpać zysków z naszej pracy bez zgody społeczności.\n\n3. MAPA DROGOWA WŁADZY\nNasz cel to decentralizacja.\n• Obecnie: Założyciel (Jacek) podejmuje decyzje operacyjne jako Główny Architekt.\n• Wkrótce: Powołanie Rady Społeczności wybieranej przez użytkowników.\n• Cel: Wdrożenie mechanizmów pozwalających społeczności na przejęcie kontroli w przypadku sprzeniewierzenia się misji.\n\n4. PROGRAM PROJEKTÓW OBYWATELSKICH\nTo inkubator prawa.\n• Procedura: Projekty zgłaszasz przez formularz. Przechodzą weryfikację formalną przez Operatora.\n• Licencja CC0: Zgłaszając projekt, przekazujesz go do Domeny Publicznej. Prawo należy do wszystkich.\n• Wolność słowa: Nie oceniamy poglądów. Odrzucamy jedynie projekty łamiące prawo karne.\n• Weryfikacja: Musisz być obywatelem kraju, w którym zgłaszasz projekt.\n\n5. AI I HIERARCHIA ŹRÓDEŁ\n• Rola AI: Sztuczna inteligencja pomaga nawigować w prawie, ale może popełniać błędy.\n• Źródło: Ostatecznym autorytetem jest zawsze oryginalny dokument PDF (linkowany w aplikacji).\n\n6. BEZPIECZEŃSTWO\n• Wiek: Aplikacja dla osób 16+.\n• Zakazy: Zabrania się atakowania infrastruktury oraz automatycznego pobierania danych (scraping) w celach komercyjnych.\n\n7. POSTANOWIENIA KOŃCOWE\nW sprawach nieuregulowanych decyduje prawo polskie.';
+      'ZASADY SPOŁECZNOŚCI LUSTRA\nData: 6 grudnia 2025\n\n1. OPERATOR I MISJA\nLustra to cyfrowa infrastruktura użyteczności publicznej. Operatorem prawnym (Opiekunem) jest FO&WO VENTURES SP. Z O.O. (LLC) z siedzibą we Wrocławiu. Spółka działa jako inkubator: nie wypłaca dywidend, nie ma zewnętrznych inwestorów, a przychody reinwestuje w infrastrukturę.\n\n2. KOD I LICENCJA (SOURCE AVAILABLE)\nKod Lustry jest dobrem wspólnym, ale chronionym przed wyzyskiem.\n• Model: Open Source (AGPLv3).\n• Co wolno: Używać kodu w celach edukacyjnych, badawczych i non-profit.\n• Czego nie wolno: Korporacje nie mogą czerpać zysków z naszej pracy bez zgody społeczności.\n\n3. MAPA DROGOWA WŁADZY\nNasz cel to decentralizacja.\n• Obecnie: Założyciel (Jacek) podejmuje decyzje operacyjne jako Główny Architekt.\n• Wkrótce: Powołanie Rady Społeczności wybieranej przez użytkowników.\n• Cel: Wdrożenie mechanizmów pozwalających społeczności na przejęcie kontroli w przypadku sprzeniewierzenia się misji.\n\n4. PROGRAM PROJEKTÓW OBYWATELSKICH\nTo inkubator prawa.\n• Procedura: Projekty zgłaszasz przez formularz. Przechodzą weryfikację formalną przez Operatora.\n• Licencja CC0: Zgłaszając projekt, przekazujesz go do Domeny Publicznej. Prawo należy do wszystkich.\n• Wolność słowa: Nie oceniamy poglądów. Odrzucamy jedynie projekty łamiące prawo karne.\n• Weryfikacja: Musisz być obywatelem kraju, w którym zgłaszasz projekt.\n\n5. AI I HIERARCHIA ŹRÓDEŁ\n• Rola AI: Sztuczna inteligencja pomaga nawigować w prawie, ale może popełniać błędy.\n• Źródło: Ostatecznym autorytetem jest zawsze oryginalny dokument PDF (linkowany w aplikacji).\n\n6. BEZPIECZEŃSTWO\n• Wiek: Aplikacja dla osób 16+.\n• Zakazy: Zabrania się atakowania infrastruktury oraz automatycznego pobierania danych (scraping) w celach komercyjnych.\n\n7. POSTANOWIENIA KOŃCOWE\nW sprawach nieuregulowanych decyduje prawo polskie.';
 
   @override
   String get privacyPolicyContent =>
@@ -1399,7 +1399,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get techFooterDate => 'Data aktualizacji Q1 2026';
 
   @override
-  String get techFooterLicense => 'PolyForm Noncommercial License';
+  String get techFooterLicense => 'Open Source (AGPLv3)';
 
   @override
   String get techGraphSource => 'Legislation Source';
@@ -2561,7 +2561,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get aboutGovSec3Bullet2Text =>
-      'Główne repozytoria są publiczne na licencji PolyForm Noncommercial. Chroni to projekt przed klonowaniem przez korporacje, ale adaptery danych, prompty systemowe AI i logika są w pełni widoczne do audytu.';
+      'Główne repozytoria są publiczne na licencji Open Source (AGPLv3). Chroni to projekt przed klonowaniem przez korporacje, ale adaptery danych, prompty systemowe AI i logika są w pełni widoczne do audytu.';
 
   @override
   String get aboutGovSec3BoxTitle => 'Potrzebujemy pomocy.';
@@ -2756,7 +2756,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get termsP2S2B1Title => 'Model:';
 
   @override
-  String get termsP2S2B1Text => 'Licencja PolyForm Noncommercial.';
+  String get termsP2S2B1Text => 'Licencja Open Source (AGPLv3).';
 
   @override
   String get termsP2S2B2Title => 'Dozwolone:';
@@ -3156,7 +3156,7 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get caSkepticText =>
-      'To dobrze. Nie ufaj naszym słowom - zrób audyt naszego systemu. Przeczytaj dokładnie, jak używamy haszowania kryptograficznego, Firebase App Check i licencji PolyForm Noncommercial, aby chronić Twoją tożsamość i integralność Woli Obywatelskiej.';
+      'To dobrze. Nie ufaj naszym słowom - zrób audyt naszego systemu. Przeczytaj dokładnie, jak używamy haszowania kryptograficznego, Firebase App Check i licencji Open Source (AGPLv3), aby chronić Twoją tożsamość i integralność Woli Obywatelskiej.';
 
   @override
   String get caSkepticBtnGov => 'Przejrzystość i Zarządzanie';

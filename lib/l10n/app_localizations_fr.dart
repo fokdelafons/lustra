@@ -1309,7 +1309,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get termsOfServiceContent =>
-      'RÈGLES DE LA COMMUNAUTÉ LUSTRA\nDate : 6 décembre 2025\n\n1. OPÉRATEUR ET MISSION\nLustra est une infrastructure publique numérique. L\'opérateur légal (Gardien) est FO&WO VENTURES SP. Z O.O. (LLC). La société agit comme incubateur : pas de dividendes, pas d\'investisseurs externes, réinvestissement des revenus dans l\'infrastructure.\n\n2. CODE ET LICENCE (SOURCE AVAILABLE)\nLe code est un bien commun.\n• Modèle : PolyForm Noncommercial.\n• Autorisé : Usage éducatif, recherche, non lucratif.\n• Interdit : Les entreprises ne peuvent pas profiter de notre travail sans consentement.\n\n3. FEUILLE DE ROUTE GOUVERNANCE\nObjectif : décentralisation.\n• Actuel : Le Fondateur (Jacek) est Architecte Principal.\n• Bientôt : Création d\'un Conseil Civique élu par les utilisateurs.\n• But : Mécanismes permettant à la communauté de prendre le contrôle en cas de trahison de la mission.\n\n4. PROJETS CITOYENS\nUn incubateur de lois.\n• Procédure : Soumission par formulaire, vérification formelle par l\'Opérateur.\n• Licence CC0 : Vous libérez le projet dans le Domaine Public. La loi appartient à tous.\n• Liberté d\'expression : Nous ne jugeons pas les opinions. Nous rejetons uniquement les projets violant le droit pénal.\n• Vérification : Vous devez être citoyen du pays concerné.\n\n5. IA ET SOURCES\n• Rôle IA : L\'IA aide à naviguer mais peut faire des erreurs.\n• Source : L\'autorité ultime est toujours le PDF original.\n\n6. SÉCURITÉ\n• Âge : Utilisateurs 16+.\n• Interdictions : Attaques d\'infrastructure et scraping commercial interdits.\n\n7. DISPOSITIONS FINALES\nRégies par le droit polonais.';
+      'RÈGLES DE LA COMMUNAUTÉ LUSTRA\nDate : 6 décembre 2025\n\n1. OPÉRATEUR ET MISSION\nLustra est une infrastructure publique numérique. L\'opérateur légal (Gardien) est FO&WO VENTURES SP. Z O.O. (LLC). La société agit comme incubateur : pas de dividendes, pas d\'investisseurs externes, réinvestissement des revenus dans l\'infrastructure.\n\n2. CODE ET LICENCE (SOURCE AVAILABLE)\nLe code est un bien commun.\n• Modèle : Open Source (AGPLv3).\n• Autorisé : Usage éducatif, recherche, non lucratif.\n• Interdit : Les entreprises ne peuvent pas profiter de notre travail sans consentement.\n\n3. FEUILLE DE ROUTE GOUVERNANCE\nObjectif : décentralisation.\n• Actuel : Le Fondateur (Jacek) est Architecte Principal.\n• Bientôt : Création d\'un Conseil Civique élu par les utilisateurs.\n• But : Mécanismes permettant à la communauté de prendre le contrôle en cas de trahison de la mission.\n\n4. PROJETS CITOYENS\nUn incubateur de lois.\n• Procédure : Soumission par formulaire, vérification formelle par l\'Opérateur.\n• Licence CC0 : Vous libérez le projet dans le Domaine Public. La loi appartient à tous.\n• Liberté d\'expression : Nous ne jugeons pas les opinions. Nous rejetons uniquement les projets violant le droit pénal.\n• Vérification : Vous devez être citoyen du pays concerné.\n\n5. IA ET SOURCES\n• Rôle IA : L\'IA aide à naviguer mais peut faire des erreurs.\n• Source : L\'autorité ultime est toujours le PDF original.\n\n6. SÉCURITÉ\n• Âge : Utilisateurs 16+.\n• Interdictions : Attaques d\'infrastructure et scraping commercial interdits.\n\n7. DISPOSITIONS FINALES\nRégies par le droit polonais.';
 
   @override
   String get privacyPolicyContent =>
@@ -1408,7 +1408,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get techFooterDate => 'Date de mise à jour Q1 2026';
 
   @override
-  String get techFooterLicense => 'PolyForm Noncommercial License';
+  String get techFooterLicense => 'Open Source (AGPLv3) License';
 
   @override
   String get techGraphSource => 'Legislation Source';
@@ -2584,7 +2584,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get aboutGovSec3Bullet2Text =>
-      'Les dépôts principaux sont publics sous la licence PolyForm Noncommercial. Elle protège contre le clonage par des entreprises, mais les adaptateurs de données, les prompts système de l\'IA et la logique sont entièrement visibles pour être audités.';
+      'Les dépôts principaux sont publics sous la licence Open Source (AGPLv3). Elle protège contre le clonage par des entreprises, mais les adaptateurs de données, les prompts système de l\'IA et la logique sont entièrement visibles pour être audités.';
 
   @override
   String get aboutGovSec3BoxTitle => 'Nous avons besoin d\'aide.';
@@ -2781,7 +2781,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get termsP2S2B1Title => 'Modèle :';
 
   @override
-  String get termsP2S2B1Text => 'Licence PolyForm Noncommercial.';
+  String get termsP2S2B1Text => 'Licence Open Source (AGPLv3).';
 
   @override
   String get termsP2S2B2Title => 'Autorisé :';
@@ -3191,7 +3191,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get caSkepticText =>
-      'Tant mieux. Ne croyez pas nos mots - auditez notre système. Lisez exactement comment nous utilisons le hachage cryptographique, Firebase App Check et la Licence PolyForm Noncommercial pour protéger votre identité et l\'intégrité de la Volonté Civique.';
+      'Tant mieux. Ne croyez pas nos mots - auditez notre système. Lisez exactement comment nous utilisons le hachage cryptographique, Firebase App Check et la Licence Open Source (AGPLv3) pour protéger votre identité et l\'intégrité de la Volonté Civique.';
 
   @override
   String get caSkepticBtnGov => 'Transparenz & Gouvernance';

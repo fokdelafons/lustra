@@ -42,7 +42,7 @@ class CivicProjectScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(
                     l10n.civicIncubatorTitle,
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w900, color: Colors.black87, height: 1.2),
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, color: Colors.black87, height: 1.2),
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -305,7 +305,7 @@ void _showManualEmailDialog(BuildContext context, AppLocalizations l10n, String 
               Expanded(
                 child: Text(
                   content,
-                  style: const TextStyle(fontSize: 14, fontFamily: "Courier New"),
+                  style: const TextStyle(fontSize: 14, fontFamily: "Roboto"),
                   maxLines: isMultiline ? 8 : 1,
                 ),
               ),
@@ -547,7 +547,7 @@ class _CodeBlock extends StatelessWidget {
           ),
           child: Text(
             code,
-            style: const TextStyle(fontFamily: "Courier New", color: Color(0xFFE2E8F0), fontSize: 13.5, height: 1.5),
+            style: const TextStyle(fontFamily: "Roboto", color: Color(0xFFE2E8F0), fontSize: 13.5, height: 1.5),
           ),
         ),
         Positioned(

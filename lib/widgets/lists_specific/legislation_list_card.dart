@@ -255,7 +255,7 @@ class LegislationListCard extends StatelessWidget {
                         style: TextStyle(
                           color: Colors.grey[500],
                           fontSize: 11,
-                          fontFamily: 'monospace',
+                          fontFamily: 'Roboto',
                           fontWeight: FontWeight.w500,
                         ),
                         overflow: TextOverflow.ellipsis,

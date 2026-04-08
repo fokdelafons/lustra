@@ -211,7 +211,7 @@ class ShareableImage extends StatelessWidget {
                       padding: EdgeInsets.fromLTRB(innerPadding, 0, innerPadding, innerPadding / 2),
                       child: Text(
                         displayTitle,
-                        style: TextStyle(fontSize: titleFontSize, fontWeight: FontWeight.w900, color: Colors.black, height: 1.2),
+                        style: TextStyle(fontSize: titleFontSize, fontWeight: FontWeight.bold, color: Colors.black, height: 1.2),
                         maxLines: isSquare ? 4 : 5,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -761,7 +761,7 @@ Widget _buildParliamentInfo(String parliamentName, String flagAssetPath, bool is
               const SizedBox(width: 12),
               Text(
                 l10n.loginToVote,
-                style: TextStyle(fontSize: baseFontSize * 0.6, color: Colors.grey[600], fontWeight: FontWeight.w600, letterSpacing: 0.5),
+                style: TextStyle(fontSize: baseFontSize * 0.6, color: Colors.grey[600], fontWeight: FontWeight.w500, letterSpacing: 0.5),
               ),
             ],
           ),
@@ -817,8 +817,8 @@ Widget _buildParliamentInfo(String parliamentName, String flagAssetPath, bool is
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(l10n.pollSupportPercent(forPercent.round().toString()), style: TextStyle(color: Colors.green[700], fontSize: baseFontSize * 0.5, fontWeight: FontWeight.w800, letterSpacing: 1)),
-            Text(l10n.pollOpposePercent(againstPercent.round().toString()), style: TextStyle(color: Colors.red[700], fontSize: baseFontSize * 0.5, fontWeight: FontWeight.w800, letterSpacing: 1)),
+            Text(l10n.pollSupportPercent(forPercent.round().toString()), style: TextStyle(color: Colors.green[700], fontSize: baseFontSize * 0.5, fontWeight: FontWeight.bold, letterSpacing: 1)),
+            Text(l10n.pollOpposePercent(againstPercent.round().toString()), style: TextStyle(color: Colors.red[700], fontSize: baseFontSize * 0.5, fontWeight: FontWeight.bold, letterSpacing: 1)),
           ],
         ),
         const SizedBox(height: 16),

@@ -58,7 +58,7 @@ class LegislationScreenState extends State<LegislationScreen> with AutomaticKeep
 }
   
   List<String> _categoryOptions = [];
-  late String _selectedCategory;
+  String _selectedCategory = 'all';
   String _sortBy = 'popularity';
   String _selectedStatusFilter = 'all';
   Map<String, String> _statusOptions = {};

@@ -41,6 +41,61 @@
   <link rel="manifest" href="manifest.json">
 
   <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+
+  <style>
+    /* TARCZA: Definicje dla DOM - Wymagane przez SelectionArea do poprawnego mapowania szerokości */
+    @font-face { font-family: 'Roboto'; src: url('assets/fonts/Roboto-Regular.ttf') format('truetype'); font-weight: 400; font-display: block; }
+    @font-face { font-family: 'Roboto'; src: url('assets/fonts/Roboto-Medium.ttf') format('truetype'); font-weight: 500; font-display: block; }
+    @font-face { font-family: 'Roboto'; src: url('assets/fonts/Roboto-Bold.ttf') format('truetype'); font-weight: 700; font-display: block; }
+  </style>
+
+  <!-- GATEKEEPER CSS (ZERO RENDER-BLOCKING) -->
+    <style>
+
+    #gate-wrapper {
+      position: fixed; inset: 0; z-index: 9999; display: block;
+      font-family: 'Roboto', system-ui, -apple-system, sans-serif;
+      background-color: #FFFFFF;
+      opacity: 0.99; 
+      transition: opacity 0.4s ease-out;
+    }
+    #gate-bg {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; z-index: 1;
+    }
+    #gate-overlay {
+      position: absolute; inset: 0; z-index: 2;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 24px; text-align: center;
+    }
+    .gate-content { max-width: 600px; width: 100%; }
+    
+    .gate-logo { max-width: 380px; margin: 0 auto; display: block; transform: translateZ(0); }
+    
+    .gate-title { font-size: 24px; font-weight: 800; letter-spacing: 4px; margin: 40px 0 24px 0; text-transform: uppercase; color: #0f172a; }
+    
+    .gate-text { font-size: 18px; line-height: 1.8; font-weight: 400; color: #1e293b; margin-bottom: 40px; }
+    
+    .gate-link { color: #4658BE; font-weight: 800; text-decoration: none; border-bottom: 2px solid rgba(70,88,190,0.3); padding-bottom: 2px; transition: 0.2s; }
+    .gate-link:hover { border-color: #4658BE; }
+    
+    @keyframes revealText { 
+      0% { opacity: 0; filter: blur(4px); } 
+      100% { opacity: 1; filter: blur(0); } 
+    }
+    
+    .gate-btn-primary { 
+      width: 100%; padding: 20px; background: #4658BE; color: white; border: none; 
+      font-size: 16px; font-weight: 800; letter-spacing: 2px; cursor: pointer; 
+      transition: background 0.2s, transform 0.1s; margin-bottom: 16px; 
+      box-shadow: 0 10px 25px -5px rgba(70,88,190,0.4);
+    }
+    .gate-btn-primary:hover:not(:disabled) { background: #3a4a9e; transform: translateY(-2px); }
+    .gate-btn-primary:disabled { 
+      background: #94a3b8; color: #f1f5f9; cursor: not-allowed; 
+      box-shadow: none; transform: none; 
+    }
+  </style>
   
   
   <style id="splash-screen-style">
@@ -194,6 +249,23 @@
 }
 </script>
 <body>
+  <!-- FULL-SCREEN GATEWAY DOM -->
+  <div id="gate-wrapper">
+    <img id="gate-bg" src="assets/background.png" alt="" aria-hidden="true">
+    <div id="gate-overlay">
+      <div class="gate-content">
+        <img class="gate-logo" src="assets/mirror-parliament.png" alt="Lustra" style="margin-bottom: 32px;">
+        <p id="g-text" class="gate-text">
+          I pledge to use this infrastructure in good faith. I understand that my votes shape public data. I will not use bots, manipulate outcomes, or attack the network.
+        </p>
+        <p style="font-size: 14px; color: #64748b; margin-bottom: 40px; font-weight: 500;">
+          <span id="g-legal">By accepting, you confirm the</span> 
+          <a id="g-policy-link" href="#" target="_blank" class="gate-link">Privacy Policy & Terms</a>.
+        </p>
+        <button id="g-accept" class="gate-btn-primary">ACCEPT</button>
+      </div>
+    </div>
+  </div>
   <picture id="splash">
       <source srcset="splash/img/light-1x.png 1x, splash/img/light-2x.png 2x, splash/img/light-3x.png 3x, splash/img/light-4x.png 4x" media="(prefers-color-scheme: light)">
       <source srcset="splash/img/dark-1x.png 1x, splash/img/dark-2x.png 2x, splash/img/dark-3x.png 3x, splash/img/dark-4x.png 4x" media="(prefers-color-scheme: dark)">
@@ -218,12 +290,94 @@
     </ul>
   </nav>
 </div>
-  <!-- SEO LAYER END -->
-  <script src="flutter_bootstrap.js" async=""></script>
+  <!-- GATEWAY CONTROLLER -->
+  <script>
+    (function() {
+      const gate = document.getElementById('gate-wrapper');
+
+      if (localStorage.getItem('lustra_pledge') === 'accepted') {
+        gate.style.display = 'none';
+        return; 
+      }
+
+      const dict = {
+        en: { text: "I pledge to use this infrastructure in good faith. I understand that my votes shape public data. I will not use bots, manipulate outcomes, or attack the network.", accept: "ACCEPT", wait: "WAIT {t}s", legal: "By accepting, you confirm the ", policyText: "Privacy Policy & Terms" },
+        pl: { text: "Zobowiązuję się korzystać z tej infrastruktury w dobrej wierze. Rozumiem, że moje głosy tworzą dane publiczne. Nie będę używać botów, manipulować wynikami ani atakować sieci.", accept: "AKCEPTUJĘ", wait: "CZEKAJ {t}s", legal: "Akceptując, potwierdzasz ", policyText: "Politykę Prywatności i Regulamin" },
+        de: { text: "Ich verpflichte mich, diese Infrastruktur in gutem Glauben zu nutzen. Ich werde keine Bots einsetzen, Ergebnisse manipulieren oder das Netzwerk angreifen.", accept: "AKZEPTIEREN", wait: "WARTEN {t}s", legal: "Mit der Annahme bestätigen Sie die ", policyText: "Datenschutzrichtlinie & Bedingungen" },
+        fr: { text: "Je m'engage à utiliser cette infrastructure de bonne foi. Je n'utiliserai pas de bots, ne manipulerai pas les résultats et n'attaquerai pas le réseau.", accept: "ACCEPTER", wait: "ATTENDRE {t}s", legal: "En acceptant, vous confirmez la ", policyText: "Politique de confidentialité et Conditions" },
+        es: { text: "Me comprometo a usar esta infraestructura de buena fe. No usaré bots, no manipularé resultados ni atacaré la red.", accept: "ACEPTAR", wait: "ESPERAR {t}s", legal: "Al aceptar, confirmas la ", policyText: "Política de Privacidad y Términos" },
+        it: { text: "Mi impegno a utilizzare questa infrastruttura in buona fede. Non userò bot, non manipolerò i risultati né attaccherò la rete.", accept: "ACCETTARE", wait: "ATTENDERE {t}s", legal: "Accettando, confermi la ", policyText: "Informativa sulla Privacy e Termini" },
+        nl: { text: "Ik beloof deze infrastructuur te goeder trouw te gebruiken. Ik zal geen bots gebruiken, resultaten manipuleren of het netwerk aanvallen.", accept: "ACCEPTEREN", wait: "WACHTEN {t}s", legal: "Door te accepteren bevestigt u het ", policyText: "Privacybeleid en Voorwaarden" },
+        pt: { text: "Comprometo-me a usar esta infraestrutura de boa fé. Não usarei bots, manipularei resultados ou atacarei a rede.", accept: "ACEITAR", wait: "AGUARDE {t}s", legal: "Ao aceitar, você confirma a ", policyText: "Política de Privacidade e Termos" }
+      };
+
+      const langRaw = navigator.language.substring(0, 2).toLowerCase();
+      const supportedLangs = ['en', 'pl', 'de', 'fr', 'es', 'it', 'nl', 'pt'];
+      const lang = supportedLangs.includes(langRaw) ? langRaw : 'en';
+      const t = dict[lang];
+      const sentences = t.text.match(/[^.]+\./g) || [t.text];
+      document.getElementById('g-text').innerHTML = sentences.map((sentence, index) => 
+        `<span style="opacity: 0; animation: revealText 0.8s ease-out forwards ${index * 1.2}s">${sentence} </span>`
+      ).join('');
+
+      document.getElementById('g-legal').innerText = t.legal;
+      
+      const policyLink = document.getElementById('g-policy-link');
+      policyLink.innerText = t.policyText;
+      policyLink.href = `https://lustra.news/${lang}/info/privacy-policy/`;
+
+      const btn = document.getElementById('g-accept');
+
+      let timeLeft = 4;
+      btn.disabled = true;
+      btn.innerText = t.wait.replace('{t}', timeLeft);
+
+      const timer = setInterval(() => {
+        timeLeft--;
+        if (timeLeft > 0) {
+          btn.innerText = t.wait.replace('{t}', timeLeft);
+        } else {
+          clearInterval(timer);
+          btn.disabled = false;
+          btn.innerText = t.accept;
+        }
+      }, 1000);
+
+      btn.addEventListener('click', () => {
+        if (btn.disabled) return;
+        localStorage.setItem('lustra_pledge', 'accepted');
+        
+        gate.style.pointerEvents = 'none';
+        gate.style.opacity = '0';
+        
+        setTimeout(() => { 
+          gate.style.display = 'none'; 
+          window.dispatchEvent(new Event('resize')); 
+        }, 500); 
+      });
+    })();
+  </script>
+
+  <script>
+    window.addEventListener('load', async function() {
+      await document.fonts.ready;
+      let script = document.createElement('script');
+      script.src = "flutter_bootstrap.js";
+      script.async = true;
+      document.body.appendChild(script);
+    });
+  </script>
   <script>
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
   });
-</script>
 
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));
+      }, 50);
+    }
+  });
+  </script>
 </body></html>

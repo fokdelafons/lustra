@@ -11,8 +11,10 @@ class OsintLoader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
+    return Material(
+      type: MaterialType.transparency,
+      child: Center(
+        child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           SizedBox(
@@ -37,6 +39,6 @@ class OsintLoader extends StatelessWidget {
           .shimmer(duration: const Duration(milliseconds: 1500), color: Colors.black), 
         ],
       ),
-    );
+    ));
   }
 }

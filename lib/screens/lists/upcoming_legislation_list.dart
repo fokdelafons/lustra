@@ -44,7 +44,7 @@ class FutureLegislationScreenState extends State<FutureLegislationScreen> with A
   bool _isSearchActive = false;
 
   List<String> _categoryOptions = [];
-  late String _selectedCategory;
+  String _selectedCategory = 'all';
 
   Map<String, String> _documentTypeOptions = {};
     String _selectedDocumentTypeKey = 'all';

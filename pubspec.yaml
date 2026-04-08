@@ -68,6 +68,16 @@ flutter:
     - assets/transform.png
     - assets/news-card.png
     - assets/social-poll.png
+
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/Roboto-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Roboto-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Roboto-Bold.ttf
+          weight: 700
   
 flutter_launcher_icons:
   android: "launcher_icon"

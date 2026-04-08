@@ -60,7 +60,7 @@ class TechStackScreen extends StatelessWidget {
       child: Text.rich(
         TextSpan(children: _parseCode(code)),
         style: const TextStyle(
-          fontFamily: 'monospace',
+          fontFamily: 'Roboto',
           fontSize: 13,
           height: 1.5,
           color: Color(0xFFD4D4D4),
@@ -249,7 +249,7 @@ class TechStackScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.grey.shade400),
       ),
-      child: Text(text, textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+      child: Text(text, textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
     );
   }
 

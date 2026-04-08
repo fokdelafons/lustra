@@ -42,7 +42,7 @@ import '../../widgets/web_link.dart';
     bool _isSyncingParliament = false;
 
     List<String> _categoryOptions = [];
-    late String _selectedCategory;
+    String _selectedCategory = 'all';
       void _initializeLocalizableLists(AppLocalizations l10n) {
       if (_categoryOptions.isEmpty) {
         _categoryOptions = [

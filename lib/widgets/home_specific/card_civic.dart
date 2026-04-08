@@ -92,7 +92,7 @@ class CivicProjectCard extends StatelessWidget {
                                       headerActionText,
                                       style: TextStyle(
                                         color: primaryColor,
-                                        fontWeight: FontWeight.w600,
+                                        fontWeight: FontWeight.w500,
                                         fontSize: 12
                                       ),
                                     ),

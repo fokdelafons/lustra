@@ -23,7 +23,7 @@ To protect the mission from "Founder Risk" (corruption, burnout, drift), a **Civ
 
 How do we ensure Lustra never sells out?
 
-1.  **Source Available License (PolyForm):** Prevents hostile corporate forks. If Lustra ever becomes "evil", the community cannot be commercially exploited by a clone.
+1.  **Open Source License (AGPLv3):** Prevents hostile philanthrocapitalistic exploitation.
 2.  **Radical Transparency:** AI prompts and logs are public. Any attempt to bias the algorithm is visible in the diffs.
 3.  **The "Nuclear Option" (Community Fork):** If the Custodian betrays the mission, the community has the moral and technical right to fork the codebase (under non-commercial terms) and migrate to a new instance. We build infrastructure, not cages.
 

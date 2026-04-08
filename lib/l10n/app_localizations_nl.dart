@@ -1313,7 +1313,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get termsOfServiceContent =>
-      'LUSTRA GEMEENSCHAPSREGELS\nDatum: 6 december 2025\n\n1. OPERATOR EN MISSIE\nLustra is digitale publieke infrastructuur. De juridische operator (Bewaarder) is FO&WO VENTURES SP. Z O.O. (LLC). Het bedrijf fungeert als incubator: geen dividenden, geen externe investeerders, herinvestering in infrastructuur.\n\n2. CODE EN LICENTIE (SOURCE AVAILABLE)\nCode is gemeenschappelijk goed.\n• Model: PolyForm Noncommercial.\n• Toegestaan: Educatief, onderzoek, non-profit.\n• Verboden: Bedrijven mogen niet profiteren zonder toestemming.\n\n3. BESTUURSROADMAP\nDoel: decentralisatie.\n• Huidig: Oprichter (Jacek) is Hoofdarchitect.\n• Binnenkort: Burgerraad gekozen door gebruikers.\n• Doel: Mechanismen voor gemeenschapscontrole bij verraad van de missie.\n\n4. BURGERPROJECTEN\nWetsincubator.\n• Procedure: Indiening via formulier, formele verificatie.\n• CC0 Licentie: Je geeft het project vrij in het Publiek Domein.\n• Vrijheid van meningsuiting: We beoordelen geen meningen. We weigeren alleen strafrechtelijke schendingen.\n• Verificatie: Je moet burger zijn van het betreffende land.\n\n5. AI EN BRONNEN\n• AI Rol: Helpt navigeren maar kan fouten maken.\n• Bron: De uiteindelijke autoriteit is altijd de originele PDF.\n\n6. VEILIGHEID\n• Leeftijd: Gebruikers 16+.\n• Verboden: Aanvallen op infrastructuur en commerciële scraping.\n\n7. SLOTBEPALINGEN\nPools recht is van toepassing.';
+      'LUSTRA GEMEENSCHAPSREGELS\nDatum: 6 december 2025\n\n1. OPERATOR EN MISSIE\nLustra is digitale publieke infrastructuur. De juridische operator (Bewaarder) is FO&WO VENTURES SP. Z O.O. (LLC). Het bedrijf fungeert als incubator: geen dividenden, geen externe investeerders, herinvestering in infrastructuur.\n\n2. CODE EN LICENTIE (SOURCE AVAILABLE)\nCode is gemeenschappelijk goed.\n• Model: Open Source (AGPLv3).\n• Toegestaan: Educatief, onderzoek, non-profit.\n• Verboden: Bedrijven mogen niet profiteren zonder toestemming.\n\n3. BESTUURSROADMAP\nDoel: decentralisatie.\n• Huidig: Oprichter (Jacek) is Hoofdarchitect.\n• Binnenkort: Burgerraad gekozen door gebruikers.\n• Doel: Mechanismen voor gemeenschapscontrole bij verraad van de missie.\n\n4. BURGERPROJECTEN\nWetsincubator.\n• Procedure: Indiening via formulier, formele verificatie.\n• CC0 Licentie: Je geeft het project vrij in het Publiek Domein.\n• Vrijheid van meningsuiting: We beoordelen geen meningen. We weigeren alleen strafrechtelijke schendingen.\n• Verificatie: Je moet burger zijn van het betreffende land.\n\n5. AI EN BRONNEN\n• AI Rol: Helpt navigeren maar kan fouten maken.\n• Bron: De uiteindelijke autoriteit is altijd de originele PDF.\n\n6. VEILIGHEID\n• Leeftijd: Gebruikers 16+.\n• Verboden: Aanvallen op infrastructuur en commerciële scraping.\n\n7. SLOTBEPALINGEN\nPools recht is van toepassing.';
 
   @override
   String get privacyPolicyContent =>
@@ -1412,7 +1412,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get techFooterDate => 'Datum update Q1 2026';
 
   @override
-  String get techFooterLicense => 'PolyForm Noncommercial License';
+  String get techFooterLicense => 'Open Source (AGPLv3)';
 
   @override
   String get techGraphSource => 'Legislation Source';
@@ -2573,7 +2573,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get aboutGovSec3Bullet2Text =>
-      'De core-repositories zijn openbaar onder de PolyForm Noncommercial License. Het is beschermd tegen het klonen door bedrijven, maar de data-adapters, AI-systeemprompts en logica zijn volledig zichtbaar voor audits.';
+      'De core-repositories zijn openbaar onder de Open Source (AGPLv3) License. Het is beschermd tegen het klonen door bedrijven, maar de data-adapters, AI-systeemprompts en logica zijn volledig zichtbaar voor audits.';
 
   @override
   String get aboutGovSec3BoxTitle => 'We hebben hulp nodig.';
@@ -2768,7 +2768,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get termsP2S2B1Title => 'Model:';
 
   @override
-  String get termsP2S2B1Text => 'PolyForm Noncommercial Licentie.';
+  String get termsP2S2B1Text => 'Open Source (AGPLv3)';
 
   @override
   String get termsP2S2B2Title => 'Toegestaan:';
@@ -3167,7 +3167,7 @@ class AppLocalizationsNl extends AppLocalizations {
 
   @override
   String get caSkepticText =>
-      'Goed. Vertrouw niet op onze woorden - audit ons systeem. Lees precies hoe we cryptografische hashing, Firebase App Check en de PolyForm Noncommercial Licentie gebruiken om jouw identiteit en de integriteit van de Burgerwil te beschermen.';
+      'Goed. Vertrouw niet op onze woorden - audit ons systeem. Lees precies hoe we cryptografische hashing, Firebase App Check en de Open Source (AGPLv3) Licentie gebruiken om jouw identiteit en de integriteit van de Burgerwil te beschermen.';
 
   @override
   String get caSkepticBtnGov => 'Transparantie & Governance';

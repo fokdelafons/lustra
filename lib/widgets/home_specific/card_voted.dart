@@ -152,7 +152,7 @@ class VotedCard extends StatelessWidget {
                                     l10n.votingResultsTitle.toUpperCase(),
                                     style: TextStyle(
                                       fontSize: 12 + fScale,
-                                      fontWeight: FontWeight.w600,
+                                      fontWeight: FontWeight.w500,
                                       color: Colors.black87,
                                       letterSpacing: 0.5,
                                     ),

@@ -306,7 +306,7 @@ class _CuratedListManagerDialogState extends State<CuratedListManagerDialog> {
                                   },
                                 ),
                                 Expanded(
-                                  child: Text(list['listName'], style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                                  child: Text(list['listName'], style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
                                 ),
                                 IconButton(
                                   icon: const Icon(Icons.edit_outlined, size: 20, color: Colors.blueGrey),

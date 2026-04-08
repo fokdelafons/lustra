@@ -112,7 +112,7 @@ class InfoScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(
                     l10n.infoScreenTitle,
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w900, color: Colors.black87, height: 1.2),
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, color: Colors.black87, height: 1.2),
                   ).animate().fade(delay: 100.ms).slideX(),
                 ],
               ),

@@ -1313,7 +1313,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get termsOfServiceContent =>
-      'REGLAS DE LA COMUNIDAD LUSTRA\nFecha: 6 de diciembre de 2025\n\n1. OPERADOR Y MISIÓN\nLustra es una infraestructura pública digital. El operador legal (Custodio) es FO&WO VENTURES SP. Z O.O. (LLC). La empresa actúa como incubadora: sin dividendos, sin inversores externos, reinversión en infraestructura.\n\n2. CÓDIGO Y LICENCIA (SOURCE AVAILABLE)\nEl código es un bien común.\n• Modelo: PolyForm Noncommercial.\n• Permitido: Uso educativo, investigación, sin fines de lucro.\n• Prohibido: Las corporaciones no pueden lucrar sin consentimiento.\n\n3. HOJA DE RUTA DE GOBERNANZA\nObjetivo: descentralización.\n• Actual: Fundador (Jacek) como Arquitecto Principal.\n• Pronto: Consejo Cívico elegido por usuarios.\n• Meta: Mecanismos para que la comunidad tome el control si se traiciona la misión.\n\n4. PROYECTOS CIUDADANOS\nIncubadora de leyes.\n• Procedimiento: Envío por formulario, verificación formal.\n• Licencia CC0: Liberas el proyecto al Dominio Público. La ley es de todos.\n• Libertad de expresión: No juzgamos opiniones. Solo rechazamos violaciones del código penal.\n• Verificación: Debes ser ciudadano del país correspondiente.\n\n5. IA Y FUENTES\n• Rol IA: Ayuda a navegar pero puede errar.\n• Fuente: La autoridad final es siempre el PDF original.\n\n6. SEGURIDAD\n• Edad: Usuarios 16+.\n• Prohibido: Ataques a infraestructura y scraping comercial.\n\n7. DISPOSICIONES FINALES\nRegido por la ley polaca.';
+      'REGLAS DE LA COMUNIDAD LUSTRA\nFecha: 6 de diciembre de 2025\n\n1. OPERADOR Y MISIÓN\nLustra es una infraestructura pública digital. El operador legal (Custodio) es FO&WO VENTURES SP. Z O.O. (LLC). La empresa actúa como incubadora: sin dividendos, sin inversores externos, reinversión en infraestructura.\n\n2. CÓDIGO Y LICENCIA (SOURCE AVAILABLE)\nEl código es un bien común.\n• Modelo: Open Source (AGPLv3).\n• Permitido: Uso educativo, investigación, sin fines de lucro.\n• Prohibido: Las corporaciones no pueden lucrar sin consentimiento.\n\n3. HOJA DE RUTA DE GOBERNANZA\nObjetivo: descentralización.\n• Actual: Fundador (Jacek) como Arquitecto Principal.\n• Pronto: Consejo Cívico elegido por usuarios.\n• Meta: Mecanismos para que la comunidad tome el control si se traiciona la misión.\n\n4. PROYECTOS CIUDADANOS\nIncubadora de leyes.\n• Procedimiento: Envío por formulario, verificación formal.\n• Licencia CC0: Liberas el proyecto al Dominio Público. La ley es de todos.\n• Libertad de expresión: No juzgamos opiniones. Solo rechazamos violaciones del código penal.\n• Verificación: Debes ser ciudadano del país correspondiente.\n\n5. IA Y FUENTES\n• Rol IA: Ayuda a navegar pero puede errar.\n• Fuente: La autoridad final es siempre el PDF original.\n\n6. SEGURIDAD\n• Edad: Usuarios 16+.\n• Prohibido: Ataques a infraestructura y scraping comercial.\n\n7. DISPOSICIONES FINALES\nRegido por la ley polaca.';
 
   @override
   String get privacyPolicyContent =>
@@ -1413,7 +1413,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get techFooterDate => 'Fecha de actualización Q1 2026';
 
   @override
-  String get techFooterLicense => 'PolyForm Noncommercial License';
+  String get techFooterLicense => 'Open Source (AGPLv3) License';
 
   @override
   String get techGraphSource => 'Legislation Source';
@@ -2575,7 +2575,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get aboutGovSec3Bullet2Text =>
-      'Los repositorios principales son públicos bajo la Licencia PolyForm Noncommercial. Está protegido contra la clonación corporativa, pero los adaptadores de datos, los prompts del sistema de IA y la lógica son completamente visibles para su auditoría.';
+      'Los repositorios principales son públicos bajo la Licencia Open Source (AGPLv3). Está protegido contra la clonación corporativa, pero los adaptadores de datos, los prompts del sistema de IA y la lógica son completamente visibles para su auditoría.';
 
   @override
   String get aboutGovSec3BoxTitle => 'Necesitamos ayuda.';
@@ -2772,7 +2772,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get termsP2S2B1Title => 'Modelo:';
 
   @override
-  String get termsP2S2B1Text => 'Licencia PolyForm Noncommercial.';
+  String get termsP2S2B1Text => 'Licencia Open Source (AGPLv3).';
 
   @override
   String get termsP2S2B2Title => 'Permitido:';
@@ -3178,7 +3178,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get caSkepticText =>
-      'Bien. No confíes en nuestras palabras: audita nuestro sistema. Lee exactamente cómo usamos el hashing criptográfico, Firebase App Check y la Licencia PolyForm Noncommercial para proteger tu identidad y la integridad de la Voluntad Cívica.';
+      'Bien. No confíes en nuestras palabras: audita nuestro sistema. Lee exactamente cómo usamos el hashing criptográfico, Firebase App Check y la Licencia Open Source (AGPLv3) para proteger tu identidad y la integridad de la Voluntad Cívica.';
 
   @override
   String get caSkepticBtnGov => 'Transparencia y Gobernanza';

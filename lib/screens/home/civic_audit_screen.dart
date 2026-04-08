@@ -134,7 +134,7 @@ class CivicAuditScreen extends StatelessWidget {
           const Text(
             "1 CITIZEN + FACT CARD = 1,000+ VIEWS",
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w900, fontFamily: 'monospace'),
+            style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Roboto'),
           ),
         ],
       ),
@@ -262,7 +262,7 @@ class CivicAuditScreen extends StatelessWidget {
                 const SizedBox(height: 16),
                 Text(
                   l10n.caTitle,
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w900, color: Colors.black87, height: 1.2),
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, color: Colors.black87, height: 1.2),
                 ),
                 const SizedBox(height: 16),
                 Text(

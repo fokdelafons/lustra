@@ -428,7 +428,7 @@ Widget build(BuildContext context) {
                   Consumer<ParliamentManager>(
                     builder: (context, parliamentManager, child) {
                       return DropdownButtonFormField<String>(
-                        value: _selectedParliamentId,
+                        initialValue: _selectedParliamentId,
                         decoration: InputDecoration(
                           labelText: l10n.selectYourParliament,
                           border: const OutlineInputBorder(),

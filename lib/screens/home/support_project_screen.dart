@@ -118,11 +118,11 @@ class _SupportProjectScreenState extends State<SupportProjectScreen> {
                         children: [
                           Text(
                             "\$${(value * target).toInt()}",
-                            style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold, fontSize: 22, fontFamily: 'monospace'),
+                            style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold, fontSize: 22, fontFamily: 'Roboto'),
                           ),
                           Text(
                             "Target: \$${target.toInt()}",
-                            style: TextStyle(color: Colors.grey.shade600, fontWeight: FontWeight.bold, fontSize: 14, fontFamily: 'monospace'),
+                            style: TextStyle(color: Colors.grey.shade600, fontWeight: FontWeight.bold, fontSize: 14, fontFamily: 'Roboto'),
                           ),
                         ],
                       ),
@@ -246,7 +246,7 @@ class _SupportProjectScreenState extends State<SupportProjectScreen> {
                     const SizedBox(height: 16),
                     Text(
                       l10n.supportMegaTitle,
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w900, color: Colors.black87, height: 1.2),
+                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, color: Colors.black87, height: 1.2),
                     ).animate().fade(delay: 100.ms).slideX(),
                   ],
                 ),

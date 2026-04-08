@@ -2453,7 +2453,7 @@ abstract class AppLocalizations {
   /// No description provided for @termsOfServiceContent.
   ///
   /// In en, this message translates to:
-  /// **'LUSTRA COMMUNITY RULES\nDate: December 6, 2025\n\n1. OPERATOR AND MISSION\nLustra is a digital public infrastructure. The legal operator (Custodian) is FO&WO VENTURES SP. Z O.O. (LLC) based in Wrocław. The company acts as an incubator: it pays no dividends, has no external investors, and reinvests revenue into infrastructure.\n\n2. CODE AND LICENSE (SOURCE AVAILABLE)\nLustra\'s code is a common good protected from exploitation.\n• Model: PolyForm Noncommercial.\n• Allowed: Educational, research, and non-profit use.\n• Prohibited: Corporations cannot profit from our work without community consent.\n\n3. GOVERNANCE ROADMAP\nOur goal is decentralization.\n• Current: Founder (Jacek) acts as Lead Architect.\n• Soon: Establishment of a Civic Board elected by users.\n• Goal: Implementing mechanisms for the community to take control in case of mission betrayal.\n\n4. CITIZEN DRAFTS PROGRAM\nAn incubator for law.\n• Procedure: Drafts are submitted via form and verified formally by the Operator.\n• CC0 License: By submitting, you release the draft into the Public Domain. Law belongs to everyone.\n• Free Speech: We do not judge opinions. We only reject projects violating criminal law.\n• Verification: You must be a citizen of the country where you submit a draft.\n\n5. AI AND SOURCE HIERARCHY\n• AI Role: AI helps navigate law but can make mistakes.\n• Source: The ultimate authority is always the original PDF document (linked in the app).\n\n6. SAFETY\n• Age: App for users 16+.\n• Bans: Attacks on infrastructure and commercial scraping are prohibited.\n\n7. FINAL PROVISIONS\nMatters not regulated herein are decided by Polish law.'**
+  /// **'LUSTRA COMMUNITY RULES\nDate: December 6, 2025\n\n1. OPERATOR AND MISSION\nLustra is a digital public infrastructure. The legal operator (Custodian) is FO&WO VENTURES SP. Z O.O. (LLC) based in Wrocław. The company acts as an incubator: it pays no dividends, has no external investors, and reinvests revenue into infrastructure.\n\n2. CODE AND LICENSE (SOURCE AVAILABLE)\nLustra\'s code is a common good protected from exploitation.\n• Model: Open Source (AGPLv3).\n• Allowed: Educational, research, and non-profit use.\n• Prohibited: Corporations cannot profit from our work without community consent.\n\n3. GOVERNANCE ROADMAP\nOur goal is decentralization.\n• Current: Founder (Jacek) acts as Lead Architect.\n• Soon: Establishment of a Civic Board elected by users.\n• Goal: Implementing mechanisms for the community to take control in case of mission betrayal.\n\n4. CITIZEN DRAFTS PROGRAM\nAn incubator for law.\n• Procedure: Drafts are submitted via form and verified formally by the Operator.\n• CC0 License: By submitting, you release the draft into the Public Domain. Law belongs to everyone.\n• Free Speech: We do not judge opinions. We only reject projects violating criminal law.\n• Verification: You must be a citizen of the country where you submit a draft.\n\n5. AI AND SOURCE HIERARCHY\n• AI Role: AI helps navigate law but can make mistakes.\n• Source: The ultimate authority is always the original PDF document (linked in the app).\n\n6. SAFETY\n• Age: App for users 16+.\n• Bans: Attacks on infrastructure and commercial scraping are prohibited.\n\n7. FINAL PROVISIONS\nMatters not regulated herein are decided by Polish law.'**
   String get termsOfServiceContent;
 
   /// No description provided for @privacyPolicyContent.
@@ -2621,7 +2621,7 @@ abstract class AppLocalizations {
   /// No description provided for @techFooterLicense.
   ///
   /// In en, this message translates to:
-  /// **'PolyForm Noncommercial License'**
+  /// **'Open Source (AGPLv3) License'**
   String get techFooterLicense;
 
   /// No description provided for @techGraphSource.
@@ -4715,7 +4715,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboutGovSec3Bullet2Text.
   ///
   /// In en, this message translates to:
-  /// **'The core repositories are public under the PolyForm Noncommercial License. It is protected against corporate cloning, but the data adapters, AI system prompts, and logic are fully visible for audit.'**
+  /// **'The core repositories are public under the Open Source (AGPLv3) License. It is protected against corporate cloning, but the data adapters, AI system prompts, and logic are fully visible for audit.'**
   String get aboutGovSec3Bullet2Text;
 
   /// No description provided for @aboutGovSec3BoxTitle.
@@ -5051,7 +5051,7 @@ abstract class AppLocalizations {
   /// No description provided for @termsP2S2B1Text.
   ///
   /// In en, this message translates to:
-  /// **'PolyForm Noncommercial License.'**
+  /// **'Open Source (AGPLv3) License.'**
   String get termsP2S2B1Text;
 
   /// No description provided for @termsP2S2B2Title.
@@ -5735,7 +5735,7 @@ abstract class AppLocalizations {
   /// No description provided for @caSkepticText.
   ///
   /// In en, this message translates to:
-  /// **'Good. Don\'t trust our words - audit our system. Read exactly how we use cryptographic hashing, Firebase App Check, and the PolyForm Noncommercial License to protect your identity and the integrity of the Civic Will.'**
+  /// **'Good. Don\'t trust our words - audit our system. Read exactly how we use cryptographic hashing, Firebase App Check, and the Open Source (AGPLv3) License to protect your identity and the integrity of the Civic Will.'**
   String get caSkepticText;
 
   /// No description provided for @caSkepticBtnGov.

@@ -19,7 +19,7 @@
     <!-- === SEO LAYER === -->
     <meta name="robots" content="index, follow">
     <title>Konstytucja i Prywatność | Lustra - Mirror Parliament</title>
-    <meta name="description" content="Polityka Radykalnej Transparentności platformy Lustra. Zobacz, jakie dane zbieramy, zasady naszej społeczności oraz licencję open-source PolyForm.">
+    <meta name="description" content="Polityka Radykalnej Transparentności platformy Lustra. Zobacz, jakie dane zbieramy, zasady naszej społeczności oraz licencję open-source AGPLv3.">
 
     <!-- FONTS -->
     <link rel="preconnect" href="https://fonts.googleapis.com/">
@@ -271,7 +271,7 @@
         <h3 class="subsection-title">2. Kod i Licencja (Source Available)</h3>
         <p>Kod Lustry jest dobrem wspólnym chronionym przed korporacyjnym wyzyskiem.</p>
         <ul>
-            <li><strong>Model:</strong> Licencja PolyForm Noncommercial.</li>
+            <li><strong>Model:</strong> Licencja AGPLv3.</li>
             <li><strong>Dozwolone:</strong> Użytek edukacyjny, badawczy oraz non-profit/obywatelski.</li>
             <li><strong>Zabronione:</strong> Korporacje nie mogą używać ani czerpać zysków z naszej pracy bez wyraźnej zgody społeczności.</li>
         </ul>
@@ -299,11 +299,19 @@
         <h3 class="subsection-title">6. Bezpieczeństwo i Postanowienia Końcowe</h3>
         <p>Ataki na infrastrukturę, DDoS oraz komercyjny scraping są surowo zabronione. Kwestie nieuregulowane niniejszym dokumentem rozstrzyga prawo polskie.</p>
 
+        <h3 class="subsection-title">7. Ciasteczka i Local Storage (Bez śledzenia)</h3>
+        <p>Nie używamy ciasteczek marketingowych. Używamy wyłącznie niezbędnego Local Storage i IndexedDB, aby:</p>
+        <ul>
+            <li>Zapamiętać wybrany Parlament (aby nie trzeba było go wybierać przy każdej wizycie).</li>
+            <li>Zapisać akceptację Bramki Civic Pledge.</li>
+            <li>Utrzymywać sesję bezpieczną i aktywną (Firebase Auth).</li>
+        </ul>
+        <p>Jeśli zablokujesz te funkcje w przeglądarce, aplikacja nie będzie działać.</p>
 
         <!-- FOOTER -->
         <div class="tech-footer">
             <div>Utrzymywane przez Inicjatywę Lustra</div>
-            <div style="margin-top: 8px;">Licencja PolyForm Noncommercial</div>
+            <div style="margin-top: 8px;">Licencja AGPLv3</div>
         </div>
 
     </main>

@@ -9,7 +9,7 @@
 **No.** The "Context Sterilization" process removes opinions. We provide facts; users provide the judgment.
 
 ### Why is the code "Source Available" and not MIT/Apache?
-To protect the ecosystem from corporate capture. The **PolyForm Noncommercial License** ensures that Big Tech cannot wrap our work into a paid SaaS product while allowing students, NGOs, and activists to use it freely.
+To protect the ecosystem from corporate capture. The **Open Source (AGPLv3) License** ensures that Big Tech cannot wrap our work into a paid SaaS product while allowing students, NGOs, and activists to use it freely.
 
 ## Technology & AI
 

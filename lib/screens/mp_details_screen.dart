@@ -407,8 +407,8 @@ Widget build(BuildContext context) {
     );
   }
   final TextTheme textTheme = theme.textTheme;
-  final TextStyle? sectionTitleStyle = textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600);
-  final TextStyle? subSectionTitleStyle = textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600);
+  final TextStyle? sectionTitleStyle = textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w500);
+  final TextStyle? subSectionTitleStyle = textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500);
   final displayMP = _mp!;
 
       Widget contentBody = kIsWeb

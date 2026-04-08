@@ -19,7 +19,7 @@
     <!-- === SEO LAYER === -->
     <meta name="robots" content="index, follow">
     <title>Costituzione e Privacy | Lustra - Mirror Parliament</title>
-    <meta name="description" content="Politica di Trasparenza Radicale di Lustra. Scopri esattamente quali dati raccogliamo, le nostre regole comunitarie e la nostra licenza open-source PolyForm.">
+    <meta name="description" content="Politica di Trasparenza Radicale di Lustra. Scopri esattamente quali dati raccogliamo, le nostre regole comunitarie e la nostra licenza open-source AGPLv3.">
 
     <!-- FONTS -->
     <link rel="preconnect" href="https://fonts.googleapis.com/">
@@ -271,7 +271,7 @@
         <h3 class="subsection-title">2. Codice e Licenza (Source Available)</h3>
         <p>Il codice di Lustra è un bene comune protetto dallo sfruttamento aziendale.</p>
         <ul>
-            <li><strong>Modello:</strong> Licenza PolyForm Noncommercial.</li>
+            <li><strong>Modello:</strong> Licenza AGPLv3.</li>
             <li><strong>Consentito:</strong> Uso educativo, di ricerca e non profit/civico.</li>
             <li><strong>Vietato:</strong> Le aziende non possono utilizzare il nostro lavoro né trarne profitto senza il consenso esplicito della community.</li>
         </ul>
@@ -299,11 +299,19 @@
         <h3 class="subsection-title">6. Sicurezza &amp; Disposizioni Finali</h3>
         <p>Gli attacchi all'infrastruttura, i DDoS e lo scraping commerciale sono severamente vietati. Le questioni non disciplinate dal presente documento sono regolate dalla legge polacca.</p>
 
+        <h3 class="subsection-title">7. Cookie e Local Storage (Nessun tracciamento)</h3>
+        <p>Non utilizziamo cookie di marketing. Utilizziamo esclusivamente Local Storage e IndexedDB essenziali per:</p>
+        <ul>
+            <li>Ricordare il Parlamento scelto (per non doverlo selezionare a ogni visita).</li>
+            <li>Salvare l'accettazione del Civic Pledge Gateway.</li>
+            <li>Mantenere la sessione sicura e attiva (Firebase Auth).</li>
+        </ul>
+        <p>Se blocchi queste funzioni nel tuo browser, l'applicazione non funzionerà.</p>
 
         <!-- FOOTER -->
         <div class="tech-footer">
             <div>Gestito dall'Iniziativa Lustra</div>
-            <div style="margin-top: 8px;">PolyForm Noncommercial License</div>
+            <div style="margin-top: 8px;">AGPLv3 License</div>
         </div>
 
     </main>

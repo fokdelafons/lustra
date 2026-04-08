@@ -96,7 +96,7 @@ class BlueprintScreen extends StatelessWidget {
       child: Text(
         code,
         style: const TextStyle(
-          fontFamily: 'monospace',
+          fontFamily: 'Roboto',
           fontSize: 13,
           height: 1.5,
           color: Color(0xFFD4D4D4),

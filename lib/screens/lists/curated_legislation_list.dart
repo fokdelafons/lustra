@@ -648,7 +648,7 @@ Future<void> refreshData() async {
                       Text(AppLocalizations.of(context)!.supportCreatorOptionalLabel, style: const TextStyle(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
-                        value: selectedProvider,
+                        initialValue: selectedProvider,
                         decoration: InputDecoration(border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)), isDense: true),
                         items: ['None', 'Patreon', 'BuyMeACoffee', 'Ko-fi'].map((String val) {
                           return DropdownMenuItem(value: val, child: Text(val));

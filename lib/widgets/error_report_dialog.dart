@@ -76,7 +76,7 @@ void showErrorReportDialog({
                     ),
                     const SizedBox(height: 16),
                     CheckboxListTile(
-                      title: Text(l10n.reportIncludeDiagnosticsTitle, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                      title: Text(l10n.reportIncludeDiagnosticsTitle, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
                       subtitle: Text(l10n.reportIncludeDiagnosticsSubtitle, style: const TextStyle(fontSize: 12, color: Colors.grey)),
                       value: includeDiagnostics,
                       activeColor: Theme.of(mainContext).primaryColor,
@@ -108,7 +108,7 @@ void showErrorReportDialog({
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 ),
                 onPressed: isSending ? null : () => Navigator.of(dialogContext).pop(),
-                child: Text(l10n.actionCancel, style: const TextStyle(fontWeight: FontWeight.w600)),
+                child: Text(l10n.actionCancel, style: const TextStyle(fontWeight: FontWeight.w500)),
               ),
               if (!isSending)
                 ElevatedButton(

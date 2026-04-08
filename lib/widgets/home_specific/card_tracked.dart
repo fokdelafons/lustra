@@ -229,7 +229,7 @@ class _TrackedCardState extends State<TrackedCard> {
                 padding: const EdgeInsets.only(top: 4.0),
                 child: Text(
                   bill.id,
-                  style: TextStyle(fontFamily: 'monospace', fontSize: 11, color: Colors.grey[600]),
+                  style: TextStyle(fontFamily: 'Roboto', fontSize: 11, color: Colors.grey[600]),
                 ),
               ),
               trailing: const Icon(Icons.chevron_right, size: 20, color: Colors.grey),

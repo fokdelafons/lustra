@@ -47,7 +47,7 @@ import '../../widgets/osint_loader.dart';
     bool _isFromNotification = false;
 
     List<String> _categoryOptions = [];
-    late String _selectedCategory;
+    String _selectedCategory = 'all';
     Map<String, String> _documentTypeOptions = {};
     String _selectedDocumentTypeKey = 'all';
     Map<String, String> _statusOptions = {};

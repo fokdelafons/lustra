@@ -345,9 +345,9 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(l10n.pollSupportPercent(forPercent.round().toString()), style: TextStyle(color: Colors.green[700], fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1)),
-            if (flexPending > 0) Text(l10n.pollSyncing, style: const TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
-            Text(l10n.pollOpposePercent(againstPercent.round().toString()), style: TextStyle(color: Colors.red[700], fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1)),
+            Text(l10n.pollSupportPercent(forPercent.round().toString()), style: TextStyle(color: Colors.green[700], fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1)),
+            if (flexPending > 0) Text(l10n.pollSyncing, style: const TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+            Text(l10n.pollOpposePercent(againstPercent.round().toString()), style: TextStyle(color: Colors.red[700], fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1)),
           ],
         ),
         const SizedBox(height: 8),
@@ -382,7 +382,7 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
         Text(
           l10n.recordYourPositionForAudit,
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 12, color: Colors.grey[600], fontWeight: FontWeight.w600, letterSpacing: 0.5),
+          style: TextStyle(fontSize: 12, color: Colors.grey[600], fontWeight: FontWeight.w500, letterSpacing: 0.5),
         ),
         const SizedBox(height: 16),
         Row(
@@ -402,7 +402,7 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
                   children: [
                     const Icon(Icons.check_circle_outline, size: 24),
                     const SizedBox(height: 4),
-                    Text(l10n.pollSupport.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, letterSpacing: 1)),
+                    Text(l10n.pollSupport.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11, letterSpacing: 1)),
                   ],
                 ),
               ),
@@ -423,7 +423,7 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
                   children: [
                     const Icon(Icons.cancel_outlined, size: 24),
                     const SizedBox(height: 4),
-                    Text(l10n.pollDontSupport.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, letterSpacing: 1)),
+                    Text(l10n.pollDontSupport.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11, letterSpacing: 1)),
                   ],
                 ),
               ),
@@ -456,7 +456,7 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
                 l10n.pollPositionRecorded,
                 style: TextStyle(
                   fontSize: 14, 
-                  fontWeight: FontWeight.w900, 
+                  fontWeight: FontWeight.bold, 
                   color: primaryColor,
                   letterSpacing: 1.5,
                 ),
@@ -473,7 +473,7 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
                   Text(
                     l10n.pollVoteSignificance, 
                     textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 6),
                   Text(
@@ -532,7 +532,7 @@ Widget _buildRestrictedView(String parliamentName) {
             l10n.pollRestrictedToCitizens,
             style: TextStyle(
               fontSize: 14, 
-              fontWeight: FontWeight.w900, 
+              fontWeight: FontWeight.bold, 
               color: primaryColor,
               letterSpacing: 1.5,
             ),

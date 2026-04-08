@@ -1,5 +1,6 @@
 import 'dart:developer' as developer;
 import 'firebase_options.dart';
+import 'package:flutter/services.dart';
 
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -32,6 +33,14 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // SHIELD: Preload core typography into RAM to prevent Skia Glyph Atlas Corruption on Web
+  await Future.wait([
+    rootBundle.load('assets/fonts/Roboto-Regular.ttf'),
+    rootBundle.load('assets/fonts/Roboto-Medium.ttf'),
+    rootBundle.load('assets/fonts/Roboto-Bold.ttf'),
+  ]);
+
   await precacheSvgAssets();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -144,6 +153,7 @@ class MyApp extends StatelessWidget {
 				primaryColor: const Color(0xFF1565C0),
 				scaffoldBackgroundColor: const Color(0xFFF5F5F5),
 				visualDensity: VisualDensity.adaptivePlatformDensity,
+				fontFamily: 'Roboto',
                 pageTransitionsTheme: const PageTransitionsTheme(
                   builders: {
                     TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),

@@ -12,7 +12,7 @@ When discussing:
 ## Project Identity
 Name: Lustra
 Type: Digital Public Infrastructure / Civic Tech
-License: PolyForm Noncommercial 1.0.0 (Source Available)
+License: Open Source (AGPLv3)
 Mission: "Citizens Above Politics" - transforming democracy from indirect observation to direct participation.
 
 ## Core Technical Concepts

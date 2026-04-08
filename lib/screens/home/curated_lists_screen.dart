@@ -163,7 +163,7 @@ class CuratedListsScreen extends StatelessWidget {
               width: 50,
               child: Text(
                 value,
-                style: const TextStyle(color: Colors.greenAccent, fontSize: 24, fontWeight: FontWeight.bold, fontFamily: 'monospace'),
+                style: const TextStyle(color: Colors.greenAccent, fontSize: 24, fontWeight: FontWeight.bold, fontFamily: 'Roboto'),
               ),
             ),
             Expanded(
@@ -199,7 +199,7 @@ class CuratedListsScreen extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 l10n.clLimitsTitle,
-                style: const TextStyle(color: Colors.grey, fontSize: 12, letterSpacing: 1.2, fontWeight: FontWeight.bold, fontFamily: 'monospace'),
+                style: const TextStyle(color: Colors.grey, fontSize: 12, letterSpacing: 1.2, fontWeight: FontWeight.bold, fontFamily: 'Roboto'),
               ),
             ],
           ),
@@ -240,7 +240,7 @@ class CuratedListsScreen extends StatelessWidget {
                 const SizedBox(height: 16),
                 Text(
                   l10n.clTitle,
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w900, color: Colors.black87, height: 1.2),
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, color: Colors.black87, height: 1.2),
                 ),
                 const SizedBox(height: 16),
                 Text(
