@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 import 'package:lustra/providers/language_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:web_smooth_scroll/web_smooth_scroll.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../services/parliament_service_interface.dart';
@@ -18,6 +17,7 @@ import '../../widgets/web_link.dart';
 import '../../widgets/lists_specific/legislation_control_bar.dart';
 import '../../widgets/lists_specific/legislation_list_card.dart';
 import '../../widgets/osint_loader.dart';
+import '../../widgets/web_smooth_scroll.dart';
 
 class LegislationScreen extends StatefulWidget {
   const LegislationScreen({super.key});
@@ -133,7 +133,7 @@ Future<void> _loadFilterOptions() async {
   }
 }
 
-  final ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollController = SmoothScrollController();
   void _resetAndLoadData({bool forceRefresh = false, bool newSourceChanged = false}) {
     developer.log('Resetowanie stanu i ładowanie danych. forceRefresh: $forceRefresh, newSourceChanged: $newSourceChanged', name: 'LegislationScreen');
     if (!mounted) {
@@ -384,9 +384,7 @@ Widget build(BuildContext context) {
       Widget listView = ListView.builder(
         controller: _scrollController,
         
-        physics: isDesktopWeb 
-            ? const NeverScrollableScrollPhysics() 
-            : const AlwaysScrollableScrollPhysics(),
+        physics: const AlwaysScrollableScrollPhysics(),
             
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         itemCount: processedBills.length + (_isLoadingMore ? 1 : 0),
@@ -463,9 +461,6 @@ Widget build(BuildContext context) {
           child: isDesktopWeb
               ? WebSmoothScroll(
                 controller: _scrollController,
-                scrollAnimationLength: 450,
-                scrollSpeed: 0.7,
-                curve: Curves.easeOut,
                 child: listView,
               )
               : listView,

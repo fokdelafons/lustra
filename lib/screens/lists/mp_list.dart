@@ -11,8 +11,8 @@ import 'package:go_router/go_router.dart';
 import 'package:lustra/providers/language_provider.dart';
 import 'package:flutter/foundation.dart';
 import '../../services/app_router.dart';
-import 'package:web_smooth_scroll/web_smooth_scroll.dart';
 import '../../widgets/osint_loader.dart';
+import '../../widgets/web_smooth_scroll.dart';
 
 // --- LEGACY CODE --- 
 // potential for some rework
@@ -38,7 +38,7 @@ class MPScreenState extends State<MPScreen> with AutomaticKeepAliveClientMixin {
   ParliamentSource? _lastSource;
   int? _lastTerm;
   bool _isFirstBuild = true;
-  final ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollController = SmoothScrollController();
   String? _nextCursor;
   bool _hasMoreItems = true;
   static const int _itemsPerPage = 15;
@@ -514,7 +514,7 @@ Widget _buildFilterChips() {
 
       Widget listView = ListView.builder(
         controller: _scrollController,
-        physics: isDesktopWeb ? const NeverScrollableScrollPhysics() : const AlwaysScrollableScrollPhysics(),
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),
         itemCount: filteredMPs.length + (_isLoadingMore ? 1 : 0),
         itemBuilder: (context, index) {
@@ -532,9 +532,6 @@ Widget _buildFilterChips() {
       return isDesktopWeb
           ? WebSmoothScroll(
                 controller: _scrollController,
-                scrollAnimationLength: 450,
-                scrollSpeed: 0.7,
-                curve: Curves.easeOut,
                 child: listView,
               )
           : listView;

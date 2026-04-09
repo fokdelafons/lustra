@@ -206,7 +206,7 @@ class _TrackedCardState extends State<TrackedCard> {
     } else {
       content = ListView.separated(
         shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: EdgeInsets.zero,
         itemCount: _trackedBills.length,
         separatorBuilder: (context, index) => const Divider(height: 1),

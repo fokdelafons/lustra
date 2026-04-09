@@ -26,7 +26,7 @@ class PartiallyExpandableListWidgetState extends State<PartiallyExpandableListWi
   @override
   Widget build(BuildContext context) {
     final int effectiveLimit = widget.initiallyVisibleCount ?? 
-        (MediaQuery.of(context).size.width > 750 ? 5 : 3);
+        (MediaQuery.of(context).size.width > 800 ? 3 : 2);
 
     final bool canExpand = widget.items.length > effectiveLimit;
     final List<dynamic> visibleItems = _isExpanded
@@ -48,7 +48,7 @@ class PartiallyExpandableListWidgetState extends State<PartiallyExpandableListWi
         ListView.builder(
           padding: EdgeInsets.zero,
           shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
+          physics: const AlwaysScrollableScrollPhysics(),
           itemCount: visibleItems.length,
           itemBuilder: (context, index) => widget.itemBuilder(context, visibleItems[index]),
         ),

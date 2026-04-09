@@ -387,7 +387,7 @@ final attendancePercentage = deputy!.attendancePercentage ?? 0.0;
                         Expanded(
                           child: ListView(
                             padding: EdgeInsets.zero,
-                            physics: const NeverScrollableScrollPhysics(),
+                            physics: const AlwaysScrollableScrollPhysics(),
                             children: recentVotings!
                                 .take(4)
                                 .map((vote) => _buildVoteRow(vote, isSquare))

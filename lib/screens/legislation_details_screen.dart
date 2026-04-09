@@ -9,7 +9,6 @@ import 'package:provider/provider.dart';
 import 'package:lustra/l10n/app_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:web_smooth_scroll/web_smooth_scroll.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:go_router/go_router.dart';
 
@@ -30,6 +29,8 @@ import '../widgets/error_report_dialog.dart';
 import '../widgets/lists_specific/curated_list_manager_dialog.dart';
 import '../../widgets/osint_loader.dart';
 import '../../widgets/web_link.dart';
+import '../../widgets/web_smooth_scroll.dart';
+
 
 
 class LegislationDetailsScreen extends StatefulWidget {
@@ -738,7 +739,7 @@ void _reportError() {
             const SizedBox(height: 12),
             Center(child: Text(l10n.scheduledMeetingsSectionTitle, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87))),
             const SizedBox(height: 12),
-            ListView.builder(padding: EdgeInsets.zero, shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), itemCount: upcomingProceedingDates.length, itemBuilder: (context, index) {
+            ListView.builder(padding: EdgeInsets.zero, shrinkWrap: true, physics: const AlwaysScrollableScrollPhysics(), itemCount: upcomingProceedingDates.length, itemBuilder: (context, index) {
               final formattedDate = _formatDateTime(context, upcomingProceedingDates[index]);
               return bulletPoint(context, formattedDate);
             }),
@@ -967,7 +968,7 @@ void _reportError() {
 
     Widget contentBody = SingleChildScrollView(
         controller: _pageScrollController,
-        physics: isDesktopWeb ? const NeverScrollableScrollPhysics() : const AlwaysScrollableScrollPhysics(),
+        physics: AlwaysScrollableScrollPhysics(),
         padding: kIsWeb ? const EdgeInsets.symmetric(vertical: 32.0) : const EdgeInsets.all(16.0),
         child: kIsWeb 
           ? Center(

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lustra/providers/language_provider.dart';
 import 'package:go_router/go_router.dart';
-import 'package:web_smooth_scroll/web_smooth_scroll.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../services/parliament_service_interface.dart';
@@ -17,6 +16,7 @@ import '../../widgets/lists_specific/legislation_control_bar.dart';
 import '../../widgets/lists_specific/legislation_list_card.dart';
 import '../../widgets/osint_loader.dart';
 import '../../widgets/web_link.dart';
+import '../../widgets/web_smooth_scroll.dart';
 
   class CivicLegislationScreen extends StatefulWidget {
     const CivicLegislationScreen({super.key});
@@ -122,7 +122,7 @@ import '../../widgets/web_link.dart';
       }
     }
 
-  final ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollController = SmoothScrollController();
 
   @override
   void dispose() {
@@ -336,7 +336,7 @@ import '../../widgets/web_link.dart';
 
         Widget listView = ListView.builder(
           controller: _scrollController,
-          physics: isDesktopWeb ? const NeverScrollableScrollPhysics() : const AlwaysScrollableScrollPhysics(),
+          physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           itemCount: processedBills.length + (_isLoadingMore ? 1 : 0),
           itemBuilder: (context, index) {
@@ -376,9 +376,6 @@ import '../../widgets/web_link.dart';
             child: isDesktopWeb
                 ? WebSmoothScroll(
                 controller: _scrollController,
-                scrollAnimationLength: 450,
-                scrollSpeed: 0.7,
-                curve: Curves.easeOut,
                 child: listView,
               )
                 : listView,

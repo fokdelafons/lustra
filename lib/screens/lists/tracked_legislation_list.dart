@@ -4,7 +4,6 @@ import 'package:lustra/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lustra/providers/language_provider.dart';
-import 'package:web_smooth_scroll/web_smooth_scroll.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -14,6 +13,7 @@ import '../../models/legislation.dart';
 import '../../widgets/lists_specific/legislation_list_card.dart';
 import '../../widgets/web_link.dart';
 import '../../widgets/osint_loader.dart';
+import '../../widgets/web_smooth_scroll.dart';
 
 class TrackedLegislationScreen extends StatefulWidget {
   const TrackedLegislationScreen({super.key});
@@ -27,7 +27,7 @@ class TrackedLegislationScreenState extends State<TrackedLegislationScreen> with
   bool get wantKeepAlive => true;
   
   final TrackingService _trackingService = TrackingService();
-  final ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollController = SmoothScrollController();
   
   List<Legislation> _bills = [];
   bool _isLoading = false;
@@ -160,7 +160,7 @@ class TrackedLegislationScreenState extends State<TrackedLegislationScreen> with
 
     Widget listView = ListView.builder(
       controller: _scrollController,
-      physics: isDesktopWeb ? const NeverScrollableScrollPhysics() : const AlwaysScrollableScrollPhysics(),
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
       itemCount: _bills.length,
       itemBuilder: (context, index) {
@@ -188,9 +188,6 @@ class TrackedLegislationScreenState extends State<TrackedLegislationScreen> with
       child: isDesktopWeb
           ? WebSmoothScroll(
               controller: _scrollController,
-              scrollAnimationLength: 450,
-              scrollSpeed: 0.7,
-              curve: Curves.easeOut,
               child: listView,
             )
           : listView,

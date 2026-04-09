@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lustra/l10n/app_localizations.dart';
 import 'package:flutter/foundation.dart';
-import 'package:web_smooth_scroll/web_smooth_scroll.dart';
-// import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../models/home_screen_data.dart';
 import '../../providers/language_provider.dart';
@@ -26,6 +24,7 @@ import '../../widgets/home_specific/app_bar_mobile.dart';
 import '../../widgets/home_specific/app_bar_mobile_bottom.dart';
 import '../../widgets/home_specific/card_tracked.dart';
 import '../../widgets/home_specific/card_curated.dart';
+import '../../widgets/web_smooth_scroll.dart';
 
 
 
@@ -119,7 +118,7 @@ class HomeContent extends StatefulWidget {
 class HomeContentState extends State<HomeContent> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
-  final ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollController = SmoothScrollController();
   final GlobalKey _searchWidgetKey = GlobalKey();
   bool _isInitialScrollPerformed = false;
   HomeScreenData? _data;
@@ -391,9 +390,7 @@ Widget _buildContentList(BuildContext context) {
       cacheExtent: 3000.0, 
       
       controller: _scrollController,
-      physics: isDesktopWeb 
-          ? const NeverScrollableScrollPhysics() 
-          : const AlwaysScrollableScrollPhysics(),
+      physics: null,
           
       padding: kIsWeb
           ? const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0)
@@ -435,9 +432,6 @@ Widget _buildContentList(BuildContext context) {
         child: isDesktopWeb
             ? WebSmoothScroll(
                 controller: _scrollController,
-                scrollAnimationLength: 450,
-                scrollSpeed: 0.7,
-                curve: Curves.easeOut,
                 child: listView,
               )
             : listView,
@@ -445,67 +439,3 @@ Widget _buildContentList(BuildContext context) {
     );
   }
 }
-
-// // ============================================================================
-// // TARCZA: PŁYWAJĄCY KOD QR DLA WEBA (STICKY PROMO)
-// // ============================================================================
-// class _StickyWebQrCode extends StatefulWidget {
-//   const _StickyWebQrCode();
-
-//   @override
-//   State<_StickyWebQrCode> createState() => _StickyWebQrCodeState();
-// }
-
-// class _StickyWebQrCodeState extends State<_StickyWebQrCode> {
-//   bool _isHovered = false;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final screenWidth = MediaQuery.of(context).size.width;
-//     // Pokazujemy tylko na Webie i tylko, gdy jest wystarczająco dużo miejsca po bokach (np. > 1140)
-//     if (!kIsWeb || screenWidth < 1140) return const SizedBox.shrink();
-
-//     // Obliczamy pozycję, żeby kod był ładnie wyśrodkowany w prawym marginesie
-//     final rightMargin = (screenWidth - 750) / 2;
-//     final qrSize = (rightMargin * 0.6).clamp(80.0, 360.0);
-//     final widgetWidth = qrSize + 32;
-//     final rightPosition = ((rightMargin - widgetWidth) / 2).clamp(8.0, double.infinity);
-
-//     return Positioned(
-//       bottom: 40, // Przypięte do dołu ekranu
-//       right: rightPosition,
-//       child: MouseRegion(
-//         onEnter: (_) => setState(() => _isHovered = true),
-//         onExit: (_) => setState(() => _isHovered = false),
-//         child: AnimatedOpacity(
-//           duration: const Duration(milliseconds: 250),
-//           opacity: _isHovered ? 1.0 : 0.10, // Subtelne 25% na co dzień, 100% po najechaniu
-//           child: Container(
-//             padding: const EdgeInsets.all(16),
-//             decoration: BoxDecoration(
-//               color: Colors.white,
-//               borderRadius: BorderRadius.circular(16),
-//               boxShadow: _isHovered ? [const BoxShadow(color: Colors.black12, blurRadius: 12, spreadRadius: 2)] : [],
-//               border: Border.all(color: Colors.grey.shade300)
-//             ),
-//             child: Column(
-//               children: [
-//                 QrImageView(
-//                   data: 'https://lustra.news/download',
-//                   version: QrVersions.auto,
-//                   size: qrSize,
-//                   backgroundColor: Colors.white,
-//                 ),
-//                 const SizedBox(height: 8),
-//                 const Text(
-//                   "Get dedicated mobile app for notifications!", // TODO: L10N
-//                   style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.blueGrey),
-//                 )
-//               ],
-//             ),
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }

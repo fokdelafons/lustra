@@ -2,7 +2,6 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lustra/l10n/app_localizations.dart';
-import 'package:web_smooth_scroll/web_smooth_scroll.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -20,6 +19,7 @@ import '../../services/cache/parliament_cache_manager.dart';
 import '../../widgets/osint_loader.dart';
 import '../../widgets/error_report_dialog.dart';
 import '../../widgets/web_link.dart';
+import '../../widgets/web_smooth_scroll.dart';
 
 class CuratedLegislationScreen extends StatefulWidget {
   final String listId;
@@ -34,7 +34,7 @@ class CuratedLegislationScreenState extends State<CuratedLegislationScreen> with
   bool get wantKeepAlive => true;
   
   final CuratedListService _curatedService = CuratedListService();
-  final ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollController = SmoothScrollController();
   
   List<Legislation> _bills = [];
   Map<String, dynamic>? _metadata;
@@ -837,7 +837,7 @@ Future<void> refreshData() async {
 
     Widget listView = ListView.builder(
       controller: _scrollController,
-      physics: isDesktopWeb ? const NeverScrollableScrollPhysics() : const AlwaysScrollableScrollPhysics(),
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.only(bottom: 32.0),
       itemCount: _bills.length + 2,
       itemBuilder: (context, index) {
@@ -924,9 +924,6 @@ Future<void> refreshData() async {
       child: isDesktopWeb
           ? WebSmoothScroll(
               controller: _scrollController,
-              scrollAnimationLength: 450,
-              scrollSpeed: 0.7,
-              curve: Curves.easeOut,
               child: listView,
             )
           : listView,
