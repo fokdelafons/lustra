@@ -1,7 +1,7 @@
 name: lustra
 description: "Media reimagined"
 publish_to: 'none'
-version: 1.4.3+55
+version: 1.4.3+56
 
 environment:
   sdk: ^3.7.2
@@ -43,6 +43,7 @@ dependencies:
   firebase_analytics: ^12.1.1
   flutter_animate: ^4.5.2
   qr_flutter: ^4.1.0
+  visibility_detector: ^0.4.0+2
 
 
 dev_dependencies:

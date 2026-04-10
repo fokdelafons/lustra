@@ -40,11 +40,13 @@ import '../../screens/lists/curated_legislation_list.dart';
 class LegislationWrapperScreen extends StatefulWidget {
   final String type;
   final String? listId;
+  final String? initialAction;
 
   const LegislationWrapperScreen({
     super.key, 
     required this.type, 
     this.listId,
+    this.initialAction,
   });
 
   @override
@@ -200,7 +202,11 @@ class _LegislationWrapperScreenState extends State<LegislationWrapperScreen> {
               if (widget.listId == null) {
                  return Center(child: Text(l10n.errorMissingListId));
               }
-              return CuratedLegislationScreen(key: _curatedKey, listId: widget.listId!);
+              return CuratedLegislationScreen(
+                key: _curatedKey, 
+                listId: widget.listId!,
+                initialAction: widget.initialAction,
+              );
             case 'voted':
             default:
               return LegislationScreen(key: _votedKey);

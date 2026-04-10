@@ -978,5 +978,9 @@
   "clOutro": "Lustra is geen sociaal netwerk dat gratis algoritmisch bereik genereert voor jouw lijst. Watchlists werken alleen op uitnodiging. Je moet je unieke link extern delen. Haal je publiek van X, YouTube, TikTok of je nieuwsbrief. Wij geven je geen volgers; wij geven je de infrastructuur om je bestaande volgers om te zetten in een geverifieerde, stemmende burgerkracht - en een manier om direct gefinancierd te worden voor je harde werk. Stop met je publiek om \"likes\" te vragen. Geef ze een tool om in actie te komen.",
   "supportFundTitle": "Fase 1: Oprichting Non-Profit Entiteit",
   "supportFundDesc": "Om de Lustra Foundation officieel op te richten, het intellectueel eigendom te beschermen en de juridische opstartkosten te dekken, moeten we startkapitaal verzamelen. Help ons dit systeem voor altijd onafhankelijk te maken.",
-  "supportFundDisclaimer": "Datatransparantie: Vanwege verschillende betalingsgateways en infrastructuurkosten wordt deze voortgangsbalk handmatig bijgewerkt door de oprichter (max. één keer per week)."
+  "supportFundDisclaimer": "Datatransparantie: Vanwege verschillende betalingsgateways en infrastructuurkosten wordt deze voortgangsbalk handmatig bijgewerkt door de oprichter (max. één keer per week).",
+  "actionSyncViaQr": "Toon QR-code",
+"actionHideQr": "Verberg QR-code",
+"promoGuestTrackBills": "Volg wetgeving en ontvang meldingen over nieuwe stemmingen en wetten.",
+"promoGetAppForNotifications": "Download de mobiele app voor betere prestaties en meldingen over uw gevolgde wetsvoorstellen."
 }

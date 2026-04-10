@@ -3296,4 +3296,18 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get supportFundDisclaimer =>
       'Transparência de dados: Devido a diferentes gateways de pagamento e custos de infraestrutura, esta barra de progresso é atualizada manualmente pelo fundador (no máximo uma vez por semana).';
+
+  @override
+  String get actionSyncViaQr => 'Mostrar QR';
+
+  @override
+  String get actionHideQr => 'Ocultar QR';
+
+  @override
+  String get promoGuestTrackBills =>
+      'Acompanhe a legislação e receba notificações sobre novas votações e leis.';
+
+  @override
+  String get promoGetAppForNotifications =>
+      'Obtenha a aplicação móvel para melhor desempenho e notificações sobre os seus projetos de lei acompanhados.';
 }

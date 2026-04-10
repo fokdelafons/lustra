@@ -30,6 +30,7 @@ class UserProvider with ChangeNotifier {
   String? _currentUserId;
 
   bool get isInitialized => _isInitialized;
+  Map<String, dynamic> get votes => _votes;
   bool get marketingConsent => _marketingConsent;
   List<String> get subscribedParliaments => _subscribedParliaments;
   String? get primaryParliamentId => _primaryParliamentId;
@@ -54,7 +55,7 @@ class UserProvider with ChangeNotifier {
   void updateAuthStatus(User? firebaseUser) {
     if (firebaseUser == null) {
       _clear();
-    } else if (_currentUserId != firebaseUser.uid) {
+    } else if (_currentUserId != firebaseUser.uid || !_isInitialized) {
       _currentUserId = firebaseUser.uid;
       if (!_isOnboarding) {
         _fetchUserProfile();
@@ -83,41 +84,41 @@ class UserProvider with ChangeNotifier {
     }
   }
 
-  Future<void> _fetchUserProfile({int maxRetries = 3}) async {
-    developer.log("Pobieranie profilu użytkownika (UserProvider)...", name: 'UserProvider');
+  Future<void> _fetchUserProfile({int maxRetries = 5}) async {
+    // TARCZA: Increased retries to 5 for better cold-start resilience.
+    developer.log("Fetching User Profile...", name: 'UserProvider');
     int attempt = 0;
     
     while (attempt < maxRetries) {
       try {
         final result = await _apiService.callFunction('checkUserProfile');
+        
         _profileExists = result['exists'] ?? false;
 
         if (result['exists'] == true && result['profile'] != null) {
-          final profile = result['profile'] as Map<String, dynamic>;
+          final profile = Map<String, dynamic>.from(result['profile']);
           
           _marketingConsent = profile['marketingConsent'] ?? false;
           _notificationsTrackedBills = profile['notificationsTrackedBills'] ?? false;
           _subscribedParliaments = List<String>.from(profile['subscribedParliaments'] ?? []);
-          _primaryParliamentId = profile['primaryParliamentId'];
+          _primaryParliamentId = profile['primaryParliamentId']?.toString();
 
-          if (profile.containsKey('votes')) {
-            _votes = Map<String, dynamic>.from(profile['votes']);
-            developer.log("Pobrano ${_votes.length} głosów.", name: 'UserProvider');
-          } else {
-            _votes = {};
-          }
+          _votes = profile['votes'] != null ? Map<String, dynamic>.from(profile['votes']) : {};
+          developer.log("Synchronized ${_votes.length} votes.", name: 'UserProvider');
           _subscribedLists = List<String>.from(profile['subscribedLists'] ?? []);
           _createdLists = List<String>.from(profile['createdLists'] ?? []);
           _isCurator = profile['isCurator'] ?? false;
           
           await CacheService().save('_cached_user_profile', profile);
+          developer.log("Profile fetched and cached successfully.", name: 'UserProvider');
         }
+        
         _isInitialized = true;
         notifyListeners();
         return;
       } catch (e) {
         attempt++;
-        developer.log("Błąd pobierania profilu (próba $attempt/$maxRetries): $e", name: 'UserProvider');
+        developer.log("Fetch failed (Attempt $attempt/$maxRetries): $e", name: 'UserProvider');
         
         if (attempt >= maxRetries) {
           final cachedProfile = await CacheService().get('_cached_user_profile');
@@ -134,7 +135,7 @@ class UserProvider with ChangeNotifier {
           _isInitialized = true;
           notifyListeners();
         } else {
-          await Future.delayed(Duration(milliseconds: 500 * attempt));
+          await Future.delayed(Duration(seconds: attempt * 1)); 
         }
       }
     }

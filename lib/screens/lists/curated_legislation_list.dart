@@ -23,7 +23,8 @@ import '../../widgets/web_smooth_scroll.dart';
 
 class CuratedLegislationScreen extends StatefulWidget {
   final String listId;
-  const CuratedLegislationScreen({super.key, required this.listId});
+  final String? initialAction;
+  const CuratedLegislationScreen({super.key, required this.listId, this.initialAction});
 
   @override
   CuratedLegislationScreenState createState() => CuratedLegislationScreenState();
@@ -47,7 +48,11 @@ class CuratedLegislationScreenState extends State<CuratedLegislationScreen> with
   @override
   void initState() {
     super.initState();
-    _loadData();
+    _loadData().then((_) {
+      if (widget.initialAction == 'subscribe' && mounted) {
+        _toggleSubscription();
+      }
+    });
   }
 
 
@@ -126,8 +131,22 @@ Future<void> refreshData() async {
 
   Future<void> _toggleSubscription() async {
     if (FirebaseAuth.instance.currentUser == null) {
+      final l10n = AppLocalizations.of(context)!;
+      final currentUri = GoRouterState.of(context).uri;
+      final Map<String, dynamic> newParams = Map.from(currentUri.queryParameters);
+      newParams['action'] = 'subscribe';
+      final redirectUri = currentUri.replace(queryParameters: newParams).toString();
+      final encodedNext = Uri.encodeComponent(redirectUri);
+
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.errorMustBeLoggedInToSubscribe)),
+        SnackBar(
+          content: Text(l10n.errorMustBeLoggedInToSubscribe),
+          action: SnackBarAction(
+            label: l10n.promptToLogin,
+            onPressed: () => context.smartNavigate('/login?next=$encodedNext'),
+          ),
+          duration: const Duration(seconds: 5),
+        ),
       );
       return;
     }

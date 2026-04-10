@@ -1104,5 +1104,9 @@
   "clOutro": "Lustra nie jest siecią społecznościową generującą darmowy algorytmiczny zasięg dla Twojej listy. Listy Kuratorskie działają tylko na zaproszenie. Musisz udostępnić swój unikalny link na zewnątrz. Przyprowadź swoją publiczność z X, YouTube, TikToka lub z newslettera. Nie dajemy Ci followersów; dajemy Ci infrastrukturę, aby przekształcić obecnych obserwatorów w zweryfikowaną, głosującą siłę obywatelską - i sposób na bezpośrednie finansowanie Twojej ciężkiej pracy. Przestań prosić publiczność o \"lajki\". Daj im narzędzie do działania.",
   "supportFundTitle": "Faza 1: Uruchomienie Podmiotu Non-Profit",
   "supportFundDesc": "Aby oficjalnie otworzyć Fundację Lustra, chronić własność intelektualną i pokryć koszty prawne, musimy zebrać początkowy kapitał. Pomóż nam uniezależnić ten system na zawsze.",
-  "supportFundDisclaimer": "Przejrzystość danych: Ze względu na różne bramki płatności i koszty infrastruktury, ten pasek postępu jest aktualizowany ręcznie przez założyciela (maksymalnie raz w tygodniu)."
+  "supportFundDisclaimer": "Przejrzystość danych: Ze względu na różne bramki płatności i koszty infrastruktury, ten pasek postępu jest aktualizowany ręcznie przez założyciela (maksymalnie raz w tygodniu).",
+  "actionSyncViaQr": "Pokaż kod QR",
+"actionHideQr": "Ukryj kod QR",
+"promoGuestTrackBills": "Śledź proces legislacyjny i otrzymuj powiadomienia o nowych głosowaniach i ustawach.",
+"promoGetAppForNotifications": "Pobierz aplikację mobilną dla lepszej wydajności i powiadomień o śledzonych ustawach."
 }

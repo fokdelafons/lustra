@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
-const double defaultScrollOffset = 0.7; 
-const int defaultAnimationDuration = 450; 
+const double defaultScrollOffset = 1.0; 
+const int defaultAnimationDuration = 400; 
 
 class WebSmoothScroll extends StatefulWidget {
   final ScrollController controller;
@@ -40,6 +40,7 @@ class _WebSmoothScrollState extends State<WebSmoothScroll> {
     super.initState();
     widget.controller.addListener(scrollListener);
     _targetScroll = widget.controller.initialScrollOffset;
+    HardwareKeyboard.instance.addHandler(_handleGlobalKey);
   }
 
   @override
@@ -52,6 +53,7 @@ class _WebSmoothScrollState extends State<WebSmoothScroll> {
 
   @override
   void dispose() {
+    HardwareKeyboard.instance.removeHandler(_handleGlobalKey);
     _focusNode.dispose();
     widget.controller.removeListener(scrollListener);
     super.dispose();
@@ -107,6 +109,63 @@ class _WebSmoothScrollState extends State<WebSmoothScroll> {
     }
   }
 
+  void _applyBrakes(bool isDown) {
+    if (!widget.controller.hasClients) return;
+    final double momentum = isDown ? 150.0 : -150.0;
+    double newTarget = (widget.controller.offset + momentum).clamp(0.0, widget.controller.position.maxScrollExtent);
+    
+    _targetScroll = newTarget;
+    _isAnimating = true;
+    widget.controller.animateTo(
+      newTarget,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOutCubic,
+    ).then((_) { if (mounted) setState(() => _isAnimating = false); });
+  }
+
+bool _handleGlobalKey(KeyEvent event) {
+    final primaryFocus = FocusManager.instance.primaryFocus;
+    if (primaryFocus != null && primaryFocus.context?.widget is EditableText) {
+      return false; 
+    }
+
+    if (event.logicalKey == LogicalKeyboardKey.pageDown) {
+      if (event is KeyDownEvent || event is KeyRepeatEvent) _smoothScrollTo(400);
+      return true;
+    }
+    if (event.logicalKey == LogicalKeyboardKey.pageUp) {
+      if (event is KeyDownEvent || event is KeyRepeatEvent) _smoothScrollTo(-400);
+      return true;
+    }
+
+    if (event.logicalKey == LogicalKeyboardKey.arrowDown || event.logicalKey == LogicalKeyboardKey.arrowUp) {
+      if (event is KeyDownEvent && _heldKey != event.logicalKey) {
+        _heldKey = event.logicalKey;
+        final isDown = event.logicalKey == LogicalKeyboardKey.arrowDown;
+        final target = isDown ? widget.controller.position.maxScrollExtent : 0.0;
+        final distance = (target - widget.controller.offset).abs();
+        final durationMs = (distance / 1200.0 * 1000).toInt(); 
+        
+        if (distance > 0) {
+          _targetScroll = target; 
+          _isAnimating = true;
+          widget.controller.animateTo(
+            target, 
+            duration: Duration(milliseconds: durationMs), 
+            curve: Curves.linear,
+          ).then((_) { if (mounted) setState(() => _isAnimating = false); });
+        }
+        return true;
+      } else if (event is KeyUpEvent && _heldKey == event.logicalKey) {
+        final isDown = _heldKey == LogicalKeyboardKey.arrowDown;
+        _heldKey = null;
+        _applyBrakes(isDown);
+        return true;
+      }
+    }
+    return false;
+  }
+
   void onPointerSignal(PointerSignalEvent pointerSignal) {
     if (pointerSignal is PointerScrollEvent) {
       if (pointerSignal.kind != PointerDeviceKind.trackpad) {
@@ -148,60 +207,6 @@ class _WebSmoothScrollState extends State<WebSmoothScroll> {
             child: Focus(
           focusNode: _focusNode,
           autofocus: true,
-          onKeyEvent: (FocusNode node, KeyEvent event) {
-            if (event.logicalKey == LogicalKeyboardKey.pageDown) {
-              if (event is KeyDownEvent || event is KeyRepeatEvent) _smoothScrollTo(400);
-              return KeyEventResult.handled;
-            }
-            if (event.logicalKey == LogicalKeyboardKey.pageUp) {
-              if (event is KeyDownEvent || event is KeyRepeatEvent) _smoothScrollTo(-400);
-              return KeyEventResult.handled;
-            }
-
-            if (event.logicalKey == LogicalKeyboardKey.arrowDown || event.logicalKey == LogicalKeyboardKey.arrowUp) {
-              if (event is KeyDownEvent && _heldKey != event.logicalKey) {
-                _heldKey = event.logicalKey;
-                
-                final isDown = event.logicalKey == LogicalKeyboardKey.arrowDown;
-                final target = isDown ? widget.controller.position.maxScrollExtent : 0.0;
-                final distance = (target - widget.controller.offset).abs();
-                
-                final durationMs = (distance / 1500.0 * 1000).toInt(); 
-                
-                if (distance > 0) {
-                  _targetScroll = target; 
-                  _isAnimating = true;
-                  widget.controller.animateTo(
-                    target, 
-                    duration: Duration(milliseconds: durationMs), 
-                    curve: Curves.linear,
-                  ).then((_) { if (mounted) setState(() => _isAnimating = false); });
-                }
-                return KeyEventResult.handled;
-                
-              } else if (event is KeyUpEvent && _heldKey == event.logicalKey) {
-                _heldKey = null;
-                
-                final isDown = event.logicalKey == LogicalKeyboardKey.arrowDown;
-                double newTarget = widget.controller.offset + (isDown ? 150.0 : -150.0);
-                newTarget = newTarget.clamp(0.0, widget.controller.position.maxScrollExtent);
-                
-                _targetScroll = newTarget;
-                _isAnimating = true;
-                widget.controller.animateTo(
-                  newTarget,
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeOutCubic,
-                ).then((_) { if (mounted) setState(() => _isAnimating = false); });
-                
-                return KeyEventResult.handled;
-                
-              } else if (event is KeyRepeatEvent) {
-                return KeyEventResult.handled;
-              }
-            }
-            return KeyEventResult.ignored;
-          },
           child: Listener(
             onPointerDown: (_) {
               Future.microtask(() {

@@ -3320,4 +3320,18 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get supportFundDisclaimer =>
       'Datentransparenz: Aufgrund verschiedener Zahlungs-Gateways und Infrastrukturkosten wird dieser Fortschrittsbalken manuell vom Gründer aktualisiert (max. einmal pro Woche).';
+
+  @override
+  String get actionSyncViaQr => 'QR-Code zeigen';
+
+  @override
+  String get actionHideQr => 'QR-Code ausblenden';
+
+  @override
+  String get promoGuestTrackBills =>
+      'Verfolgen Sie die Gesetzgebung und erhalten Sie Benachrichtigungen über neue Abstimmungen und Gesetze.';
+
+  @override
+  String get promoGetAppForNotifications =>
+      'Holen Sie sich die mobile App für bessere Performance und Benachrichtigungen zu Ihren verfolgten Gesetzen.';
 }

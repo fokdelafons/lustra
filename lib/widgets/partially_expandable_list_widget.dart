@@ -45,12 +45,10 @@ class PartiallyExpandableListWidgetState extends State<PartiallyExpandableListWi
           ),
         ),
         const SizedBox(height: 8),
-        ListView.builder(
-          padding: EdgeInsets.zero,
-          shrinkWrap: true,
-          physics: const AlwaysScrollableScrollPhysics(),
-          itemCount: visibleItems.length,
-          itemBuilder: (context, index) => widget.itemBuilder(context, visibleItems[index]),
+        Column(
+          children: visibleItems
+              .map((item) => widget.itemBuilder(context, item))
+              .toList(),
         ),
         if (canExpand)
         Padding(

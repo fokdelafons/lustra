@@ -869,7 +869,15 @@ void _reportError() {
         Text(l10n.additionalInfoSectionTitle, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        if (_bill!.id.isNotEmpty)
+          if (_bill!.titleOfficial != null && _bill!.titleOfficial!.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 2.0),
+              child: Text(
+                _bill!.titleOfficial!, 
+                style: const TextStyle(fontSize: 15, height: 1.5)
+              ),
+            ),
+          if (_bill!.id.isNotEmpty)
             Text(l10n.printNumberLabel(_bill!.id), style: const TextStyle(fontSize: 15, height: 1.5)),
 
           if (_bill!.sponsor != null && _bill!.sponsor!['name'] != null)

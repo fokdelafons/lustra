@@ -3301,4 +3301,18 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get supportFundDisclaimer =>
       'Datatransparantie: Vanwege verschillende betalingsgateways en infrastructuurkosten wordt deze voortgangsbalk handmatig bijgewerkt door de oprichter (max. één keer per week).';
+
+  @override
+  String get actionSyncViaQr => 'Toon QR-code';
+
+  @override
+  String get actionHideQr => 'Verberg QR-code';
+
+  @override
+  String get promoGuestTrackBills =>
+      'Volg wetgeving en ontvang meldingen over nieuwe stemmingen en wetten.';
+
+  @override
+  String get promoGetAppForNotifications =>
+      'Download de mobiele app voor betere prestaties en meldingen over uw gevolgde wetsvoorstellen.';
 }

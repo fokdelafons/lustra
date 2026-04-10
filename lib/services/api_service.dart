@@ -8,6 +8,10 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class ApiService {
+  static final ApiService _instance = ApiService._internal();
+  factory ApiService() => _instance;
+  ApiService._internal();
+
   final String _baseUrl = 'https://api.lustra.dev';
   final FirebaseAuth _auth = FirebaseAuth.instance;
   String? _cachedAppCheckToken;

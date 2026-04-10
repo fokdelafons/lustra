@@ -978,5 +978,9 @@
   "clOutro": "Lustra ist kein soziales Netzwerk, das kostenlose algorithmische Reichweite für deine Liste generiert. Watchlists funktionieren nur auf Einladung. Du musst deinen einzigartigen Link extern teilen. Bringe dein Publikum von X, YouTube, TikTok oder deinem Newsletter mit. Wir geben dir keine Follower; wir geben dir die Infrastruktur, um deine bestehenden Follower in eine verifizierte, wählende bürgerschaftliche Kraft zu verwandeln – und einen Weg, direkt für deine harte Arbeit finanziert zu werden. Hör auf, dein Publikum um \"Likes\" zu bitten. Gib ihnen ein Werkzeug zum Handeln.",
   "supportFundTitle": "Phase 1: Gründung der Non-Profit-Organisation",
   "supportFundDesc": "Um die Lustra Foundation offiziell zu gründen, das geistige Eigentum zu schützen und die rechtlichen Gründungskosten zu decken, müssen wir Startkapital sammeln. Hilf uns, dieses System für immer unabhängig zu machen.",
-  "supportFundDisclaimer": "Datentransparenz: Aufgrund verschiedener Zahlungs-Gateways und Infrastrukturkosten wird dieser Fortschrittsbalken manuell vom Gründer aktualisiert (max. einmal pro Woche)."
+  "supportFundDisclaimer": "Datentransparenz: Aufgrund verschiedener Zahlungs-Gateways und Infrastrukturkosten wird dieser Fortschrittsbalken manuell vom Gründer aktualisiert (max. einmal pro Woche).",
+  "actionSyncViaQr": "QR-Code zeigen",
+"actionHideQr": "QR-Code ausblenden",
+"promoGuestTrackBills": "Verfolgen Sie die Gesetzgebung und erhalten Sie Benachrichtigungen über neue Abstimmungen und Gesetze.",
+"promoGetAppForNotifications": "Holen Sie sich die mobile App für bessere Performance und Benachrichtigungen zu Ihren verfolgten Gesetzen."
 }

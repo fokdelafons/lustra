@@ -27,9 +27,9 @@ class _TrackedCardState extends State<TrackedCard> {
   final TrackingService _trackingService = TrackingService();
   bool _isLoading = true;
   bool _playAnimation = true;
-  bool _isQrHovered = false;
   List<Legislation> _trackedBills = [];
   int? _lastDbUpdateStamp;
+  bool _showQrExplicitly = false;
 
   @override
   void initState() {
@@ -98,8 +98,6 @@ class _TrackedCardState extends State<TrackedCard> {
   @override
   Widget build(BuildContext context) {
     final firebaseUser = context.watch<User?>();
-    if (firebaseUser == null) return const SizedBox.shrink();
-
     final l10n = AppLocalizations.of(context)!;
     final manager = context.read<ParliamentManager>();
     final slug = manager.activeSlug;
@@ -109,138 +107,72 @@ class _TrackedCardState extends State<TrackedCard> {
     Widget content;
 
     if (_isLoading) {
-      content = SizedBox(
-        height: 150,
-        child: Center(child: OsintLoader(text: l10n.loaderLoadingTrackedBills)),
-      );
-    } else if (_trackedBills.isEmpty) {
-      final double screenWidth = MediaQuery.of(context).size.width;
-      final bool showQrCode = screenWidth >= 1024;
-      
+      content = SizedBox(height: 150, child: Center(child: OsintLoader(text: l10n.loaderLoadingTrackedBills)));
+    } else if (firebaseUser == null || _trackedBills.isEmpty) {
+      final bool isGuest = firebaseUser == null;
       content = Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Icon(Icons.notifications_off_outlined, size: 48, color: Colors.grey[400]),
+              Icon(isGuest ? Icons.auto_awesome : Icons.notifications_off_outlined, size: 48, color: Colors.grey[400]),
               const SizedBox(height: 16),
-              Text(l10n.emptyTrackedBills, textAlign: TextAlign.center, style: const TextStyle(color: Colors.grey)),
+              Text(
+                isGuest ? l10n.promoGuestTrackBills : l10n.emptyTrackedBills,
+                textAlign: TextAlign.center, style: const TextStyle(color: Colors.grey)
+              ),
               if (kIsWeb) ...[
+                const SizedBox(height: 32),
+                _buildDownloadButtons(),
+                
+                if (_showQrExplicitly) ...[
+                  const SizedBox(height: 24),
+                  _buildQrCode(),
+                ],
                 const SizedBox(height: 24),
-                Text(l10n.notificationsMobileOnly, textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, color: Colors.blueGrey, height: 1.4)),
-                const SizedBox(height: 16),
-                if (showQrCode)
-                  MouseRegion(
-                    onEnter: (_) => setState(() => _isQrHovered = true),
-                    onExit: (_) => setState(() => _isQrHovered = false),
-                    cursor: SystemMouseCursors.click,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(_isQrHovered ? 16.0 : 12.0),
-                        border: Border.all(
-                          color: _isQrHovered ? Theme.of(context).primaryColor.withAlpha(100) : Colors.grey.shade300,
-                          width: _isQrHovered ? 2.0 : 1.0,
-                        ),
-                      ),
-                      child: FittedBox(
-                        child: SizedBox(
-                          width: 160,
-                          height: 160,
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: QrImageView(
-                              data: 'https://www.lustra.news/download',
-                              version: QrVersions.auto,
-                              backgroundColor: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
-                    .animate(target: _isQrHovered ? 1 : 0)
-                    .custom(
-                      duration: 400.ms,
-                      curve: Curves.easeOutBack,
-                      builder: (context, value, child) {
-                        // Size increase
-                        final size = 64.0 + (256.0 * value);
-                        return SizedBox(width: size, height: size, child: child);
-                      },
-                    )
-                    .fade(begin: 0.35, end: 1.0, duration: 250.ms)
-                    .boxShadow(
-                      begin: const BoxShadow(color: Colors.transparent),
-                      end: BoxShadow(
-                        color: Theme.of(context).primaryColor.withAlpha(30), 
-                        blurRadius: 16, 
-                        spreadRadius: 2
-                      ),
-                      duration: 300.ms,
-                    ),
-                  )
-                else
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ElevatedButton.icon(
-                        icon: const Icon(Icons.android, size: 16), label: const Text("Google Play"),
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.black, foregroundColor: Colors.white),
-                        onPressed: () => launchUrlString("https://play.google.com/store/apps/details?id=dev.lustra"),
-                      ),
-                      const SizedBox(width: 12),
-                      ElevatedButton.icon(
-                        icon: const Icon(Icons.apple, size: 16), label: const Text("App Store"),
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.black, foregroundColor: Colors.white),
-                        onPressed: () => launchUrlString("https://apps.apple.com/app/id6751850630"),
-                      ),
-                    ],
-                  )
+                Text(l10n.notificationsMobileOnly, textAlign: TextAlign.center, style: const TextStyle(fontSize: 11, color: Colors.blueGrey)),
               ]
             ],
           ),
         ),
       );
     } else {
-      content = ListView.separated(
-        shrinkWrap: true,
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: EdgeInsets.zero,
-        itemCount: _trackedBills.length,
-        separatorBuilder: (context, index) => const Divider(height: 1),
-        itemBuilder: (context, index) {
-          final bill = _trackedBills[index];
-          
-          final tile = WebLink(
-            path: '/$lang/$slug/$term/legislations/${bill.id}',
-            extra: bill,
-            builder: (context, onTapCallback) => ListTile(
-              hoverColor: Colors.black.withAlpha(15), 
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-              title: Text(
-                bill.title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+      content = Column(
+        children: [
+          ...List.generate(_trackedBills.length, (index) {
+            final bill = _trackedBills[index];
+            final tile = WebLink(
+              path: '/$lang/$slug/$term/legislations/${bill.id}',
+              extra: bill,
+              builder: (context, onTapCallback) => ListTile(
+                hoverColor: Colors.black.withAlpha(15), contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                title: Text(bill.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14)),
+                subtitle: Padding(padding: const EdgeInsets.only(top: 4.0), child: Text(bill.id, style: TextStyle(fontFamily: 'Roboto', fontSize: 11, color: Colors.grey[600]))),
+                trailing: const Icon(Icons.chevron_right, size: 20, color: Colors.grey),
+                onTap: onTapCallback,
               ),
-              subtitle: Padding(
-                padding: const EdgeInsets.only(top: 4.0),
-                child: Text(
-                  bill.id,
-                  style: TextStyle(fontFamily: 'Roboto', fontSize: 11, color: Colors.grey[600]),
-                ),
+            );
+            final item = _playAnimation ? _StaggeredListItem(key: ValueKey('stagger_$index'), index: index, child: tile) : tile;
+            return index < _trackedBills.length - 1 ? Column(children: [item, const Divider(height: 1)]) : item;
+          }),
+          if (kIsWeb) ...[
+            const Divider(height: 1),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  Text(l10n.promoGetAppForNotifications, style: const TextStyle(fontSize: 12, color: Colors.blueGrey), textAlign: TextAlign.center),
+                  const SizedBox(height: 16),
+                  _buildDownloadButtons(small: true),
+                  if (_showQrExplicitly) ...[
+                    const SizedBox(height: 24),
+                    _buildQrCode(),
+                  ],
+                ],
               ),
-              trailing: const Icon(Icons.chevron_right, size: 20, color: Colors.grey),
-              onTap: onTapCallback,
             ),
-          );
-          if (_playAnimation) {
-             return _StaggeredListItem(key: ValueKey('stagger_$index'), index: index, child: tile);
-          }
-          return tile;
-        },
+          ]
+        ],
       );
     }
     return HomeSectionCard(
@@ -255,6 +187,57 @@ class _TrackedCardState extends State<TrackedCard> {
         alignment: Alignment.topCenter,
         child: content,
       ),
+    );
+  }
+  Widget _buildDownloadButtons({bool small = false}) {
+    final l10n = AppLocalizations.of(context)!;
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 12.0,
+      runSpacing: 12.0,
+      children: [
+        ElevatedButton.icon(
+          icon: Icon(Icons.android, size: small ? 14 : 16),
+          label: Text("Google Play", style: TextStyle(fontSize: small ? 11 : 13)),
+          style: ElevatedButton.styleFrom(backgroundColor: Colors.black, foregroundColor: Colors.white, padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8)),
+          onPressed: () => launchUrlString("https://play.google.com/store/apps/details?id=dev.lustra"),
+        ),
+        ElevatedButton.icon(
+          icon: Icon(Icons.apple, size: small ? 14 : 16),
+          label: Text("App Store", style: TextStyle(fontSize: small ? 11 : 13)),
+          style: ElevatedButton.styleFrom(backgroundColor: Colors.black, foregroundColor: Colors.white, padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8)),
+          onPressed: () => launchUrlString("https://apps.apple.com/app/id6751850630"),
+        ),
+        if (kIsWeb && MediaQuery.of(context).size.width > 800)
+        ElevatedButton.icon(
+          icon: Icon(_showQrExplicitly ? Icons.close : Icons.qr_code_scanner, size: small ? 14 : 16),
+          label: Text(_showQrExplicitly ? l10n.actionHideQr : l10n.actionSyncViaQr, style: TextStyle(fontSize: small ? 11 : 13)),
+          style: ElevatedButton.styleFrom(backgroundColor: Colors.blueGrey[800], foregroundColor: Colors.white, padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8)),
+          onPressed: () => setState(() => _showQrExplicitly = !_showQrExplicitly),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQrCode() {
+    
+    return Column(
+      children: [
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.all(12.0),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12.0),
+            border: Border.all(color: Colors.grey.shade300, width: 1.0),
+            boxShadow: [BoxShadow(color: Colors.black.withAlpha(10), blurRadius: 10, spreadRadius: 2)],
+          ),
+          child: SizedBox(
+            width: 140, height: 140,
+            child: QrImageView(data: 'https://www.lustra.news/download', version: QrVersions.auto, backgroundColor: Colors.white),
+          ),
+        ).animate().fade(duration: 300.ms).scale(begin: const Offset(0.9, 0.9), curve: Curves.easeOutBack),
+      ],
     );
   }
 }

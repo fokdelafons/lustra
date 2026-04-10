@@ -3300,4 +3300,18 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get supportFundDisclaimer =>
       'Trasparenza dei dati: A causa dei diversi gateway di pagamento e dei costi dell\'infrastruttura, questa barra di avanzamento viene aggiornata manualmente dal fondatore (massimo una volta a settimana).';
+
+  @override
+  String get actionSyncViaQr => 'Mostra QR';
+
+  @override
+  String get actionHideQr => 'Nascondi QR';
+
+  @override
+  String get promoGuestTrackBills =>
+      'Segui la legislazione e ricevi notifiche su nuove votazioni e leggi.';
+
+  @override
+  String get promoGetAppForNotifications =>
+      'Scarica l\'app mobile per migliori prestazioni e notifiche sui tuoi progetti di legge seguiti.';
 }

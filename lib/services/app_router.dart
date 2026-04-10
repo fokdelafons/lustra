@@ -36,9 +36,11 @@ final GoRouter router = GoRouter(
   observers: [observer],
   redirect: (context, state) {
     final goTarget = state.uri.queryParameters['go'];
-    if (goTarget != null && goTarget.isNotEmpty) {
-       return goTarget;
+    if (goTarget != null && goTarget.isNotEmpty) return goTarget;
+    if (state.uri.fragment.isNotEmpty && state.uri.fragment.startsWith('/')) {
+      return state.uri.fragment;
     }
+
     return null;
   },
   routes: [
@@ -155,6 +157,7 @@ final GoRouter router = GoRouter(
         final pid = ParliamentSource.getIdBySlug(slug)!;
         final queryList = state.uri.queryParameters['list'];
         final listId = state.uri.queryParameters['listId'];
+        final initialAction = state.uri.queryParameters['action']; // TARCZA: Capture action for deep-link automation
 
         String type = queryList ?? 'voted';
         if (queryList == 'tracked') {
@@ -169,7 +172,7 @@ final GoRouter router = GoRouter(
           targetLang: lang,
           targetParliamentId: pid,
           targetTerm: termParam,
-          child: LegislationWrapperScreen(type: type, listId: listId),
+          child: LegislationWrapperScreen(type: type, listId: listId, initialAction: initialAction),
         );
       },
       routes: [

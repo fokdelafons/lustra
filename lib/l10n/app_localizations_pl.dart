@@ -3290,4 +3290,18 @@ class AppLocalizationsPl extends AppLocalizations {
   @override
   String get supportFundDisclaimer =>
       'Przejrzystość danych: Ze względu na różne bramki płatności i koszty infrastruktury, ten pasek postępu jest aktualizowany ręcznie przez założyciela (maksymalnie raz w tygodniu).';
+
+  @override
+  String get actionSyncViaQr => 'Pokaż kod QR';
+
+  @override
+  String get actionHideQr => 'Ukryj kod QR';
+
+  @override
+  String get promoGuestTrackBills =>
+      'Śledź proces legislacyjny i otrzymuj powiadomienia o nowych głosowaniach i ustawach.';
+
+  @override
+  String get promoGetAppForNotifications =>
+      'Pobierz aplikację mobilną dla lepszej wydajności i powiadomień o śledzonych ustawach.';
 }

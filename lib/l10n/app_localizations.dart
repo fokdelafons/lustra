@@ -5965,6 +5965,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Data transparency: Due to different payment gateways and infrastructure costs, this progress bar is updated manually by the founder (max once a week).'**
   String get supportFundDisclaimer;
+
+  /// No description provided for @actionSyncViaQr.
+  ///
+  /// In en, this message translates to:
+  /// **'Show QR'**
+  String get actionSyncViaQr;
+
+  /// No description provided for @actionHideQr.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide QR'**
+  String get actionHideQr;
+
+  /// No description provided for @promoGuestTrackBills.
+  ///
+  /// In en, this message translates to:
+  /// **'Track legislation and receive notifications about new votes and legislations.'**
+  String get promoGuestTrackBills;
+
+  /// No description provided for @promoGetAppForNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Get the mobile app for better performance and notifications on your tracked bills.'**
+  String get promoGetAppForNotifications;
 }
 
 class _AppLocalizationsDelegate

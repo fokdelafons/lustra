@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:lustra/l10n/app_localizations.dart';
+import 'package:visibility_detector/visibility_detector.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../models/legislation.dart';
 import '../../services/parliament_service_interface.dart';
@@ -48,7 +50,7 @@ class LegislationListCard extends StatelessWidget {
     
     final List<String> individualCategories = _parseCategories(bill.category);
 
-    return Card(
+    Widget currentCard = Card(
       margin: const EdgeInsets.only(bottom: 12.0),
       elevation: 2,
       clipBehavior: Clip.antiAlias,
@@ -278,6 +280,19 @@ class LegislationListCard extends StatelessWidget {
         ),
       )
     );
+
+    if (isNew && !kIsWeb) {
+      return VisibilityDetector(
+        key: Key('view_det_${bill.id}'),
+        onVisibilityChanged: (info) {
+          if (info.visibleFraction > 0.8) {
+            context.read<InteractionProvider>().markAsViewedLocally(bill.id);
+          }
+        },
+        child: currentCard,
+      );
+    }
+    return currentCard;
   }
 
   List<String> _parseCategories(String categoryString) {

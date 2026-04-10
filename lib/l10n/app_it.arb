@@ -978,5 +978,9 @@
   "clOutro": "Lustra non è un social network che genera portata algoritmica gratuita per la tua lista. Le Liste Curate sono solo su invito. Devi condividere il tuo link unico esternamente. Porta il tuo pubblico da X, YouTube, TikTok o dalla tua newsletter. Non ti diamo follower; ti diamo l'infrastruttura per trasformare i tuoi attuali follower in una forza civica verificata e votante, e un modo per essere finanziato direttamente per il tuo duro lavoro. Smetti di chiedere \"mi piace\" al tuo pubblico. Dai loro uno strumento per agire.",
   "supportFundTitle": "Fase 1: Lancio dell'Entità Non-Profit",
   "supportFundDesc": "Per aprire ufficialmente la Fondazione Lustra, proteggere la proprietà intellettuale e coprire le spese legali di avvio, abbiamo bisogno di raccogliere un capitale iniziale. Aiutaci a rendere questo sistema indipendente per sempre.",
-  "supportFundDisclaimer": "Trasparenza dei dati: A causa dei diversi gateway di pagamento e dei costi dell'infrastruttura, questa barra di avanzamento viene aggiornata manualmente dal fondatore (massimo una volta a settimana)."
+  "supportFundDisclaimer": "Trasparenza dei dati: A causa dei diversi gateway di pagamento e dei costi dell'infrastruttura, questa barra di avanzamento viene aggiornata manualmente dal fondatore (massimo una volta a settimana).",
+  "actionSyncViaQr": "Mostra QR",
+"actionHideQr": "Nascondi QR",
+"promoGuestTrackBills": "Segui la legislazione e ricevi notifiche su nuove votazioni e leggi.",
+"promoGetAppForNotifications": "Scarica l'app mobile per migliori prestazioni e notifiche sui tuoi progetti di legge seguiti."
 }

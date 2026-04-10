@@ -979,5 +979,9 @@
   "clOutro": "Lustra não é uma rede social que gera alcance algorítmico gratuito para a sua lista. As Watchlists são apenas para convidados. Você deve compartilhar o seu link exclusivo externamente. Traga o seu público do X, YouTube, TikTok ou da sua newsletter. Nós não lhe damos seguidores; nós lhe damos a infraestrutura para transformar os seus seguidores existentes em uma força cívica verificada e votante - e uma maneira de ser financiado diretamente pelo seu trabalho árduo. Pare de pedir \"likes\" ao seu público. Dê-lhes uma ferramenta para agir.",
   "supportFundTitle": "Fase 1: Lançamento da Entidade Sem Fins Lucrativos",
   "supportFundDesc": "Para abrir oficialmente a Fundação Lustra, proteger a propriedade intelectual e cobrir os custos legais de configuração, precisamos reunir o capital inicial. Ajude-nos a tornar este sistema independente para sempre.",
-  "supportFundDisclaimer": "Transparência de dados: Devido a diferentes gateways de pagamento e custos de infraestrutura, esta barra de progresso é atualizada manualmente pelo fundador (no máximo uma vez por semana)."
+  "supportFundDisclaimer": "Transparência de dados: Devido a diferentes gateways de pagamento e custos de infraestrutura, esta barra de progresso é atualizada manualmente pelo fundador (no máximo uma vez por semana).",
+  "actionSyncViaQr": "Mostrar QR",
+"actionHideQr": "Ocultar QR",
+"promoGuestTrackBills": "Acompanhe a legislação e receba notificações sobre novas votações e leis.",
+"promoGetAppForNotifications": "Obtenha a aplicação móvel para melhor desempenho e notificações sobre os seus projetos de lei acompanhados."
 }

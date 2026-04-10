@@ -12,6 +12,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 import 'providers/user_provider.dart';
 import 'providers/language_provider.dart';
@@ -33,8 +34,9 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  VisibilityDetectorController.instance.updateInterval = const Duration(seconds: 1);
   
-  // SHIELD: Preload core typography into RAM to prevent Skia Glyph Atlas Corruption on Web
   await Future.wait([
     rootBundle.load('assets/fonts/Roboto-Regular.ttf'),
     rootBundle.load('assets/fonts/Roboto-Medium.ttf'),
@@ -59,7 +61,6 @@ void main() async {
     );
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-    // Inicjalizacja dedykowanego serwisu powiadomień
     await NotificationService.instance.init();
   }
   final remoteConfigService = await RemoteConfigService.create();
