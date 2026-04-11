@@ -489,7 +489,7 @@
 "homeSearchHint": "Voer een zoekterm in...",
   "homeSearchButtonDeputies": "Kamerleden",
   "homeSearchButtonLegislations": "Wetten",
-  "actionSeeAll": "Alles bekijken",
+  "actionSeeAll": "Alles",
   "notificationsEnabledForOtherParliament": "Actief voor een ander parlement",
   "votingResultsUSMotionToTableTitle": "RESULTATEN: MOTIE VAN VERWERPING",
   "crowdfundingLabel": "Steun Lustra om een onafhankelijke bron te blijven:",
@@ -982,5 +982,9 @@
   "actionSyncViaQr": "Toon QR-code",
 "actionHideQr": "Verberg QR-code",
 "promoGuestTrackBills": "Volg wetgeving en ontvang meldingen over nieuwe stemmingen en wetten.",
-"promoGetAppForNotifications": "Download de mobiele app voor betere prestaties en meldingen over uw gevolgde wetsvoorstellen."
+"promoGetAppForNotifications": "Download de mobiele app voor betere prestaties en meldingen over uw gevolgde wetsvoorstellen.",
+"buttonSeeAllUpcoming": "Aankomende wetsontwerpen",
+"buttonSeeAllProcess": "Wetsontwerpen in behandeling",
+"buttonSeeAllVoted": "Stemresultaten bekijken",
+"buttonSeeAllCivicProjects": "Burgerprojecten bekijken"
 }

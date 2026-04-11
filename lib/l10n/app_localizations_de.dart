@@ -1653,7 +1653,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get homeSearchButtonLegislations => 'Gesetze';
 
   @override
-  String get actionSeeAll => 'Alle anzeigen';
+  String get actionSeeAll => 'Alle';
 
   @override
   String get notificationsEnabledForOtherParliament =>
@@ -3334,4 +3334,16 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get promoGetAppForNotifications =>
       'Holen Sie sich die mobile App für bessere Performance und Benachrichtigungen zu Ihren verfolgten Gesetzen.';
+
+  @override
+  String get buttonSeeAllUpcoming => 'Anstehende Gesetze durchsuchen';
+
+  @override
+  String get buttonSeeAllProcess => 'Laufende Verfahren verfolgen';
+
+  @override
+  String get buttonSeeAllVoted => 'Abstimmungsergebnisse ansehen';
+
+  @override
+  String get buttonSeeAllCivicProjects => 'Bürgerprojekte durchsuchen';
 }

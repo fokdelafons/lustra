@@ -40,6 +40,7 @@ class ProcessCard extends StatelessWidget {
       icon: Icons.gavel,
       destinationPath: '/$lang/$slug/$term/legislations?list=process',
       buttonText: l10n.actionSeeAll,
+      footerButtonText: l10n.buttonSeeAllProcess,
       legislationItem: item,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 16.0),

@@ -31,7 +31,7 @@ class CivicProjectCard extends StatelessWidget {
 
     final headerActionText = l10n.civicRulesAction;
 
-    final bottomButtonText = l10n.actionSeeAll;
+    final bottomButtonText = l10n.buttonSeeAllCivicProjects;
 
     final primaryColor = Colors.teal[700]!;
     final lightPrimaryColor = Colors.teal.withAlpha((255 * 0.05).round());
@@ -245,7 +245,7 @@ class CivicProjectCard extends StatelessWidget {
                           Flexible(
                             child: Text(
                               bottomButtonText,
-                              style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 13),
+                              style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 15),
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                             ),

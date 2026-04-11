@@ -608,7 +608,7 @@
 "homeSearchHint": "Enter a phrase...",
   "homeSearchButtonDeputies": "Deputies",
   "homeSearchButtonLegislations": "Legislations",
-  "actionSeeAll": "See all",
+  "actionSeeAll": "All",
 "notificationsEnabledForOtherParliament": "Active for another parliament",
 "votingResultsUSMotionToTableTitle": "RESULTS: MOTION TO TABLE",
 "crowdfundingLabel": "Support Lustra in remaining an independent source:",
@@ -1188,5 +1188,9 @@
   "actionSyncViaQr": "Show QR",
 "actionHideQr": "Hide QR",
 "promoGuestTrackBills": "Track legislation and receive notifications about new votes and legislations.",
-"promoGetAppForNotifications": "Get the mobile app for better performance and notifications on your tracked bills."
+"promoGetAppForNotifications": "Get the mobile app for better performance and notifications on your tracked bills.",
+"buttonSeeAllUpcoming": "Browse Upcoming Bills",
+"buttonSeeAllProcess": "Track Bills in Progress",
+"buttonSeeAllVoted": "Browse Voting Results",
+"buttonSeeAllCivicProjects": "Browse Civic Projects"
 }

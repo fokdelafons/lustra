@@ -491,7 +491,7 @@
   "homeSearchHint": "Wpisz frazę...",
   "homeSearchButtonDeputies": "Posłowie",
   "homeSearchButtonLegislations": "Ustawy",
-    "actionSeeAll": "Zobacz wszystkie",
+    "actionSeeAll": "Wszystkie",
   "notificationsEnabledForOtherParliament": "Aktywne dla innego parlamentu",
   "votingResultsUSMotionToTableTitle": "WYNIKI: WNIOSEK O ODRZUCENIE",
   "crowdfundingLabel": "Wesprzyj Lustra w pozostaniu niezależnym źródłem:",
@@ -1108,5 +1108,9 @@
   "actionSyncViaQr": "Pokaż kod QR",
 "actionHideQr": "Ukryj kod QR",
 "promoGuestTrackBills": "Śledź proces legislacyjny i otrzymuj powiadomienia o nowych głosowaniach i ustawach.",
-"promoGetAppForNotifications": "Pobierz aplikację mobilną dla lepszej wydajności i powiadomień o śledzonych ustawach."
+"promoGetAppForNotifications": "Pobierz aplikację mobilną dla lepszej wydajności i powiadomień o śledzonych ustawach.",
+"buttonSeeAllUpcoming": "Przeglądaj nadchodzące projekty",
+"buttonSeeAllProcess": "Śledź projekty w toku",
+"buttonSeeAllVoted": "Przeglądaj wyniki głosowań",
+"buttonSeeAllCivicProjects": "Przeglądaj projekty obywatelskie"
 }

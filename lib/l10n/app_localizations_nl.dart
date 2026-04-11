@@ -1648,7 +1648,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get homeSearchButtonLegislations => 'Wetten';
 
   @override
-  String get actionSeeAll => 'Alles bekijken';
+  String get actionSeeAll => 'Alles';
 
   @override
   String get notificationsEnabledForOtherParliament =>
@@ -3315,4 +3315,16 @@ class AppLocalizationsNl extends AppLocalizations {
   @override
   String get promoGetAppForNotifications =>
       'Download de mobiele app voor betere prestaties en meldingen over uw gevolgde wetsvoorstellen.';
+
+  @override
+  String get buttonSeeAllUpcoming => 'Aankomende wetsontwerpen';
+
+  @override
+  String get buttonSeeAllProcess => 'Wetsontwerpen in behandeling';
+
+  @override
+  String get buttonSeeAllVoted => 'Stemresultaten bekijken';
+
+  @override
+  String get buttonSeeAllCivicProjects => 'Burgerprojecten bekijken';
 }

@@ -490,7 +490,7 @@
 "homeSearchHint": "Digite uma frase...",
   "homeSearchButtonDeputies": "Deputados",
   "homeSearchButtonLegislations": "Leis",
-  "actionSeeAll": "Ver tudo",
+  "actionSeeAll": "Tudo",
   "notificationsEnabledForOtherParliament": "Ativo para outro parlamento",
   "votingResultsUSMotionToTableTitle": "RESULTADOS: MOÇÃO DE REJEIÇÃO",
   "crowdfundingLabel": "Apoie o Lustra para que continue sendo uma fonte independente:",
@@ -983,5 +983,9 @@
   "actionSyncViaQr": "Mostrar QR",
 "actionHideQr": "Ocultar QR",
 "promoGuestTrackBills": "Acompanhe a legislação e receba notificações sobre novas votações e leis.",
-"promoGetAppForNotifications": "Obtenha a aplicação móvel para melhor desempenho e notificações sobre os seus projetos de lei acompanhados."
+"promoGetAppForNotifications": "Obtenha a aplicação móvel para melhor desempenho e notificações sobre os seus projetos de lei acompanhados.",
+"buttonSeeAllUpcoming": "Próximos projetos de lei",
+"buttonSeeAllProcess": "Acompanhar leis em tramitação",
+"buttonSeeAllVoted": "Ver resultados das votações",
+"buttonSeeAllCivicProjects": "Ver projetos cidadãos"
 }

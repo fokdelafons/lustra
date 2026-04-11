@@ -95,7 +95,7 @@ class HomeDeputySectionCard extends StatelessWidget {
                       Flexible(
                         child: Text(
                           buttonText,
-                          style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 13),
+                          style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 15),
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
                         ),

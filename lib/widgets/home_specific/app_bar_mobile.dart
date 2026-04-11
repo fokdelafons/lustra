@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lustra/l10n/app_localizations.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:developer' as developer;
 
 import '../../providers/language_provider.dart';
@@ -33,8 +34,8 @@ class _MobileAppBarState extends State<MobileAppBar> {
   Future<void> _handleNotificationsToggle(bool isEnabled) async {
     final parliamentManager = context.read<ParliamentManager>();
     final userProvider = context.read<UserProvider>();
+        if (kIsWeb) return;
     final parliamentId = parliamentManager.activeServiceId;
-
     if (parliamentId == null) return;
     List<String> updatedList = List.from(userProvider.subscribedParliaments);
 
@@ -58,6 +59,7 @@ class _MobileAppBarState extends State<MobileAppBar> {
   }
 
   Future<void> _handleTrackedNotificationsToggle(bool isEnabled) async {
+    if (kIsWeb) return;
     final userProvider = context.read<UserProvider>();
 
     if (isEnabled) {
@@ -453,6 +455,7 @@ class _MobileAppBarState extends State<MobileAppBar> {
           builder: (context, user, child) {
             if (user != null) {
               return PopupMenuButton<String>(
+                onOpened: () => FocusManager.instance.primaryFocus?.unfocus(),
                 tooltip: l10n.settingsTitle,
                 color: Colors.white,
                 surfaceTintColor: Colors.transparent,
@@ -472,7 +475,7 @@ class _MobileAppBarState extends State<MobileAppBar> {
                         children: [
                           Icon(Icons.account_balance, size: 20, color: Colors.grey[400]),
                           const SizedBox(width: 12),
-                          Text("Primary: ${userProv.primaryParliamentId ?? 'Unknown'}", style: TextStyle(color: Colors.grey[600], fontSize: 13, fontWeight: FontWeight.bold)),
+                          Text((userProv.primaryParliamentId ?? 'Unknown'), style: TextStyle(color: Colors.grey[600], fontSize: 13, fontWeight: FontWeight.bold)),
                         ],
                       ),
                     ),
@@ -489,79 +492,100 @@ class _MobileAppBarState extends State<MobileAppBar> {
                       ),
                     ),
                     const PopupMenuDivider(),
-
+                    if (!kIsWeb) ...[
                     PopupMenuItem<String>(
                       enabled: true,
-                      value: 'notifications_new_laws',
+                      value: 'ignore',
+                      padding: EdgeInsets.zero,
                       child: Consumer<UserProvider>(
                         builder: (context, userProvider, _) {
-                          final currentParliamentId = context.watch<ParliamentManager>().activeServiceId;
+                          final currentParliamentId = context.read<ParliamentManager>().activeServiceId;
                           if (currentParliamentId == null) return const SizedBox.shrink();
                           final isSubscribed = userProvider.isParliamentSubscribed(currentParliamentId);
 
-                          return Row(
-                            children: [
-                              Icon(Icons.notifications_active_outlined, size: 20, color: Colors.grey[700]),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(l10n.settingsNotificationsNewLaws, style: const TextStyle(fontSize: 14)),
+                          return InkWell(
+                            onTap: () => _handleNotificationsToggle(!isSubscribed),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.notifications_active_outlined, size: 20, color: Colors.grey[700]),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(l10n.settingsNotificationsNewLaws, style: const TextStyle(fontSize: 14)),
+                                  ),
+                                  Checkbox(
+                                    value: isSubscribed,
+                                    onChanged: (bool? value) => _handleNotificationsToggle(value ?? false),
+                                    activeColor: Theme.of(context).primaryColor,
+                                    visualDensity: VisualDensity.compact,
+                                  ),
+                                ],
                               ),
-                              Checkbox(
-                                value: isSubscribed,
-                                onChanged: (bool? value) => _handleNotificationsToggle(value ?? false),
-                                activeColor: Theme.of(context).primaryColor,
-                                visualDensity: VisualDensity.compact,
-                              ),
-                            ],
+                            ),
                           );
                         },
                       ),
                     ),
                     PopupMenuItem<String>(
                       enabled: true,
-                      value: 'notifications_tracked_bills',
+                      value: 'ignore',
+                      padding: EdgeInsets.zero,
                       child: Consumer<UserProvider>(
                         builder: (context, userProvider, _) {
-                          return Row(
-                            children: [
-                              Icon(Icons.notifications_active_outlined, size: 20, color: Colors.grey[700]),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(l10n.trackedBillsTitle, style: const TextStyle(fontSize: 14)),
+                          return InkWell(
+                            onTap: () => _handleTrackedNotificationsToggle(!userProvider.notificationsTrackedBills),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.notifications_active_outlined, size: 20, color: Colors.grey[700]),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(l10n.trackedBillsTitle, style: const TextStyle(fontSize: 14)),
+                                  ),
+                                  Checkbox(
+                                    value: userProvider.notificationsTrackedBills,
+                                    onChanged: (bool? value) => _handleTrackedNotificationsToggle(value ?? false),
+                                    activeColor: Theme.of(context).primaryColor,
+                                    visualDensity: VisualDensity.compact,
+                                  ),
+                                ],
                               ),
-                              Checkbox(
-                                value: userProvider.notificationsTrackedBills,
-                                onChanged: (bool? value) => _handleTrackedNotificationsToggle(value ?? false),
-                                activeColor: Theme.of(context).primaryColor,
-                                visualDensity: VisualDensity.compact,
-                              ),
-                            ],
+                            ),
                           );
                         },
                       ),
                     ),
                     const PopupMenuDivider(),
+                    ],
 
                     PopupMenuItem<String>(
                       enabled: true,
-                      value: 'marketing_consent',
-                      child: Row(
-                        children: [
-                          Icon(Icons.favorite_outline, size: 20, color: Colors.grey[700]),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(AppLocalizations.of(context)!.lustraClubLabel, style: const TextStyle(fontSize: 14)),
+                      value: 'ignore',
+                      padding: EdgeInsets.zero,
+                      child: Consumer<UserProvider>(
+                        builder: (context, uProv, _) => InkWell(
+                          onTap: () => uProv.updatePreferences(marketing: !uProv.marketingConsent),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                            child: Row(
+                              children: [
+                                Icon(Icons.favorite_outline, size: 20, color: Colors.grey[700]),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(l10n.lustraClubLabel, style: const TextStyle(fontSize: 14)),
+                                ),
+                                Checkbox(
+                                  value: uProv.marketingConsent,
+                                  onChanged: (bool? value) => uProv.updatePreferences(marketing: value ?? false),
+                                  activeColor: Theme.of(context).primaryColor,
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                              ],
+                            ),
                           ),
-                          Checkbox(
-                            value: userProv.marketingConsent,
-                            onChanged: (bool? value) async {
-                              if (value == null) return;
-                              await userProv.updatePreferences(marketing: value); 
-                            },
-                            activeColor: Theme.of(context).primaryColor,
-                            visualDensity: VisualDensity.compact,
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                     const PopupMenuDivider(),

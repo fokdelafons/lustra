@@ -3047,7 +3047,7 @@ abstract class AppLocalizations {
   /// No description provided for @actionSeeAll.
   ///
   /// In en, this message translates to:
-  /// **'See all'**
+  /// **'All'**
   String get actionSeeAll;
 
   /// No description provided for @notificationsEnabledForOtherParliament.
@@ -5989,6 +5989,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Get the mobile app for better performance and notifications on your tracked bills.'**
   String get promoGetAppForNotifications;
+
+  /// No description provided for @buttonSeeAllUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse Upcoming Bills'**
+  String get buttonSeeAllUpcoming;
+
+  /// No description provided for @buttonSeeAllProcess.
+  ///
+  /// In en, this message translates to:
+  /// **'Track Bills in Progress'**
+  String get buttonSeeAllProcess;
+
+  /// No description provided for @buttonSeeAllVoted.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse Voting Results'**
+  String get buttonSeeAllVoted;
+
+  /// No description provided for @buttonSeeAllCivicProjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse Civic Projects'**
+  String get buttonSeeAllCivicProjects;
 }
 
 class _AppLocalizationsDelegate

@@ -480,7 +480,7 @@ class _WebAppBarState extends State<WebAppBar> {
                           children: [
                             Icon(Icons.account_balance, size: 20, color: Colors.grey[400]),
                             const SizedBox(width: 12),
-                            Text(l10n.primaryParliamentLabel(userProv.primaryParliamentId ?? 'Unknown'), style: TextStyle(color: Colors.grey[600], fontSize: 13, fontWeight: FontWeight.bold)),
+                            Text((userProv.primaryParliamentId ?? 'Unknown'), style: TextStyle(color: Colors.grey[600], fontSize: 13, fontWeight: FontWeight.bold)),
                           ],
                         ),
                       ),
@@ -498,24 +498,30 @@ class _WebAppBarState extends State<WebAppBar> {
                       const PopupMenuDivider(),
                       PopupMenuItem<String>(
                         enabled: true,
-                        value: 'marketing_consent',
-                        child: Row(
-                          children: [
-                            Icon(Icons.favorite_outline, size: 20, color: Colors.grey[700]),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(l10n.lustraClubLabel, style: const TextStyle(fontSize: 14)),
+                        value: 'ignore',
+                        padding: EdgeInsets.zero,
+                        child: Consumer<UserProvider>(
+                          builder: (context, uProv, _) => InkWell(
+                            onTap: () => uProv.updatePreferences(marketing: !uProv.marketingConsent),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.favorite_outline, size: 20, color: Colors.grey[700]),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(l10n.lustraClubLabel, style: const TextStyle(fontSize: 14)),
+                                  ),
+                                  Checkbox(
+                                    value: uProv.marketingConsent,
+                                    onChanged: (bool? value) => uProv.updatePreferences(marketing: value ?? false),
+                                    activeColor: Theme.of(context).primaryColor,
+                                    visualDensity: VisualDensity.compact,
+                                  ),
+                                ],
+                              ),
                             ),
-                            Checkbox(
-                              value: userProv.marketingConsent,
-                              onChanged: (bool? value) async {
-                                if (value == null) return;
-                                await userProv.updatePreferences(marketing: value);
-                              },
-                              activeColor: Theme.of(context).primaryColor,
-                              visualDensity: VisualDensity.compact,
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                       const PopupMenuDivider(),

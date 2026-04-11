@@ -42,6 +42,7 @@ class UpcomingCard extends StatelessWidget {
       icon: Icons.upcoming,
       destinationPath: '/$lang/$slug/$term/legislations?list=upcoming',
       buttonText: l10n.actionSeeAll,
+      footerButtonText: l10n.buttonSeeAllUpcoming,
       legislationItem: item,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 16.0),

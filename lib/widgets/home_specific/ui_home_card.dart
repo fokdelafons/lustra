@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lustra/l10n/app_localizations.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../models/legislation.dart';
 import '../../services/share_service.dart';
@@ -12,6 +11,7 @@ import '../../services/parliament_service_interface.dart';
 import '../../widgets/web_link.dart';
 
 class HomeSectionCard extends StatelessWidget {
+  final String? footerButtonText;
   final String title;
   final IconData icon;
   final Widget child;
@@ -21,6 +21,7 @@ class HomeSectionCard extends StatelessWidget {
   final bool isHighlighted;
   final Widget? trailingTitleWidget;
   final bool showFooter;
+  final bool showHeaderAction;
 
   const HomeSectionCard({
     super.key,
@@ -29,10 +30,12 @@ class HomeSectionCard extends StatelessWidget {
     required this.child,
     required this.destinationPath,
     required this.buttonText,
+    this.footerButtonText,
     this.legislationItem,
     this.isHighlighted = false,
     this.trailingTitleWidget,
     this.showFooter = true,
+    this.showHeaderAction = true,
   });
 
 @override
@@ -64,14 +67,14 @@ return Card(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // --- HEADER ---
-                  Padding(
+                 Padding(
                     padding: EdgeInsets.all(
                       kIsWeb ? 24.0 : MediaQuery.of(context).size.width * 0.04
                     ),
                     child: Row(
                       children: [
-                        Icon(icon, color: iconColor),
-                        SizedBox(width: kIsWeb ? 12.0 : MediaQuery.of(context).size.width * 0.02),
+                        Icon(icon, color: iconColor, size: 20),
+                        SizedBox(width: 12),
                         Expanded(
                           child: Text(
                             title,
@@ -84,8 +87,31 @@ return Card(
                             maxLines: 1,
                           ),
                         ),
+                        if (showFooter && showHeaderAction && trailingTitleWidget == null)
+                          WebLink(
+                            path: destinationPath,
+                            builder: (context, onTapCallback) => InkWell(
+                              onTap: onTapCallback,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    buttonText.toUpperCase(),
+                                    style: TextStyle(
+                                      color: primaryColor,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Icon(Icons.arrow_forward_ios, size: 10, color: primaryColor),
+                                ],
+                              ),
+                            ),
+                          ),
                         if (trailingTitleWidget != null) ...[
-                          SizedBox(width: kIsWeb ? 12.0 : MediaQuery.of(context).size.width * 0.02),
+                          const SizedBox(width: 12),
                           trailingTitleWidget!,
                         ],
                       ],
@@ -163,14 +189,6 @@ return Card(
                                       ),
                                     ],
                                   )
-                                  .animate(onPlay: (controller) => controller.repeat(reverse: false))
-                                  .shimmer(
-                                      delay: 2500.ms, 
-                                      duration: 1200.ms, 
-                                      color: Colors.white.withValues(alpha: 0.8),
-                                      size: 2
-                                   )
-                                  .then(delay: 2000.ms),
                                 ),
                               ),
                             ),
@@ -189,7 +207,7 @@ return Card(
               child: WebLink(
                 path: destinationPath,
                 builder: (context, onTapCallback) => InkWell(
-                  hoverColor: primaryColor.withAlpha((255 * 0.15).round()), // TARCZA: Dynamiczny kolor hover na bazie koloru wiodącego
+                  hoverColor: primaryColor.withAlpha((255 * 0.15).round()),
                   onTap: onTapCallback,
                   child: Container(
                     width: double.infinity,
@@ -200,11 +218,11 @@ return Card(
                       children: [
                         Flexible(
                           child: Text(
-                            buttonText,
+                            footerButtonText ?? buttonText,
                             style: TextStyle(
                               color: primaryColor, 
                               fontWeight: FontWeight.bold, 
-                              fontSize: 13
+                              fontSize: 15
                             ),
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,

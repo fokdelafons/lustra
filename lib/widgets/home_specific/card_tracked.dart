@@ -130,7 +130,7 @@ class _TrackedCardState extends State<TrackedCard> {
                   _buildQrCode(),
                 ],
                 const SizedBox(height: 24),
-                Text(l10n.notificationsMobileOnly, textAlign: TextAlign.center, style: const TextStyle(fontSize: 11, color: Colors.blueGrey)),
+                Text(l10n.promoGetAppForNotifications, textAlign: TextAlign.center, style: const TextStyle(fontSize: 11, color: Colors.blueGrey)),
               ]
             ],
           ),
@@ -180,6 +180,7 @@ class _TrackedCardState extends State<TrackedCard> {
       icon: Icons.notifications_active,
       destinationPath: '/$lang/$slug/$term/legislations?list=tracked',
       buttonText: l10n.buttonSeeAllTracked,
+      showHeaderAction: false,
       showFooter: _trackedBills.isNotEmpty,
       child: AnimatedSize(
         duration: Duration(milliseconds: _playAnimation ? 400 : 0), 

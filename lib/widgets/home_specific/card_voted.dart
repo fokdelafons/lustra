@@ -65,6 +65,7 @@ class VotedCard extends StatelessWidget {
       icon: Icons.how_to_vote,
       destinationPath: '/$lang/$slug/$term/legislations?list=voted',
       buttonText: l10n.actionSeeAll,
+      footerButtonText: l10n.buttonSeeAllVoted,
       legislationItem: item,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 16.0),
@@ -188,14 +189,12 @@ class VotedCard extends StatelessWidget {
             const SizedBox(height: 32),
             LayoutBuilder(
               builder: (context, constraints) {
-                // Tarcza: Punkt odcięcia dla urządzeń mobilnych (ok. 600px).
-                final bool isDesktop = constraints.maxWidth >= 600;
+                final bool isDesktop = constraints.maxWidth >= 800;
                 final bool showLastStatus = isDesktop && item.lastStatus != null;
 
                 return Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // LEWA STRONA (lastStatus tylko na Web/Tablet lub pusty balans dla centrowania)
                     Expanded(
                       child: showLastStatus
                           ? Padding(
@@ -237,12 +236,10 @@ class VotedCard extends StatelessWidget {
                                 ],
                               ),
                             )
-                          : const SizedBox.shrink(), // Pusty balans utrzymujący centrowanie
+                          : const SizedBox.shrink(),
                     ),
                     
-                    // ŚRODEK (Główny status - zawsze widoczny, absolutny priorytet)
                     ConstrainedBox(
-                      // Na mobilce pozwalamy zająć więcej miejsca (80%), na desktopie trzymamy rygor (60%)
                       constraints: BoxConstraints(
                         maxWidth: constraints.maxWidth * (isDesktop ? 0.6 : 0.8),
                       ),
