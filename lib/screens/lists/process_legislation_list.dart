@@ -233,6 +233,7 @@ import '../../widgets/web_smooth_scroll.dart';
                 category: categoryValue,
                 sortBy: sortByValue,
                 processStartDateAfter: _filterFromTimestamp,
+                hideNoDocument: _hideNoDocument,
               );
 
       if (!mounted) return;
@@ -281,6 +282,7 @@ Future<void> _loadMoreBills() async {
                 category: categoryValue,
                 sortBy: sortByValue,
                 processStartDateAfter: _filterFromTimestamp,
+                hideNoDocument: _hideNoDocument,
               );
 
       if (!mounted) return;
@@ -299,13 +301,6 @@ Future<void> _loadMoreBills() async {
           setState(() => _isLoadingMore = false);
         }
       }
-    }
-
-    List<Legislation> _getProcessedBills() {
-      if (_hideNoDocument) {
-        return _bills.where((bill) => bill.noDocument != true).toList();
-      }
-      return _bills;
     }
 
     @override
@@ -343,7 +338,7 @@ Future<void> _loadMoreBills() async {
         value: manager.activeService,
         child: Consumer<ParliamentServiceInterface>(
           builder: (context, activeService, child) {
-            final processedBills = _getProcessedBills();
+            final processedBills = _bills;
               return Column(
                 children: [
                   LegislationControlBar(
@@ -388,7 +383,7 @@ Future<void> _loadMoreBills() async {
                     },
                     sortOptions: {
                       'popularity': l10n.sortByPopularity,
-                      'lastUpdated': l10n.sortByFreshness,
+                      'processStartDate': l10n.sortByFreshness,
                     },
                     selectedSortKey: _sortBy,
                     onSortChanged: (String? newValue) {
@@ -401,6 +396,7 @@ Future<void> _loadMoreBills() async {
                     hideNoDocument: _hideNoDocument,
                     onHideNoDocumentChanged: (bool value) {
                       setState(() => _hideNoDocument = value);
+                      _resetAndLoadData(forceRefresh: false);
                     },
                   ),
                   const Divider(height: 8),

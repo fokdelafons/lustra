@@ -575,7 +575,7 @@ String _getOrdinalSuffix(int n) {
       BuildContext context, {
       int limit = 20, String? lastVisibleId, bool forceRefresh = false,
       String? searchQuery, String? status, List<String>? documentType,
-      bool? active, String? category, String? sortBy, String? processStartDateAfter,
+      bool? active, String? category, String? sortBy, String? processStartDateAfter, bool? hideNoDocument,
   }) async {
     final int? termToUse = _currentTerm;
     if (termToUse == null) throw Exception("Brak wybranej kadencji w USParliamentService");
@@ -597,7 +597,7 @@ String _getOrdinalSuffix(int n) {
         if (!forceRefresh) {
           final cachedData = await _cache.getLegislationsCursor(
             langCode, limit, lastVisibleId, 
-            status: status, documentType: documentType, category: category, sortBy: sortBy, processStartDateAfter: processStartDateAfter, term: termToUse
+            status: status, documentType: documentType, category: category, sortBy: sortBy, processStartDateAfter: processStartDateAfter, term: termToUse, hideNoDocument: hideNoDocument
           );
           if (cachedData != null) return cachedData;
         }
@@ -610,6 +610,7 @@ String _getOrdinalSuffix(int n) {
           if (documentType != null && documentType.isNotEmpty) 'documentType': documentType.join(','),
           if (sortBy != null && sortBy.isNotEmpty) 'sortBy': sortBy,
           if (processStartDateAfter != null && processStartDateAfter.isNotEmpty) 'processStartDateAfter': processStartDateAfter,
+          if (hideNoDocument == true) 'hideNoDocument': 'true',
         };
         developer.log('Wywołanie API us_getLegislations z parametrami: $params', name: 'USParliamentService');
         final resultData = await _apiService.callFunction('us_getLegislations', params: params);
@@ -617,7 +618,7 @@ String _getOrdinalSuffix(int n) {
         // CACHE SAVE
         await _cache.saveLegislationsCursor(
           resultData, langCode, limit, lastVisibleId, 
-          status: status, documentType: documentType, category: category, sortBy: sortBy, processStartDateAfter: processStartDateAfter, term: termToUse
+          status: status, documentType: documentType, category: category, sortBy: sortBy, processStartDateAfter: processStartDateAfter, term: termToUse, hideNoDocument: hideNoDocument
         );
         
         return resultData;
@@ -627,7 +628,7 @@ String _getOrdinalSuffix(int n) {
         // CACHE FALLBACK
         final cachedData = await _cache.getLegislationsCursor(
             langCode, limit, lastVisibleId, 
-            status: status, documentType: documentType, category: category, sortBy: sortBy, processStartDateAfter: processStartDateAfter, term: termToUse
+            status: status, documentType: documentType, category: category, sortBy: sortBy, processStartDateAfter: processStartDateAfter, term: termToUse, hideNoDocument: hideNoDocument
         );
         if (cachedData != null) return cachedData;
         rethrow;

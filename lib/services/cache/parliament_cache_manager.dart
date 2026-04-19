@@ -61,28 +61,30 @@ Future<HomeScreenData?> getHomeScreenData(String lang, int term, {bool ignoreTim
 
   Future<Map<String, dynamic>?> getLegislationsCursor(
     String langCode, int limit, String? lastVisibleId, 
-    {String? status, List<String>? documentType, String? category, String? sortBy, String? processStartDateAfter, required int term}
+    {String? status, List<String>? documentType, String? category, String? sortBy, String? processStartDateAfter, required int term, bool? hideNoDocument}
   ) async {
-    final key = _genBillsKey(langCode, limit, lastVisibleId, status, documentType, category, sortBy, processStartDateAfter, term);
+    final key = _genBillsKey(langCode, limit, lastVisibleId, status, documentType, category, sortBy, processStartDateAfter, term, hideNoDocument);
     return await _storage.get(key, validationKey: _globalUpdateKey);
   }
 
   Future<void> saveLegislationsCursor(
     Map<String, dynamic> data, String langCode, int limit, String? lastVisibleId,
-    {String? status, List<String>? documentType, String? category, String? sortBy, String? processStartDateAfter, required int term}
+    {String? status, List<String>? documentType, String? category, String? sortBy, String? processStartDateAfter, required int term, bool? hideNoDocument}
   ) async {
-    final key = _genBillsKey(langCode, limit, lastVisibleId, status, documentType, category, sortBy, processStartDateAfter, term);
+    final key = _genBillsKey(langCode, limit, lastVisibleId, status, documentType, category, sortBy, processStartDateAfter, term, hideNoDocument);
     await _storage.save(key, data);
   }
 
-  String _genBillsKey(String lang, int limit, String? cursor, String? status, List<String>? types, String? cat, String? sort, String? after, int term) {
+  String _genBillsKey(String lang, int limit, String? cursor, String? status, List<String>? types, String? cat, String? sort, String? after, int term, bool? hideNoDoc) {
     final tStr = types?.join(',') ?? 'none';
     final sStr = status?.isNotEmpty == true ? status : 'none';
     final cStr = cat?.isNotEmpty == true && cat != 'Wszystkie' ? cat : 'none';
     final curStr = cursor ?? 'firstPage';
     final sortStr = sort ?? 'popularity';
     final aftStr = after ?? 'none';
-    return '${prefix}_cached_bills_cursor_term_${term}_lang_${lang}_lim_${limit}_cursor_${curStr}_stat_${sStr}_type_${tStr}_cat_${cStr}_sort_${sortStr}_after_$aftStr';
+    final hndStr = hideNoDoc == true ? 'true' : 'false';
+    return
+    '${prefix}_cached_bills_cursor_term_${term}_lang_${lang}_lim_${limit}_cursor_${curStr}_stat_${sStr}_type_${tStr}_cat_${cStr}_sort_${sortStr}_after_${aftStr}_hnd_$hndStr';
   }
 
   // --- BILL DETAILS ---

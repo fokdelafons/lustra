@@ -636,7 +636,7 @@ const getLegislations = async (req, res) => {
     }
     try {
         const data = req.body.data || req.body;
-        const { status: statusFilter, category, sortBy: rawSortBy, sortOrder: rawSortOrder, term: requestedTerm, documentType: documentTypeFilter, limit: rawLimit, lastVisibleDocId, lang: requestedLangParam, raw, processStartDateAfter } = data;
+        const { status: statusFilter, category, sortBy: rawSortBy, sortOrder: rawSortOrder, term: requestedTerm, documentType: documentTypeFilter, limit: rawLimit, lastVisibleDocId, lang: requestedLangParam, raw, processStartDateAfter, hideNoDocument } = data;
         
         const limit = parseInt(rawLimit) || 20;
         let sortBy = 'popularity';
@@ -674,7 +674,7 @@ const getLegislations = async (req, res) => {
             termToUse = requestedTerm;
         }
 
-        const cacheKey = `us-legs-${termToUse}-${statusFilter || 'all'}-${category || 'all'}-${documentTypeFilter || 'all'}-${sortBy}-${sortOrder}-${processStartDateAfter || 'none'}-${lang}-${limit}-${lastVisibleDocId || 'firstPage'}-${raw || 'false'}`;
+        const cacheKey = `us-legs-${termToUse}-${statusFilter || 'all'}-${category || 'all'}-${documentTypeFilter || 'all'}-${sortBy}-${sortOrder}-${processStartDateAfter || 'none'}-${lang}-${limit}-${lastVisibleDocId || 'firstPage'}-${raw || 'false'}-hnd-${hideNoDocument || 'false'}`;
         if (cache.has(cacheKey)) {
             const cachedEntry = cache.get(cacheKey);
             if ((Date.now() - cachedEntry.timestamp) / 1000 < CACHE_TTL_SECONDS) {
@@ -714,6 +714,9 @@ const getLegislations = async (req, res) => {
             if (processStartDateAfter) {
                 const startDate = new Date(processStartDateAfter);
                 query = query.where('processStartDate', '>=', startDate);
+            }
+            if (hideNoDocument === 'true') {
+                query = query.where('noDocument', '==', false);
             }
 
             query = query.orderBy(sortBy, sortOrder).orderBy(admin.firestore.FieldPath.documentId(), 'asc');

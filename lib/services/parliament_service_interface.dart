@@ -83,7 +83,7 @@ abstract class ParliamentServiceInterface with ChangeNotifier {
   Future<void> clearCache();
 
   Future<HomeScreenData> getHomeScreenData(BuildContext context, {bool forceRefresh = false});
-  Future<Map<String, dynamic>> getLegislations(BuildContext context, {int limit = 20, String? lastVisibleId, bool forceRefresh = false, String? searchQuery, String? status, List<String>? documentType, bool? active, String? category, String? sortBy, String? processStartDateAfter});
+  Future<Map<String, dynamic>> getLegislations(BuildContext context, {int limit = 20, String? lastVisibleId, bool forceRefresh = false, String? searchQuery, String? status, List<String>? documentType, bool? active, String? category, String? sortBy, String? processStartDateAfter, bool? hideNoDocument});
   Future<Map<String, dynamic>> getCivicProjects(BuildContext context, {int limit = 20, String? lastVisibleId, bool forceRefresh = false, String? category, String? sortBy});
   Future<Legislation?> getLegislationDetails(BuildContext context, String legislationId, {bool forceRefresh = false, String? documentType});
   Future<Map<String, dynamic>> getMPs(BuildContext context, {required int limit, String? lastVisibleId, bool forceRefresh = false, String? searchQuery, String? club, String? sortBy});
