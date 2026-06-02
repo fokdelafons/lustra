@@ -703,7 +703,7 @@ class AppLocalizationsPl extends AppLocalizations {
       'Ilość lat jest wartością przybliżoną, obliczoną na podstawie poniższych danych, bez brania pod uwagę przedwczesnego wygaśnięcia mandatu poselskiego.';
 
   @override
-  String tenureTermItem(String romanNumeral, String duration) {
+  String tenureTermItemPL(Object duration, Object romanNumeral) {
     return '$romanNumeral kadencja Sejmu RP $duration';
   }
 
@@ -1710,7 +1710,7 @@ class AppLocalizationsPl extends AppLocalizations {
   String get webBannerDownloadButton => 'Pobierz';
 
   @override
-  String get supportStripeButton => 'Wesprzyj (Stripe)';
+  String get supportStripeButton => 'Wesprzyj (KoFi)';
 
   @override
   String get supportFounderMessage =>

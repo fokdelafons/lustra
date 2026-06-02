@@ -420,7 +420,7 @@ class _WebAppBarState extends State<WebAppBar> {
                   return ParliamentSource.availableSources
                       .map((ParliamentSource source) {
                     final bool isFullyEnabled =
-                        source.id == 'pl' || source.id == 'us';
+                        source.id == 'pl' || source.id == 'us' || source.id == 'uk';
                     return PopupMenuItem<String>(
                       value: source.id,
                       enabled: true,

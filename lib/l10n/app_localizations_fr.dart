@@ -707,7 +707,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Le nombre d\'années est une valeur approximative, calculée sur la base des données ci-dessous, sans tenir compte de l\'expiration prématurée du mandat parlementaire.';
 
   @override
-  String tenureTermItem(String romanNumeral, String duration) {
+  String tenureTermItemPL(Object duration, Object romanNumeral) {
     return '${romanNumeral}e législature de la Diète de la République de Pologne $duration';
   }
 
@@ -1729,7 +1729,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get webBannerDownloadButton => 'Télécharger';
 
   @override
-  String get supportStripeButton => 'Soutenir (Stripe)';
+  String get supportStripeButton => 'Soutenir (KoFi)';
 
   @override
   String get supportFounderMessage =>

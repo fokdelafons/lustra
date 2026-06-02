@@ -119,8 +119,7 @@ class HomeContentState extends State<HomeContent> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   final ScrollController _scrollController = SmoothScrollController();
-  final GlobalKey _searchWidgetKey = GlobalKey();
-  bool _isInitialScrollPerformed = false;
+    final GlobalKey _searchWidgetKey = GlobalKey();
   HomeScreenData? _data;
   bool _isLoading = true;
   Object? _error;
@@ -157,10 +156,6 @@ class HomeContentState extends State<HomeContent> {
 
   Future<void> _loadHomeScreenData() async {
     setState(() {
-      _isInitialScrollPerformed = false; 
-    });
-
-    setState(() {
       _isLoading = true;
       _error = null;
     });
@@ -171,20 +166,15 @@ class HomeContentState extends State<HomeContent> {
           _data = data;
           _isLoading = false;
         });
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted && _scrollController.hasClients && !_isInitialScrollPerformed) {
-            final RenderBox? searchBox = _searchWidgetKey.currentContext?.findRenderObject() as RenderBox?;
-            
-            if (searchBox != null) {
-              if (!kIsWeb) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && _scrollController.hasClients) {
+            if (!kIsWeb) {
+              final RenderBox? searchBox = _searchWidgetKey.currentContext?.findRenderObject() as RenderBox?;
+              if (searchBox != null) {
                 final searchHeight = searchBox.size.height;
-                final totalOffset = searchHeight + 16.0; 
-                
+                final totalOffset = searchHeight + 16.0;
                 _scrollController.jumpTo(totalOffset);
               }
-              setState(() {
-                _isInitialScrollPerformed = true;
-              });
             }
           }
         });
@@ -386,10 +376,10 @@ Widget _buildContentList(BuildContext context) {
       return emptyContent;
     }
 
-    Widget listView = ListView.separated(
-      cacheExtent: 3000.0, 
+      Widget listView = ListView.separated(
+        cacheExtent: 3000.0,
       
-      controller: _scrollController,
+        controller: _scrollController,
       physics: null,
           
       padding: kIsWeb
@@ -427,15 +417,12 @@ Widget _buildContentList(BuildContext context) {
         }
         return false;
       },
-      child: Opacity(
-        opacity: _isInitialScrollPerformed ? 1.0 : 0.0,
-        child: isDesktopWeb
-            ? WebSmoothScroll(
-                controller: _scrollController,
-                child: listView,
-              )
-            : listView,
-      ),
+            child: isDesktopWeb
+          ? WebSmoothScroll(
+              controller: _scrollController,
+              child: listView,
+            )
+          : listView,
     );
   }
 }

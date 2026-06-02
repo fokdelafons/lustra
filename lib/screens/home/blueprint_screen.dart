@@ -128,7 +128,7 @@ class BlueprintScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 24.0),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8.0),
-        child: Image.asset(
+        child: Image.network(
           assetPath,
           width: double.infinity,
           fit: BoxFit.contain,
@@ -195,7 +195,7 @@ class BlueprintScreen extends StatelessWidget {
             l10n.bpTitle,
             style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, color: Colors.black87),
           ),
-          _buildImage('assets/protocol.png',),
+          _buildImage('https://lustra.news/assets/protocol.webp',),
           _buildParagraph(context, l10n.bpIntroBig),
           _buildParagraph(context, l10n.bpIntroSmall),
 
@@ -261,7 +261,7 @@ class BlueprintScreen extends StatelessWidget {
           _buildSubsectionTitle(context, l10n.bpS3ATitle, Icons.translate),
           _buildParagraph(context, l10n.bpS3AP1),
           _buildParagraph(context, l10n.bpS3AP2, isBold: true),
-          _buildImage('assets/transform.png'),
+          _buildImage('https://lustra.news/assets/transform.webp'),
 
           _buildSubsectionTitle(context, l10n.bpS3BTitle, Icons.share),
           _buildParagraph(context, l10n.bpS3BP1),
@@ -269,12 +269,12 @@ class BlueprintScreen extends StatelessWidget {
           _buildBullet(context, l10n.bpS3BList2Title, l10n.bpS3BList2Text),
           _buildBullet(context, l10n.bpS3BList3Title, l10n.bpS3BList3Text),
           _buildParagraph(context, l10n.bpS3BExample, isBold: true),
-          _buildImage('assets/news-card.png'),
+          _buildImage('https://lustra.news/assets/news-card.webp'),
 
           _buildSubsectionTitle(context, l10n.bpS3CTitle, Icons.how_to_vote),
           _buildParagraph(context, l10n.bpS3CP1),
           _buildBullet(context, l10n.bpS3CList1Title, l10n.bpS3CList1Text),
-          _buildImage('assets/social-poll.png'),
+          _buildImage('https://lustra.news/assets/social-poll.webp'),
           _buildBullet(context, l10n.bpS3CList2Title, l10n.bpS3CList2Text),
           _buildParagraph(context, l10n.bpS3CP2),
 

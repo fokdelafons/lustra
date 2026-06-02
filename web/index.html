@@ -7,14 +7,8 @@
   <title>Lustra</title>
   <meta name="description" content="Lustra provides transparent access to global legislation. Our bill summaries and voting records are presented in a concise, clear, and impartial way.">
 
-  <!-- Google tag (gtag.js) - Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-3SWK5GX4TP"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-3SWK5GX4TP', { 'send_page_view': true });
-  </script>
+  
+  <!-- Google Analytics – loaded after gate acceptance -->
 
   <!-- Open Graph (Facebook, LinkedIn, Discord, etc.) -->
   <meta property="og:title" content="Lustra - Mirror Parliament">
@@ -42,12 +36,7 @@
 
   <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
 
-  <style>
-    /* TARCZA: Definicje dla DOM - Wymagane przez SelectionArea do poprawnego mapowania szerokości */
-    @font-face { font-family: 'Roboto'; src: url('assets/fonts/Roboto-Regular.ttf') format('truetype'); font-weight: 400; font-display: block; }
-    @font-face { font-family: 'Roboto'; src: url('assets/fonts/Roboto-Medium.ttf') format('truetype'); font-weight: 500; font-display: block; }
-    @font-face { font-family: 'Roboto'; src: url('assets/fonts/Roboto-Bold.ttf') format('truetype'); font-weight: 700; font-display: block; }
-  </style>
+  
 
   <!-- GATEKEEPER CSS (ZERO RENDER-BLOCKING) -->
     <style>
@@ -251,10 +240,10 @@
 <body>
   <!-- FULL-SCREEN GATEWAY DOM -->
   <div id="gate-wrapper">
-    <img id="gate-bg" src="assets/background.png" alt="" aria-hidden="true">
+    <img id="gate-bg" src="assets/background.webp" alt="" aria-hidden="true">
     <div id="gate-overlay">
       <div class="gate-content">
-        <img class="gate-logo" src="assets/mirror-parliament.png" alt="Lustra" style="margin-bottom: 32px;">
+        <img class="gate-logo" src="assets/mirror-parliament.webp" alt="Lustra" style="margin-bottom: 32px;">
         <p id="g-text" class="gate-text">
           I pledge to use this infrastructure in good faith. I understand that my votes shape public data. I will not use bots, manipulate outcomes, or attack the network.
         </p>
@@ -366,10 +355,7 @@
       const supportedLangs = ['en', 'pl', 'de', 'fr', 'es', 'it', 'nl', 'pt'];
       const lang = supportedLangs.includes(langRaw) ? langRaw : 'en';
       const t = dict[lang];
-      const sentences = t.text.match(/[^.]+\./g) || [t.text];
-      document.getElementById('g-text').innerHTML = sentences.map((sentence, index) => 
-        `<span style="opacity: 0; animation: revealText 0.8s ease-out forwards ${index * 1.2}s">${sentence} </span>`
-      ).join('');
+            document.getElementById('g-text').innerHTML = `<span style="opacity: 0; animation: revealText 1.2s ease-out forwards 0.3s">${t.text}</span>`;
 
       document.getElementById('g-legal').innerText = t.legal;
       
@@ -379,7 +365,7 @@
 
       const btn = document.getElementById('g-accept');
 
-      let timeLeft = 4;
+      let timeLeft = 2;
       btn.disabled = true;
       btn.innerText = t.wait.replace('{t}', timeLeft);
 
@@ -398,6 +384,22 @@
         if (btn.disabled) return;
         localStorage.setItem('lustra_pledge', 'accepted');
         
+        // Load analytics now (after user interaction, not during bootstrap)
+        if (!window.gaLoaded) {
+          window.gaLoaded = true;
+          var gaScript = document.createElement('script');
+          gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-3SWK5GX4TP';
+          gaScript.async = true;
+          document.head.appendChild(gaScript);
+          gaScript.onload = function() {
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-3SWK5GX4TP', { 'send_page_view': true });
+          };
+        }
+        
+        
         gate.style.pointerEvents = 'none';
         gate.style.opacity = '0';
         
@@ -409,15 +411,7 @@
     })();
   </script>
 
-  <script>
-    window.addEventListener('load', async function() {
-      await document.fonts.ready;
-      let script = document.createElement('script');
-      script.src = "flutter_bootstrap.js";
-      script.async = true;
-      document.body.appendChild(script);
-    });
-  </script>
+    <script src="flutter_bootstrap.js" async></script>
   <script>
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();

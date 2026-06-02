@@ -7,7 +7,7 @@ import '../models/parliament_source.dart';
 import 'countries/pl_parliament_service.dart';
 // import 'countries/eu_parliament_service.dart';
 import 'countries/us_parliament_service.dart';
-// import 'countries/uk_parliament_service.dart';
+import 'countries/uk_parliament_service.dart';
 // import 'countries/fr_parliament_service.dart';
 // import 'countries/de_parliament_service.dart';
 import 'parliament_service_interface.dart';
@@ -22,22 +22,22 @@ class ParliamentManager extends ChangeNotifier {
     'pl': () => PLParliamentService(),
     // 'eu': () => EUParliamentService(),
     'us': () => USParliamentService(),
-    // 'uk': () => UKParliamentService(),
+    'uk': () => UKParliamentService(),
     // 'de': () => DEParliamentService(),
     // 'fr': () => FRParliamentService(),
   };
 
   // WAITING FOR v2.0
-  // final Map<String, String> _languageToServiceMap = {
-  //   'pl_PL': 'pl',
-  //   'en_GB': 'uk',
-  //   'en_US': 'us',
+  final Map<String, String> _languageToServiceMap = {
+    'pl_PL': 'pl',
+    'en_GB': 'uk',
+    'en_US': 'us',
   //   'de_DE': 'de',
   //   'fr_FR': 'fr',
-  // };
+  };
 
   String? _activeServiceId;
-  late ParliamentServiceInterface _activeService;
+    late ParliamentServiceInterface _activeService;
 
   bool _isLoading = false;
   bool _isReady = false;
@@ -47,25 +47,25 @@ class ParliamentManager extends ChangeNotifier {
   String? get activeServiceId => _activeServiceId;
   String get activeSlug => ParliamentSource.getSlugById(_activeServiceId);
   // WAITING FOR v2.0
-  // List<ParliamentServiceInterface> get availableServices => _serviceFactories.values.map((factory) => factory()).toList();
-  List<ParliamentServiceInterface> get availableServices => ['us', 'pl'].map((id) => _serviceFactories[id]!()).toList();
+  List<ParliamentServiceInterface> get availableServices => _serviceFactories.values.map((factory) => factory()).toList();
+  // List<ParliamentServiceInterface> get availableServices => ['us', 'pl'].map((id) => _serviceFactories[id]!()).toList();
 
   bool get isInitialized => _activeServiceId != null;
   bool get isLoading => _isLoading;
   bool get isReady => _isReady;
   Object? get error => _error;
 
-  int? get currentTerm => _isReady ? _activeService.currentTerm : null;
+    int? get currentTerm => _isReady ? _activeService.currentTerm : null;
   List<int> get availableTerms => _isReady ? _activeService.availableTerms : [];
 
   Future<void> changeTerm(int newTerm) async {
     if (!_isReady) return;
     if (_activeService.currentTerm == newTerm) return;
 
-    try {
-      _isLoading = true;
-      notifyListeners();
-      await _activeService.changeTerm(newTerm);
+        try {
+          _isLoading = true;
+          notifyListeners();
+          await _activeService.changeTerm(newTerm);
     } catch (e) {
       developer.log('Error: Błąd zmiany kadencji na $newTerm: $e', name: 'ParliamentManager');
       rethrow;
@@ -84,33 +84,33 @@ class ParliamentManager extends ChangeNotifier {
     String? lastSelectedId = _prefs?.getString(_lastSelectedSourceKey);
 
     // WAITING FOR v2.0
-    // if (lastSelectedId != null && _serviceFactories.containsKey(lastSelectedId)) {
-    //   _activeServiceId = lastSelectedId;
-    // } else {
-    //   final locale = WidgetsBinding.instance.platformDispatcher.locale;
-    //   String deviceLocale = '${locale.languageCode}_${locale.countryCode}';
-      
-    //   String? mappedServiceId = _languageToServiceMap[deviceLocale];
-    //   if (mappedServiceId != null && _serviceFactories.containsKey(mappedServiceId)) {
-    //     _activeServiceId = mappedServiceId;
-    //   } else {
-    //     _activeServiceId = _serviceFactories.keys.first;
-    //   }
-    // }
-
-    const allowedSources = ['pl', 'us'];
-    
-    if (lastSelectedId != null && allowedSources.contains(lastSelectedId)) {
+    if (lastSelectedId != null && _serviceFactories.containsKey(lastSelectedId)) {
       _activeServiceId = lastSelectedId;
     } else {
       final locale = WidgetsBinding.instance.platformDispatcher.locale;
-      // If language code is explicitly Polish, serve PL. Otherwise default to US (World).
-      if (locale.languageCode == 'pl') {
-        _activeServiceId = 'pl';
+      String deviceLocale = '${locale.languageCode}_${locale.countryCode}';
+      
+      String? mappedServiceId = _languageToServiceMap[deviceLocale];
+      if (mappedServiceId != null && _serviceFactories.containsKey(mappedServiceId)) {
+        _activeServiceId = mappedServiceId;
       } else {
-        _activeServiceId = 'us';
+        _activeServiceId = _serviceFactories.keys.first;
       }
     }
+
+    // const allowedSources = ['pl', 'us', 'uk'];
+    
+    // if (lastSelectedId != null && allowedSources.contains(lastSelectedId)) {
+    //   _activeServiceId = lastSelectedId;
+    // } else {
+    //   final locale = WidgetsBinding.instance.platformDispatcher.locale;
+    //   // If language code is explicitly Polish, serve PL. Otherwise default to US (World).
+    //   if (locale.languageCode == 'pl') {
+    //     _activeServiceId = 'pl';
+    //   } else {
+    //     _activeServiceId = 'us';
+    //   }
+    // }
     
     _activeService = _serviceFactories[_activeServiceId]!();
     developer.log('ParliamentManager zainicjalizowany wstępnie. Aktywny serwis: $_activeServiceId', name: 'ParliamentManager');

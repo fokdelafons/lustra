@@ -21,6 +21,7 @@ import 'services/parliament_manager.dart';
 import 'services/firebase_auth.dart';
 import 'services/app_router.dart';
 import 'services/remote_config_service.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'services/parliament_service_interface.dart';
 import 'services/notification_service.dart';
 import 'screens/force_update_screen.dart';
@@ -37,17 +38,21 @@ void main() async {
 
   VisibilityDetectorController.instance.updateInterval = const Duration(seconds: 1);
   
-  await Future.wait([
+    // Fonty i SVG ładujemy nieblokująco – nie opóźniamy pierwszego frame'u
+  Future.wait([
     rootBundle.load('assets/fonts/Roboto-Regular.ttf'),
     rootBundle.load('assets/fonts/Roboto-Medium.ttf'),
     rootBundle.load('assets/fonts/Roboto-Bold.ttf'),
   ]);
+  precacheSvgAssets();
 
-  await precacheSvgAssets();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  await FirebaseAppCheck.instance.activate(
+    // App Check – nie blokuje startu; aktywuje się w tle.
+  // Backend wymaga App Check tylko dla krytycznych endpointów (vote, profile),
+  // więc pierwsze requesty (czytanie) przejdą zanim App Check będzie gotowy.
+  FirebaseAppCheck.instance.activate(
     providerAndroid: AndroidPlayIntegrityProvider(),
     providerApple: AppleAppAttestProvider(),
     // providerAndroid: AndroidDebugProvider(), // debug
@@ -63,7 +68,15 @@ void main() async {
 
     await NotificationService.instance.init();
   }
-  final remoteConfigService = await RemoteConfigService.create();
+  // Remote Config – na web nie blokujemy startu (force update i tak nie działa na web),
+  // na mobile czekamy dla kontroli wersji.
+  final RemoteConfigService remoteConfigService;
+  if (kIsWeb) {
+    remoteConfigService = RemoteConfigService(FirebaseRemoteConfig.instance);
+    remoteConfigService.initialize(); // fire and forget w tle
+  } else {
+    remoteConfigService = await RemoteConfigService.create();
+  }
   
   runApp(
 		MultiProvider(

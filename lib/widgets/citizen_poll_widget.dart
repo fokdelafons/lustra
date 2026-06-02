@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:lustra/widgets/verification_guard.dart';
 import 'package:lustra/providers/interaction_provider.dart';
 import 'package:go_router/go_router.dart';
@@ -180,7 +179,7 @@ class _CitizenPollWidgetState extends State<CitizenPollWidget> {
         // Trigger cross-tab / background interaction sync for current user
         await ParliamentCacheManager(countryPrefix).markInteractionChanged(user.uid);
       } 
-    } on FirebaseFunctionsException catch (e) {
+    } on ApiException catch (e) {
       if (mounted) setState(() => _isVoteProcessing = false);
       _handleError(e.code == 'permission-denied' ? l10n.pollPermissionDeniedError : l10n.authErrorDefault, previousHasVoted, previousCounters, scaffoldMessenger);
     } catch (e) {

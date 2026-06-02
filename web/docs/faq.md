@@ -26,7 +26,7 @@ It is our design philosophy where citizen-drafted legislation (via **Civic Proje
 ## Funding
 
 ### Who pays for the servers?
-The community. Lustra relies on voluntary contributions (Stripe) and infrastructure grants (e.g., Google for Startups).
+The community. Lustra relies on voluntary contributions (KoFi) and infrastructure grants (e.g., Google for Startups).
 
 ### Do you sell user data?
 **Never.** We collect minimal data (Email/UID for anti-bot protection) and do not use trackers or sell behavioral profiles.

@@ -1,8 +1,6 @@
-import 'dart:async';
 import 'dart:developer' as developer;
 
 import 'package:lustra/l10n/app_localizations.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -10,22 +8,15 @@ import 'package:provider/provider.dart';
 import '../../models/legislation.dart';
 import '../../models/mp.dart';
 import '../../models/parliament_source.dart';
-import '../../models/home_screen_data.dart';
 import '../../providers/language_provider.dart';
 import '../../providers/translators.dart';
 import '../parliament_service_interface.dart';
-import '../api_service.dart';
 import '../app_router.dart';
-import '../cache/parliament_cache_manager.dart';
 import '../parliament_manager.dart';
+import 'base_parliament_api.dart';
 
-class USParliamentService with ChangeNotifier implements ParliamentServiceInterface {
-  final ApiService _apiService = ApiService();
-  final String baseUrl = 'https://api.lustra.dev';
-
-  final ParliamentCacheManager _cache = ParliamentCacheManager('us');
-  
-  USParliamentService();
+class USParliamentService extends BaseParliamentApi implements ParliamentServiceInterface {
+  USParliamentService() : super('us');
 
   static const Map<int, String> _termDurations = {
     118: "(2023-2024)", 117: "(2021-2022)", 116: "(2019-2020)", 115: "(2017-2018)",
@@ -64,13 +55,7 @@ class USParliamentService with ChangeNotifier implements ParliamentServiceInterf
     return totalYears;
   }
 
-  int? _currentTerm;
-  int? _latestTerm;
-  List<int> _availableTerms = [];
-  List<String> _clubFilters = [];
-  bool _isLoading = false;
-
-  @override
+    @override
   String get name => 'United States Congress';
 
   @override
@@ -83,21 +68,6 @@ class USParliamentService with ChangeNotifier implements ParliamentServiceInterf
   String? getHistoricalDataDisclaimer(BuildContext context) {
     return null;
   }
-
-  @override
-  int? get currentTerm => _currentTerm;
-
-  @override
-  List<int> get availableTerms => _availableTerms;
-
-  @override
-  List<String> get clubFilters => _clubFilters;
-
-  Completer<void> _initializationCompleter = Completer<void>();
-  Future<void> get initializationDone => _initializationCompleter.future;
-
-  @override
-  bool get isLoading => _isLoading;
 
 @override
   Future<Map<String, String>> getLegislationFilterStatuses(BuildContext context) async {
@@ -273,109 +243,20 @@ class USParliamentService with ChangeNotifier implements ParliamentServiceInterf
   }
 
 
-  @override
+	@override
   Map<int, String> get termDurations => _termDurations;
-	
+
+  @override
+  Map<int, int> get termYears => _termYears;
+
 	@override
 	ParliamentSource get source => ParliamentSource.us;
 
-  @override
+    @override
   String get citizenVoteFunctionName => 'us_citizenVote';
 
-@override
-  Future<void> initialize() async {
-    if (_initializationCompleter.isCompleted) {
-      _initializationCompleter = Completer<void>();
-    }
-    developer.log('Inicjalizacja USParliamentService...', name: 'USParliamentService');
-    _isLoading = true;
-    notifyListeners();
-
-    // CACHE LOAD
-    final cachedMeta = await _cache.getMetadata();
-    final bool hasCache = cachedMeta != null;
-    
-    if (hasCache) {
-      try {
-        _currentTerm = cachedMeta['currentTerm'] as int?;
-        _latestTerm = cachedMeta['currentTerm'] as int?;
-        _availableTerms = (cachedMeta['availableTerms'] as List<dynamic>?)?.map((e) => e as int).toList() ?? [];
-        _clubFilters = (cachedMeta['clubs'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [];
-        _clubFilters.sort();
-        developer.log('Załadowano metadane z cache. Kadencja: $_currentTerm', name: 'USParliamentService');
-        notifyListeners();
-      } catch (e) {
-        developer.log('Błąd parsowania cache metadanych', name: 'USParliamentService');
-      }
-    }
-
-    try {
-      final data = await _apiService.callFunction('us_getMetadata');
-      // CACHE CLEANER
-      _cache.cleanUp().catchError((e) {
-      developer.log('Błąd podczas czyszczenia cache: $e', name: 'USParliamentService');
-      });
-      
-      // CACHE SAVE
-      await _cache.saveMetadata(data);
-      
-      _currentTerm = data['currentTerm'] as int?;
-      _latestTerm = data['currentTerm'] as int?;
-      _availableTerms = (data['availableTerms'] as List<dynamic>?)?.map((e) => e as int).toList() ?? [];
-      _latestTerm = data['currentTerm'] as int?;
-      _clubFilters = (data['clubs'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [];
-      _clubFilters.sort();
-      developer.log('USParliamentService zainicjalizowany (z sieci). Kadencja: $_currentTerm', name: 'USParliamentService');
-    } catch (e, stackTrace) {
-      developer.log(
-        'Błąd sieciowy podczas inicjalizacji USParliamentService: ${e.toString()}', 
-        name: 'USParliamentService',
-        error: e,
-        stackTrace: stackTrace
-      );
-      if (!hasCache) {
-        if (!_initializationCompleter.isCompleted) {
-          _initializationCompleter.completeError(e, stackTrace);
-        }
-        throw Exception('Brak połączenia z siecią i brak danych w cache. Nie można uruchomić aplikacji.');
-      }
-      developer.log('Używam danych z cache z powodu błędu sieci.', name: 'USParliamentService');
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-      if (!_initializationCompleter.isCompleted) {
-        _initializationCompleter.complete();
-      }
-    }
-  }
-
   @override
-  Future<void> changeTerm(int newTerm) async {
-    if (_currentTerm == newTerm) return;
-    _isLoading = true;
-    notifyListeners();
-    _currentTerm = newTerm;
-    try {
-      final data = await _apiService.callFunction(
-        'us_getMetadata',
-        params: {
-          'type': 'term_clubs',
-          'term': newTerm,
-        },
-      );
-      _clubFilters = (data['clubs'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [];
-      _clubFilters.sort();
-    } catch (e) {
-       _clubFilters = [];
-       developer.log('Błąd podczas zmiany kadencji: $e', name: 'USParliamentService');
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
-  @override
-    String getMandateStatusText(BuildContext context, MP mp) {
+  String getMandateStatusText(BuildContext context, MP mp) {
       final l10n = AppLocalizations.of(context)!;
       switch (mp.mandateCoverage) {
         case 'FULL':
@@ -445,7 +326,7 @@ class USParliamentService with ChangeNotifier implements ParliamentServiceInterf
   }
 
 @override
-VoidCallback? getInterpellationTapAction(BuildContext context, InterpellationPreview interp) {
+VoidCallback? getSponsoredTapAction(BuildContext context, InterpellationPreview interp) {
   if (interp.id.isNotEmpty) {
         return () {
           final pManager = context.read<ParliamentManager>();
@@ -500,7 +381,7 @@ String _getOrdinalSuffix(int n) {
       final termNumber = termInfo.term;
       final ordinalTerm = '$termNumber${_getOrdinalSuffix(termNumber)}';
       final String duration;
-      if (termNumber == _latestTerm) {
+      if (termNumber == latestTerm) {
         duration = l10n.termCurrently;
       } else {
         duration = _termDurations[termNumber] ?? '';
@@ -530,374 +411,6 @@ String _getOrdinalSuffix(int n) {
       MPActivityTab(title: l10n.sponsorshipsTab, type: 'sponsorships'),
     ];
   }
-
-@override
-  Future<HomeScreenData> getHomeScreenData(BuildContext context, {bool forceRefresh = false}) async {
-    final langCode = Provider.of<LanguageProvider>(context, listen: false).appLanguageCode;
-    await initializationDone;
-    final int? termToUse = _currentTerm;
-    if (termToUse == null) throw Exception("Brak wybranej kadencji w USParliamentService");
-    
-    // CACHE READ
-    if (!forceRefresh) {
-      final cachedData = await _cache.getHomeScreenData(langCode, termToUse);
-      if (cachedData != null) return cachedData;
-    }
-    
-    try {
-      // TARCZA: Przełączenie na zmaterializowany widok (V2)
-      final resultData = await _apiService.callFunction(
-        'us_getHomeScreenDataV2', 
-        params: {
-          'lang': langCode,
-          'term': termToUse.toString(),
-        },
-      );
-      final homeData = HomeScreenData.fromJson(resultData);
-      
-      // CACHE SAVE
-      await _cache.saveHomeScreenData(homeData, langCode, termToUse);
-      
-      return homeData;
-    } catch (e) {
-      developer.log('Błąd sieciowy. Próba fallback offline.', name: 'USParliamentService');
-      
-      // FALLBACK CACHE
-      final cachedFallback = await _cache.getHomeScreenData(langCode, termToUse, ignoreTimestamp: true);
-      if (cachedFallback != null) return cachedFallback;
-      
-      throw Exception('Błąd sieci i brak danych w cache: $e');
-    }
-  }
-
-  @override
-  Future<Map<String, dynamic>> getLegislations(
-      BuildContext context, {
-      int limit = 20, String? lastVisibleId, bool forceRefresh = false,
-      String? searchQuery, String? status, List<String>? documentType,
-      bool? active, String? category, String? sortBy, String? processStartDateAfter, bool? hideNoDocument,
-  }) async {
-    final int? termToUse = _currentTerm;
-    if (termToUse == null) throw Exception("Brak wybranej kadencji w USParliamentService");
-    final langCode = Provider.of<LanguageProvider>(context, listen: false).appLanguageCode;
-    
-    if (searchQuery != null && searchQuery.isNotEmpty) {
-      final int offset = 0;
-      final searchResult = await _trySearchFromAPI(
-        type: 'legislations', country: 'us', langCode: langCode,
-        searchQuery: searchQuery, term: termToUse, limit: 50, offset: offset,
-      );
-      if (searchResult == null || searchResult['results'] == null) {
-        return {'legislations': [], 'nextCursor': null};
-      }
-      return {'legislations': searchResult['results'], 'nextCursor': null};
-    } else {
-      try {
-        // CACHE READ
-        if (!forceRefresh) {
-          final cachedData = await _cache.getLegislationsCursor(
-            langCode, limit, lastVisibleId, 
-            status: status, documentType: documentType, category: category, sortBy: sortBy, processStartDateAfter: processStartDateAfter, term: termToUse, hideNoDocument: hideNoDocument
-          );
-          if (cachedData != null) return cachedData;
-        }
-        
-        final params = {
-          'limit': limit, 'lang': langCode, 'term': termToUse.toString(),
-          if (lastVisibleId != null) 'lastVisibleDocId': lastVisibleId,
-          if (category != null && category.isNotEmpty) 'category': category,
-          if (status != null && status.isNotEmpty) 'status': status,
-          if (documentType != null && documentType.isNotEmpty) 'documentType': documentType.join(','),
-          if (sortBy != null && sortBy.isNotEmpty) 'sortBy': sortBy,
-          if (processStartDateAfter != null && processStartDateAfter.isNotEmpty) 'processStartDateAfter': processStartDateAfter,
-          if (hideNoDocument == true) 'hideNoDocument': 'true',
-        };
-        developer.log('Wywołanie API us_getLegislations z parametrami: $params', name: 'USParliamentService');
-        final resultData = await _apiService.callFunction('us_getLegislations', params: params);
-        
-        // CACHE SAVE
-        await _cache.saveLegislationsCursor(
-          resultData, langCode, limit, lastVisibleId, 
-          status: status, documentType: documentType, category: category, sortBy: sortBy, processStartDateAfter: processStartDateAfter, term: termToUse, hideNoDocument: hideNoDocument
-        );
-        
-        return resultData;
-      } catch (e) {
-        developer.log('Błąd w getLegislations (filtr), próba odczytu z cache: $e', name: 'USParliamentService');
-        
-        // CACHE FALLBACK
-        final cachedData = await _cache.getLegislationsCursor(
-            langCode, limit, lastVisibleId, 
-            status: status, documentType: documentType, category: category, sortBy: sortBy, processStartDateAfter: processStartDateAfter, term: termToUse, hideNoDocument: hideNoDocument
-        );
-        if (cachedData != null) return cachedData;
-        rethrow;
-      }
-    }
-  }
-
-  @override
-  Future<Map<String, dynamic>> getCivicProjects(
-    BuildContext context, {
-    int limit = 20, String? lastVisibleId, bool forceRefresh = false,
-    String? category, String? sortBy,
-  }) async {
-    final langCode = Provider.of<LanguageProvider>(context, listen: false).appLanguageCode;
-    
-    try {
-      // CACHE READ
-      if (!forceRefresh) {
-        final cachedData = await _cache.getCivicProjects(langCode, limit, lastVisibleId, category, sortBy);
-        if (cachedData != null) return cachedData;
-      }
-
-      final params = {
-        'limit': limit,
-        'lang': langCode,
-        if (lastVisibleId != null) 'lastVisibleDocId': lastVisibleId,
-        if (category != null && category.isNotEmpty) 'category': category,
-        if (sortBy != null && sortBy.isNotEmpty) 'sortBy': sortBy,
-      };
-
-      developer.log('Wywołanie API us_getCivicProjects z parametrami: $params', name: 'USParliamentService');
-      final resultData = await _apiService.callFunction('us_getCivicProjects', params: params);
-      
-      // CACHE SAVE
-      await _cache.saveCivicProjects(resultData, langCode, limit, lastVisibleId, category, sortBy);
-      return resultData;
-
-    } catch (e) {
-      developer.log('Błąd w getCivicProjects, próba odczytu z cache: $e', name: 'USParliamentService');
-      // CACHE FALLBACK
-      final cachedData = await _cache.getCivicProjects(langCode, limit, lastVisibleId, category, sortBy);
-      if (cachedData != null) return cachedData;
-      rethrow;
-    }
-  }
-
-  @override
-  Future<Map<String, dynamic>> getMPs(
-      BuildContext context, {
-      required int limit, String? lastVisibleId, bool forceRefresh = false,
-      String? searchQuery, String? club, String? sortBy,
-  }) async {
-    final int? termToUse = _currentTerm;
-    if (termToUse == null) throw Exception("Brak wybranej kadencji w USParliamentService");
-    final langCode = Provider.of<LanguageProvider>(context, listen: false).appLanguageCode;
-
-    if (searchQuery != null && searchQuery.isNotEmpty) {
-      final int offset = 0;
-      final searchResult = await _trySearchFromAPI(
-        type: 'deputies', country: 'us', langCode: langCode,
-        searchQuery: searchQuery, term: termToUse, limit: 50, offset: offset,
-      );
-      if (searchResult == null || searchResult['results'] == null) {
-        return {'deputies': [], 'nextCursor': null};
-      }
-      return {'deputies': searchResult['results'], 'nextCursor': null};
-    } else {
-      try {
-        // CACHE READ
-        if (!forceRefresh) {
-          final cachedData = await _cache.getMPsCursor(langCode, limit, lastVisibleId, term: termToUse, club: club, sortBy: sortBy);
-          if (cachedData != null) return cachedData;
-        }
-        
-        final params = {
-          'limit': limit, 'lang': langCode, 'term': termToUse.toString(),
-          if (lastVisibleId != null) 'lastVisibleDocId': lastVisibleId,
-          if (club != null) 'club': club,
-          if (sortBy != null) 'sortBy': sortBy,
-        };
-        final resultData = await _apiService.callFunction('us_getDeputies', params: params);
-        
-        // CACHE SAVE
-        await _cache.saveMPsCursor(resultData, langCode, limit, lastVisibleId, term: termToUse, club: club, sortBy: sortBy);
-        
-        return resultData;
-      } catch (e) {
-        developer.log('Błąd w getMPs (filtr), próba odczytu z cache: $e', name: 'USParliamentService');
-        // CACHE FALLBACK
-        final cachedData = await _cache.getMPsCursor(langCode, limit, lastVisibleId, term: termToUse, club: club, sortBy: sortBy);
-        if (cachedData != null) return cachedData;
-        rethrow;
-      }
-    }
-  }
-	
- @override
-  Future<Legislation?> getLegislationDetails(BuildContext context, String legislationId, {bool forceRefresh = false, String? documentType}) async {
-    developer.log('SERVICE: Szczegóły ID: $legislationId, forceRefresh: $forceRefresh, type: $documentType', name: 'USParliamentService');
-    final langCode = Provider.of<LanguageProvider>(context, listen: false).appLanguageCode;
-    final backendType = (documentType == 'civic') ? 'civic' : 'bill';
-    try {
-      // CACHE READ
-      if (!forceRefresh) {
-        final cachedBill = await _cache.getLegislationDetails(legislationId, langCode);
-        if (cachedBill != null) return cachedBill;
-      }
-      
-      final data = await _apiService.callFunction(
-        'us_getDetails',
-        params: {'type': backendType, 'id': legislationId, 'lang': langCode},
-      );
-      final bill = Legislation.fromJson(data);
-      
-      // CACHE SAVE
-      await _cache.saveLegislationDetails(bill, langCode);
-      return bill;
-    } catch (e) {
-      developer.log('Błąd sieciowy w getLegislationDetails, próba odczytu z cache: $e', name: 'USParliamentService');
-      // CACHE FALLBACK
-      return await _cache.getLegislationDetails(legislationId, langCode);
-    }
-  }
-	
-  @override
-  Future<MP?> getMPData(
-    BuildContext context, String mpId, 
-    {bool forceRefresh = false, String? dataType, Map<String, dynamic>? params}
-  ) async {
-    final l10n = AppLocalizations.of(context)!;
-    final langCode = Provider.of<LanguageProvider>(context, listen: false).appLanguageCode;
-    final int? termToUse = _currentTerm;
-    if (termToUse == null) throw Exception("Brak wybranej kadencji w USParliamentService");
-    try {
-      // CACHE READ
-      if (!forceRefresh) {
-        MP? cachedMP = await _cache.getMPDetails(mpId, lang: langCode, dataType: dataType, params: params, term: termToUse);
-        if (cachedMP != null) return cachedMP;
-      }
-      
-      MP? mp = await _tryFetchMPDataFromAPI(l10n, langCode, mpId, termToUse, dataType: dataType, params: params);
-      if (mp != null) {
-        // CACHE SAVE
-        await _cache.saveMPDetails(mp, lang: langCode, dataType: dataType, params: params, term: termToUse);
-        return mp;
-      }
-      // CACHE FALLBACK
-      return await _cache.getMPDetails(mpId, lang: langCode, dataType: dataType, params: params, term: termToUse);
-    } catch (e) {
-      developer.log('Błąd w getMPData: $e', name: 'USParliamentService');
-      return await _cache.getMPDetails(mpId, lang: langCode, dataType: dataType, params: params, term: termToUse);
-    }
-  }
-
-  @override
-  Future<MP?> getMPDetails(BuildContext context, String mpId, {bool forceRefresh = false, String? dataType, Map<String, dynamic>? params}) async {
-    developer.log('SERVICE: Rozpoczynam pobieranie szczegółów posła (callable). ID: $mpId', name: 'USParliamentService');
-    try {
-      final data = await _apiService.callFunction(
-        'us_getDetails',
-        params: {
-          'type': 'deputy',
-          'id': mpId,
-        },
-      );
-      return MP.fromJson(data);
-    } on FirebaseFunctionsException catch (e) {
-      developer.log('Błąd funkcji callable us_getDetails (deputy) (${e.code}): ${e.message}', name: 'USParliamentService', error: e);
-      return null;
-    } catch (e) {
-      developer.log('Błąd sieciowy w getMPDetails: $e', name: 'USParliamentService');
-      return null;
-    }
-  }
-
-  Future<MP?> _tryFetchMPDataFromAPI(
-    AppLocalizations l10n, String langCode, String mpId, int term, 
-    {String? dataType, Map<String, dynamic>? params}
-  ) async {
-    final effectiveDataType = (dataType == 'interpellations') ? 'sponsorships' : dataType;
-    final Map<String, dynamic> callableParams = {
-      'id': mpId, 'lang': langCode, 'term': term.toString(),
-      if (effectiveDataType != null) 'dataType': effectiveDataType,
-    };
-    if (params != null) callableParams.addAll(params);
-    developer.log('Wywoływanie funkcji callable us_getDeputyDetails z parametrami: $callableParams', name: 'USParliamentService');
-    try {
-      final responseJson = await _apiService.callFunction('us_getDeputyDetails', params: callableParams);
-      if (effectiveDataType == 'votings' && responseJson['votings'] is List) {
-        final votingsRaw = (responseJson['votings'] as List)
-            .map((item) => Map<String, dynamic>.from(item as Map))
-            .toList();
-        final votingsProcessed = votingsRaw.map((v) {
-          final id = v['id'] as String? ?? '';
-          final idParts = id.split('_');
-          if (idParts.length > 1) {
-            v['id'] = idParts.take(idParts.length - 1).join('_');
-          }
-          return v;
-        }).toList();
-        responseJson['votings'] = votingsProcessed;
-      }
-      if (effectiveDataType == 'sponsorships' && responseJson['interpellationsPreview'] is List) {
-        final sponsorshipsRaw = (responseJson['interpellationsPreview'] as List)
-            .map((item) => Map<String, dynamic>.from(item as Map))
-            .toList();
-        sponsorshipsRaw.sort((a, b) {
-          if (a['sponsorshipType'] == b['sponsorshipType']) return 0;
-          if (a['sponsorshipType'] == 'sponsor') return -1;
-          if (b['sponsorshipType'] == 'sponsor') return 1;
-          return 0;
-        });
-        final sponsorshipsProcessed = sponsorshipsRaw.map((s) {
-          if (s['sponsorshipType'] == 'sponsor') {
-            s['tag'] = l10n.sponsorshipTypeSponsor;
-          } else if (s['sponsorshipType'] == 'cosponsor') {
-            s['tag'] = l10n.sponsorshipTypeCosponsor;
-          }
-          return s;
-        }).toList();
-        responseJson['interpellationsPreview'] = sponsorshipsProcessed;
-      }
-      responseJson['id'] = mpId;
-      return MP.fromJson(responseJson);
-    } on FirebaseFunctionsException catch (e) {
-      developer.log('Błąd funkcji callable us_getDeputyDetails ($mpId, ${e.code}): ${e.message}', name: 'USParliamentService', error: e);
-      return null;
-    } catch (e) {
-      developer.log('Błąd sieci lub inny podczas pobierania szczegółów posła $mpId: $e', name: 'USParliamentService', error: e);
-      return null;
-    }
-  }
-
-  Future<Map<String, dynamic>?> _trySearchFromAPI({
-    required String type,
-    required String country,
-    required String langCode,
-    required String searchQuery,
-    required int term,
-    required int limit,
-    required int offset,
-    Map<String, dynamic>? otherParams,
-  }) async {
-    final Map<String, dynamic> params = {
-      'type': type,
-      'country': country,
-      'lang': langCode,
-      'searchQuery': searchQuery,
-      'term': term.toString(),
-      'limit': limit.toString(),
-      'offset': offset.toString(),
-      if (otherParams != null) ...otherParams,
-    };
-    developer.log('Wywoływanie funkcji callable search z parametrami: $params', name: 'USParliamentService');
-    try {
-      return await _apiService.callFunction('search', params: params);
-    } on FirebaseFunctionsException catch (e) {
-      developer.log('Błąd funkcji callable search (typ: $type, ${e.code}): ${e.message}', name: 'USParliamentService', error: e);
-      return null;
-    } catch (e) {
-      developer.log('Błąd sieci w _trySearchFromAPI: $e', name: 'USParliamentService');
-      return null;
-    }
-  }
-	
-@override
-	Future<void> clearCache() async {
-		await _cache.clearAll();
-	}
 
   @override
   MissingDataAction? getMissingDataAction(BuildContext context, Legislation legislation) {

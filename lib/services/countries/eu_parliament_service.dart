@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:developer' as developer;
 
 import 'package:lustra/l10n/app_localizations.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
@@ -418,7 +417,7 @@ class EUParliamentService with ChangeNotifier implements ParliamentServiceInterf
       } else {
         duration = termDurations[termNum] ?? l10n.unknownTermDuration;
       }
-      return MPDetailItem(label: l10n.tenureTermItem(romanNumeral, duration));
+      return MPDetailItem(label: l10n.tenureTermItemPL(romanNumeral, duration));
     }).toList();
     return MPDetailSection(
       title: getTenureTitle(context, mp),
@@ -481,7 +480,7 @@ class EUParliamentService with ChangeNotifier implements ParliamentServiceInterf
   }
 
   @override
-  VoidCallback? getInterpellationTapAction(BuildContext context, InterpellationPreview interp) {
+  VoidCallback? getSponsoredTapAction(BuildContext context, InterpellationPreview interp) {
     if (interp.contentUrl != null && interp.contentUrl!.isNotEmpty) {
       return () {
         final l10n = AppLocalizations.of(context)!;
@@ -747,7 +746,7 @@ class EUParliamentService with ChangeNotifier implements ParliamentServiceInterf
         },
       );
       return MP.fromJson(data);
-    } on FirebaseFunctionsException catch (e) {
+    } on ApiException catch (e) {
       developer.log('Błąd funkcji callable ue_getDetails (deputy) (${e.code}): ${e.message}', name: 'EUParliamentService', error: e);
       return null;
     } catch (e) {
@@ -779,7 +778,7 @@ class EUParliamentService with ChangeNotifier implements ParliamentServiceInterf
     developer.log('Wywoływanie funkcji callable search z parametrami: $params', name: 'EUParliamentService');
     try {
       return await _apiService.callFunction('search', params: params);
-    } on FirebaseFunctionsException catch (e) {
+    } on ApiException catch (e) {
       developer.log('Błąd funkcji callable search (typ: $type, ${e.code}): ${e.message}', name: 'EUParliamentService', error: e);
       return null;
     } catch (e) {
@@ -814,7 +813,7 @@ class EUParliamentService with ChangeNotifier implements ParliamentServiceInterf
       final responseJson = await _apiService.callFunction('ue_getDeputyDetails', params: callableParams);
       responseJson['id'] = mpId;
       return MP.fromJson(responseJson);
-    } on FirebaseFunctionsException catch (e) {
+    } on ApiException catch (e) {
       developer.log('Błąd funkcji callable ue_getDeputyDetails ($mpId, ${e.code}): ${e.message}', name: 'EUParliamentService', error: e);
       return null;
     } catch (e) {

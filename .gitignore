@@ -31,6 +31,8 @@ migrate_working_dir/
 .pub/
 /build/
 
+.LUSTRA_SERVICE_LAYER_AUDIT.md
+
 # Symbolication related
 app.*.symbols
 

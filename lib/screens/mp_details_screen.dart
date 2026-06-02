@@ -1089,7 +1089,7 @@ return Scaffold(
                 Builder(
                   builder: (context) {
                     final activeService = context.read<ParliamentServiceInterface>();
-                    final tapAction = activeService.getInterpellationTapAction(context, interp);
+                    final tapAction = activeService.getSponsoredTapAction(context, interp);
                     return InkWell(
                       onTap: tapAction,
                       child: Text(

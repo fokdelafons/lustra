@@ -704,7 +704,7 @@ class AppLocalizationsPt extends AppLocalizations {
       'O número de anos é um valor aproximado, calculado com base nos dados abaixo, sem levar em conta a expiração prematura do mandato parlamentar.';
 
   @override
-  String tenureTermItem(String romanNumeral, String duration) {
+  String tenureTermItemPL(Object duration, Object romanNumeral) {
     return '$romanNumeralª legislatura do Sejm da República da Polônia $duration';
   }
 
@@ -1717,7 +1717,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get webBannerDownloadButton => 'Baixar';
 
   @override
-  String get supportStripeButton => 'Apoiar (Stripe)';
+  String get supportStripeButton => 'Apoiar (KoFi)';
 
   @override
   String get supportFounderMessage =>

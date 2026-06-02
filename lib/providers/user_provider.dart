@@ -57,14 +57,15 @@ class UserProvider with ChangeNotifier {
       _clear();
     } else if (_currentUserId != firebaseUser.uid || !_isInitialized) {
       _currentUserId = firebaseUser.uid;
-      if (!_isOnboarding) {
-        _fetchUserProfile();
+            if (!_isOnboarding) {
+        _fetchUserProfile(firebaseUser.uid);
       }
     }
   }
 
-  Future<void> refreshProfile() async {
-    await _fetchUserProfile();
+    Future<void> refreshProfile() async {
+    if (_currentUserId == null) return;
+    await _fetchUserProfile(_currentUserId!);
   }
 
   Future<void> createProfile({required bool marketingConsent, required String parliamentId}) async {
@@ -84,68 +85,81 @@ class UserProvider with ChangeNotifier {
     }
   }
 
-  Future<void> _fetchUserProfile({int maxRetries = 5}) async {
-    // TARCZA: Increased retries to 5 for better cold-start resilience.
-    developer.log("Fetching User Profile...", name: 'UserProvider');
-    int attempt = 0;
-    
-    while (attempt < maxRetries) {
-      try {
-        final result = await _apiService.callFunction('checkUserProfile');
-        
-        _profileExists = result['exists'] ?? false;
+  Future<void> _fetchUserProfile(String uid, {int maxRetries = 5}) async {
+      developer.log("Fetching User Profile for $uid...", name: 'UserProvider');
+      int attempt = 0;
 
-        if (result['exists'] == true && result['profile'] != null) {
-          final profile = Map<String, dynamic>.from(result['profile']);
-          
-          _marketingConsent = profile['marketingConsent'] ?? false;
-          _notificationsTrackedBills = profile['notificationsTrackedBills'] ?? false;
-          _subscribedParliaments = List<String>.from(profile['subscribedParliaments'] ?? []);
-          _primaryParliamentId = profile['primaryParliamentId']?.toString();
+      while (attempt < maxRetries) {
+        try {
+          final result = await _apiService.callFunction('checkUserProfile');
 
-          _votes = profile['votes'] != null ? Map<String, dynamic>.from(profile['votes']) : {};
-          developer.log("Synchronized ${_votes.length} votes.", name: 'UserProvider');
-          _subscribedLists = List<String>.from(profile['subscribedLists'] ?? []);
-          _createdLists = List<String>.from(profile['createdLists'] ?? []);
-          _isCurator = profile['isCurator'] ?? false;
-          
-          await CacheService().save('_cached_user_profile', profile);
-          developer.log("Profile fetched and cached successfully.", name: 'UserProvider');
-        }
-        
-        _isInitialized = true;
-        notifyListeners();
-        return;
-      } catch (e) {
-        attempt++;
-        developer.log("Fetch failed (Attempt $attempt/$maxRetries): $e", name: 'UserProvider');
-        
-        if (attempt >= maxRetries) {
-          final cachedProfile = await CacheService().get('_cached_user_profile');
-          if (cachedProfile != null) {
-            _marketingConsent = cachedProfile['marketingConsent'] ?? false;
-            _notificationsTrackedBills = cachedProfile['notificationsTrackedBills'] ?? false;
-            _subscribedParliaments = List<String>.from(cachedProfile['subscribedParliaments'] ?? []);
-            _primaryParliamentId = cachedProfile['primaryParliamentId'];
-            _subscribedLists = List<String>.from(cachedProfile['subscribedLists'] ?? []);
-            _createdLists = List<String>.from(cachedProfile['createdLists'] ?? []);
-            _isCurator = cachedProfile['isCurator'] ?? false;
-            developer.log("Załadowano profil awaryjnie z cache.", name: 'UserProvider');
+          // GUARD: user changed during request — discard stale response
+          if (_currentUserId != uid) return;
+
+          _profileExists = result['exists'] ?? false;
+
+          if (result['exists'] == true && result['profile'] != null) {
+            final profile = Map<String, dynamic>.from(result['profile']);
+
+            _marketingConsent = profile['marketingConsent'] ?? false;
+            _notificationsTrackedBills = profile['notificationsTrackedBills'] ?? false;
+            _subscribedParliaments = List<String>.from(profile['subscribedParliaments'] ?? []);
+            _primaryParliamentId = profile['primaryParliamentId']?.toString();
+            _votes = profile['votes'] != null ? Map<String, dynamic>.from(profile['votes']) : {};
+            _subscribedLists = List<String>.from(profile['subscribedLists'] ?? []);
+            _createdLists = List<String>.from(profile['createdLists'] ?? []);
+            _isCurator = profile['isCurator'] ?? false;
+
+            // Cache per UID — prevents cross-account data leaks
+            await CacheService().save('_cached_user_profile_$uid', profile);
+            developer.log("Profile fetched & cached for $uid.", name: 'UserProvider');
           }
+
+          if (_currentUserId != uid) return;
           _isInitialized = true;
           notifyListeners();
-        } else {
-          await Future.delayed(Duration(seconds: attempt * 1)); 
+          return;
+        } catch (e) {
+          attempt++;
+          developer.log("Fetch failed (Attempt $attempt/$maxRetries): $e", name: 'UserProvider');
+
+          if (attempt >= maxRetries) {
+            final cachedProfile = await CacheService().get('_cached_user_profile_$uid');
+
+            // GUARD after await — user may have changed
+            if (_currentUserId != uid) return;
+
+            if (cachedProfile != null) {
+              _marketingConsent = cachedProfile['marketingConsent'] ?? false;
+              _notificationsTrackedBills = cachedProfile['notificationsTrackedBills'] ?? false;
+              _subscribedParliaments = List<String>.from(cachedProfile['subscribedParliaments'] ?? []);
+              _primaryParliamentId = cachedProfile['primaryParliamentId'];
+              _subscribedLists = List<String>.from(cachedProfile['subscribedLists'] ?? []);
+              _createdLists = List<String>.from(cachedProfile['createdLists'] ?? []);
+              _isCurator = cachedProfile['isCurator'] ?? false;
+              developer.log("Loaded profile from cache for $uid.", name: 'UserProvider');
+            }
+            _isInitialized = true;
+            notifyListeners();
+          } else {
+            await Future.delayed(Duration(seconds: attempt * 1));
+          }
         }
       }
     }
-  }
 
-  Future<void> updatePreferences({bool? marketing, bool? notificationsTrackedBills, List<String>? subscribedParliaments, String? fcmToken, String? lang}) async {
+    Future<void> updatePreferences({bool? marketing, bool? notificationsTrackedBills, List<String>? subscribedParliaments, String? fcmToken, String? lang}) async {
+    // Snapshot for rollback on failure
+    final prevMarketing = _marketingConsent;
+    final prevNotifications = _notificationsTrackedBills;
+    final prevSubscribed = List<String>.from(_subscribedParliaments);
+
+    // Optimistic update
     if (marketing != null) _marketingConsent = marketing;
     if (notificationsTrackedBills != null) _notificationsTrackedBills = notificationsTrackedBills;
     if (subscribedParliaments != null) _subscribedParliaments = subscribedParliaments;
     notifyListeners();
+
     try {
       final Map<String, dynamic> data = {};
       if (marketing != null) data['marketingConsent'] = marketing;
@@ -157,11 +171,17 @@ class UserProvider with ChangeNotifier {
         await _apiService.callFunction('updateUserProfile', params: data);
       }
     } catch (e) {
-      developer.log("Błąd aktualizacji preferencji: $e", name: 'UserProvider');
+      // Rollback — UI shows truth, not stale optimistic state
+      _marketingConsent = prevMarketing;
+      _notificationsTrackedBills = prevNotifications;
+      _subscribedParliaments = prevSubscribed;
+      notifyListeners();
+      developer.log("Błąd aktualizacji preferencji (rollback): $e", name: 'UserProvider');
     }
   }
 
-  void _clear() {
+    void _clear() {
+    final uid = _currentUserId;
     _votes = {};
     _marketingConsent = false;
     _subscribedParliaments = [];
@@ -171,7 +191,8 @@ class UserProvider with ChangeNotifier {
     _isCurator = false;
     _currentUserId = null;
     _isInitialized = false;
-    CacheService().clearUserData();
+    // Fire-and-forget — async clear runs in background while UI resets
+    CacheService().clearUserData(uid: uid);
     notifyListeners();
   }
 

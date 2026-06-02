@@ -708,7 +708,7 @@ class AppLocalizationsNl extends AppLocalizations {
       'Het aantal jaren is een geschatte waarde, berekend op basis van de onderstaande gegevens, zonder rekening te houden met het voortijdig aflopen van het parlementaire mandaat.';
 
   @override
-  String tenureTermItem(String romanNumeral, String duration) {
+  String tenureTermItemPL(Object duration, Object romanNumeral) {
     return '${romanNumeral}e zittingsperiode van de Sejm van de Republiek Polen $duration';
   }
 
@@ -1725,7 +1725,7 @@ class AppLocalizationsNl extends AppLocalizations {
   String get webBannerDownloadButton => 'Downloaden';
 
   @override
-  String get supportStripeButton => 'Steunen (Stripe)';
+  String get supportStripeButton => 'Steunen (KoFi)';
 
   @override
   String get supportFounderMessage =>

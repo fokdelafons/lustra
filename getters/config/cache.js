@@ -1,0 +1,5 @@
+const DEFAULT_CACHE_TTL_SECONDS = 900;
+
+module.exports = {
+  DEFAULT_CACHE_TTL_SECONDS,
+};

@@ -181,7 +181,7 @@
                 return res.status(200).json({ data: { results: [], meta: { total: 0, count: 0 } } });
             }
 
-            const collectionName = `${country}_${type}`;
+            const collectionName = `global_${type}/${country}/process`;
             let allMatchingDocs = [];
             for (let i = 0; i < finalIds.length; i += 30) {
                 const chunk = finalIds.slice(i, i + 30);
@@ -621,13 +621,19 @@ const citizenVote = async (req, res) => {
             return res.status(400).json({ error: { code: 'invalid-argument', message: 'Nieprawidłowe lub brakujące parametry.' } });
         }
 
-        const validTypes = ['legislation', 'deputy', 'civic'];
-        if (!validTypes.includes(targetType)) {
+        const collectionPaths = {
+            deputy: `global_deputies/${prefix}/members`,
+            legislation: `global_legislations/${prefix}/process`,
+            civic: `global_civic/${prefix}/process`
+        };
+
+        // 2. Pobieramy gotową ścieżkę na podstawie tego co przyszło z frontu
+        const collectionName = collectionPaths[targetType];
+
+        // 3. Jeśli collectionName jest puste (undefined), to znaczy że targetType było błędne
+        if (!collectionName) {
             return res.status(400).json({ error: { code: 'invalid-argument', message: 'Nieprawidłowy typ celu głosowania.' } });
         }
-
-        const collectionName = targetType === 'deputy' ? `${prefix}_deputies` : `${prefix}_${targetType}s`.replace('civics', 'civic');
-        
         const targetRef = db.collection(collectionName).doc(targetId);
         
         const anonymousVoteHash = crypto.createHmac('sha256', SECRET_VOTE_SALT)
@@ -695,7 +701,7 @@ const toggleBillTracking = async (req, res) => {
     if (!uid) return res.status(401).json({ error: { message: 'Brak uwierzytelnienia', status: 'UNAUTHENTICATED' } });
     if (!prefix || !billId) return res.status(400).json({ error: { message: 'Missing prefix or billId', status: 'INVALID_ARGUMENT' } });
 
-    const mainCollection = docType === 'civic' ? `${prefix}_civic` : `${prefix}_legislations`;
+    const mainCollection = docType === 'civic' ? `global_civic/${prefix}/process` : `global_legislations/${prefix}/process`;
     const userArrayField = docType === 'civic' ? 'civic' : 'bills';
 
     const billFollowerRef = db.collection(mainCollection).doc(billId).collection('followers').doc(uid);
@@ -754,7 +760,7 @@ const getTrackedItems = async (req, res) => {
 
     let legislations = [];
     if (billIds.length > 0) {
-      const billRefs = billIds.map(id => db.collection(`${prefix}_legislations`).doc(id));
+      const billRefs = billIds.map(id => db.collection(`global_legislations/${prefix}/process`).doc(id));
       const snaps = await db.getAll(...billRefs);
       legislations = snaps.filter(s => s.exists).map(s => {
           const localized = localizeDocument(s.data(), lang);
@@ -764,7 +770,7 @@ const getTrackedItems = async (req, res) => {
 
     let civic = [];
     if (civicIds.length > 0) {
-      const civicRefs = civicIds.map(id => db.collection(`${prefix}_civic`).doc(id));
+      const civicRefs = civicIds.map(id => db.collection(`global_civic/${prefix}/process`).doc(id));
       const snaps = await db.getAll(...civicRefs);
       civic = snaps.filter(s => s.exists).map(s => {
           const localized = localizeDocument(s.data(), lang);
@@ -966,7 +972,7 @@ const getCuratedListFeed = async (req, res) => {
 
     let legislations = [];
     if (billIds.length > 0) {
-      const billRefs = billIds.map(id => db.collection(`${prefix}_legislations`).doc(id));
+      const billRefs = billIds.map(id => db.collection(`global_legislations/${prefix}/process`).doc(id));
       const snaps = await db.getAll(...billRefs);
       legislations = snaps.filter(s => s.exists).map(s => {
           return { id: s.id, ...localizeDocument(s.data(), lang), documentType: 'bill' };
@@ -975,7 +981,7 @@ const getCuratedListFeed = async (req, res) => {
 
     let civic = [];
     if (civicIds.length > 0) {
-      const civicRefs = civicIds.map(id => db.collection(`${prefix}_civic`).doc(id));
+      const civicRefs = civicIds.map(id => db.collection(`global_civic/${prefix}/process`).doc(id));
       const snaps = await db.getAll(...civicRefs);
       civic = snaps.filter(s => s.exists).map(s => {
           return { id: s.id, ...localizeDocument(s.data(), lang), documentType: 'civic' };

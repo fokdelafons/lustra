@@ -7,21 +7,51 @@ const cors = require('cors');
 app.use(cors({ origin: true }));
 app.use(express.json());
 
-const firebaseAuthMiddleware = async (req, res, next) => {
+const APP_CHECK_PROTECTED_FUNCTIONS = new Set([
+    'search',
+    'checkUserProfile',
+    'userOnboarding',
+    'deleteAccount',
+    'reportError',
+    'updateUserProfile',
+    'getUserInteractions',
+    'toggleBillTracking',
+    'getTrackedItems',
+    'createCuratedList',
+    'toggleBillInCuratedList',
+    'subscribeToCuratedList',
+    'getCuratedListFeed',
+    'getMyCuratedLists',
+    'deleteCuratedList',
+    'updateCuratedListMeta',
+    'setHighlightedBill',
+    'sendCuratedListPush',
+]);
+
+function requiresAppCheck(functionName) {
+    return APP_CHECK_PROTECTED_FUNCTIONS.has(functionName) || functionName.endsWith('_citizenVote');
+}
+
+const authMiddleware = async (req, res, next) => {
     if (req.body && req.body.warmup === true) {
         return next();
     }
-    const appCheckToken = req.header('X-Firebase-AppCheck');
-    if (!appCheckToken) {
-        console.error('[AUTH_CRITICAL] Brak nagłówka X-Firebase-AppCheck.');
-        return res.status(401).send('Unauthorized: Missing App Check token.');
+
+    const functionName = req.path.substring(1);
+    if (requiresAppCheck(functionName)) {
+        const appCheckToken = req.header('X-Firebase-AppCheck');
+        if (!appCheckToken) {
+            console.error(`[AUTH_CRITICAL] Brak nagłówka X-Firebase-AppCheck dla funkcji: ${functionName}.`);
+            return res.status(401).send('Unauthorized: Missing App Check token.');
+        }
+        try {
+            await getAppCheck().verifyToken(appCheckToken);
+        } catch (err) {
+            console.error(`[AUTH_CRITICAL] App Check ODRZUCONY dla funkcji ${functionName}: ${err.message}`);
+            return res.status(401).send('Unauthorized: Invalid App Check token.');
+        }
     }
-    try {
-        await getAppCheck().verifyToken(appCheckToken);
-    } catch (err) {
-        console.error(`[AUTH_CRITICAL] App Check ODRZUCONY: ${err.message}`);
-        return res.status(401).send('Unauthorized: Invalid App Check token.');
-    }
+
     const authToken = req.headers.authorization?.split('Bearer ')[1];
     if (authToken) {
         try {
@@ -34,15 +64,20 @@ const firebaseAuthMiddleware = async (req, res, next) => {
     return next();
 };
 
-app.use(firebaseAuthMiddleware);
+app.use(authMiddleware);
 
 const globalHandlers = require('./handlers/global_handlers');
-const plHandlers = require('./handlers/pl_handlers');
-const deHandlers = require('./handlers/de_handlers');
-const ueHandlers = require('./handlers/ue_handlers');
-const frHandlers = require('./handlers/fr_handlers');
-const usHandlers = require('./handlers/us_handlers');
-const ukHandlers = require('./handlers/uk_handlers');
+const { countryConfigs } = require('./handlers/country_configs');
+const { createCountryHandlers, createCountryRoutes } = require('./handlers/create_country_handlers');
+
+function createUnifiedCountryRoutes(countryCodes) {
+  return Object.fromEntries(
+    countryCodes.flatMap((countryCode) => {
+      const handlers = createCountryHandlers(countryConfigs[countryCode]);
+      return Object.entries(createCountryRoutes(countryCode, handlers, { citizenVote: globalHandlers.citizenVote }));
+    })
+  );
+}
 
 const functionsMap = {
 // --- GLOBAL ---
@@ -64,57 +99,8 @@ const functionsMap = {
     'updateCuratedListMeta': globalHandlers.updateCuratedListMeta,
     'setHighlightedBill': globalHandlers.setHighlightedBill,
     'sendCuratedListPush': globalHandlers.sendCuratedListPush,
-// --- PL ---
-    'pl_getMetadata': plHandlers.getMetadata,
-    'pl_getHomeScreenData': plHandlers.getHomeScreenData,
-    'pl_getDetails': plHandlers.getDetails,
-    'pl_getDeputies': plHandlers.getDeputies,
-    'pl_getDeputyDetails': plHandlers.getDeputyDetails,
-    'pl_getLegislations': plHandlers.getLegislations,
-    'pl_citizenVote': globalHandlers.citizenVote,
-    'pl_getHomeScreenDataV2': plHandlers.getHomeScreenDataV2,
-// --- DE ---
-    'de_getMetadata': deHandlers.getMetadata,
-    'de_getHomeScreenData': deHandlers.getHomeScreenData,
-    'de_getDetails': deHandlers.getDetails,
-    'de_getDeputies': deHandlers.getDeputies,
-    'de_getDeputyDetails': deHandlers.getDeputyDetails,
-    'de_getLegislations': deHandlers.getLegislations,
-    'de_citizenVote': globalHandlers.citizenVote,
-// --- UE ---
-    'ue_getMetadata': ueHandlers.getMetadata,
-    'ue_getHomeScreenData': ueHandlers.getHomeScreenData,
-    'ue_getDetails': ueHandlers.getDetails,
-    'ue_getDeputies': ueHandlers.getDeputies,
-    'ue_getDeputyDetails': ueHandlers.getDeputyDetails,
-    'ue_getLegislations': ueHandlers.getLegislations,
-    'ue_citizenVote': globalHandlers.citizenVote,
-// --- FR ---
-    'fr_getMetadata': frHandlers.getMetadata,
-    'fr_getHomeScreenData': frHandlers.getHomeScreenData,
-    'fr_getDetails': frHandlers.getDetails,
-    'fr_getDeputies': frHandlers.getDeputies,
-    'fr_getDeputyDetails': frHandlers.getDeputyDetails,
-    'fr_getLegislations': frHandlers.getLegislations,
-    'fr_citizenVote': globalHandlers.citizenVote,
-// --- US ---
-    'us_getMetadata': usHandlers.getMetadata,
-    'us_getHomeScreenData': usHandlers.getHomeScreenData,
-    'us_getDetails': usHandlers.getDetails,
-    'us_getDeputies': usHandlers.getDeputies,
-    'us_getDeputyDetails': usHandlers.getDeputyDetails,
-    'us_getLegislations': usHandlers.getLegislations,
-    'us_getCivicProjects': usHandlers.getCivicProjects,
-    'us_citizenVote': globalHandlers.citizenVote,
-    'us_getHomeScreenDataV2': usHandlers.getHomeScreenDataV2,
-// --- UK ---
-    'uk_getMetadata': ukHandlers.getMetadata,
-    'uk_getHomeScreenData': ukHandlers.getHomeScreenData,
-    'uk_getDetails': ukHandlers.getDetails,
-    'uk_getDeputies': ukHandlers.getDeputies,
-    'uk_getDeputyDetails': ukHandlers.getDeputyDetails,
-    'uk_getLegislations': ukHandlers.getLegislations,
-    'uk_citizenVote': globalHandlers.citizenVote,
+// --- UNIFIED COUNTRIES ---
+    ...createUnifiedCountryRoutes(['pl', 'us', 'uk']),
 };
 
 app.post(/.*/, (req, res) => {

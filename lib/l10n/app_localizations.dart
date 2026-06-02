@@ -1358,11 +1358,11 @@ abstract class AppLocalizations {
   /// **'The number of years is an approximate value, calculated based on the data below, without taking into account the premature expiration of the parliamentary mandate.'**
   String get tenureTooltip;
 
-  /// No description provided for @tenureTermItem.
+  /// No description provided for @tenureTermItemPL.
   ///
   /// In en, this message translates to:
   /// **'{romanNumeral} term of the Sejm of the Republic of Poland {duration}'**
-  String tenureTermItem(String romanNumeral, String duration);
+  String tenureTermItemPL(Object duration, Object romanNumeral);
 
   /// No description provided for @unknownTermDuration.
   ///
@@ -3191,7 +3191,7 @@ abstract class AppLocalizations {
   /// No description provided for @supportStripeButton.
   ///
   /// In en, this message translates to:
-  /// **'Support (Stripe)'**
+  /// **'Support (KoFi)'**
   String get supportStripeButton;
 
   /// No description provided for @supportFounderMessage.

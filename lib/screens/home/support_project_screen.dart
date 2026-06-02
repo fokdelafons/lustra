@@ -19,7 +19,7 @@ class SupportProjectScreen extends StatefulWidget {
 class _SupportProjectScreenState extends State<SupportProjectScreen> {
   late PaymentService _paymentService;
   
-  final String _stripeLink = 'https://buy.stripe.com/4gM9AT9DX8AMfqb8bTbfO00';
+  final String _stripeLink = 'https://ko-fi.com/fokdelafons';
 
   @override
   void initState() {
@@ -268,10 +268,10 @@ class _SupportProjectScreenState extends State<SupportProjectScreen> {
                 final profileWidget = Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const CircleAvatar(
-                      radius: 32,
-                      backgroundImage: AssetImage('assets/ja.jpg'),
-                    ),
+                                        CircleAvatar(
+                                          radius: 32,
+                                          backgroundImage: NetworkImage('https://lustra.news/assets/ja.jpg'),
+                                        ),
                     const SizedBox(height: 12),
                     Text(
                       l10n.creatorName,

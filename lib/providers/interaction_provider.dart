@@ -50,7 +50,7 @@ class InteractionProvider with ChangeNotifier, WidgetsBindingObserver {
     }
   }
 
-  void updateDependencies(String? userId, String? prefix) {
+    void updateDependencies(String? userId, String? prefix) {
     if (_lastUserId != userId || _lastPrefix != prefix) {
       _lastUserId = userId;
       _lastPrefix = prefix;
@@ -60,7 +60,7 @@ class InteractionProvider with ChangeNotifier, WidgetsBindingObserver {
       }
 
       if (userId != null && prefix != null) {
-        fetchInteractions(prefix);
+        fetchInteractions(prefix, userId: userId);
       } else {
         clear();
       }
@@ -104,23 +104,31 @@ class InteractionProvider with ChangeNotifier, WidgetsBindingObserver {
     return _votes.containsKey(voteKey);
   }
 
-  Future<void> fetchInteractions(String prefix, {int maxRetries = 3}) async {
+    Future<void> fetchInteractions(String prefix, {String? userId, int maxRetries = 3}) async {
+    final operationUserId = userId ?? _lastUserId;
+
     _isLoading = true;
     notifyListeners();
-    
+
     int attempt = 0;
     final cacheManager = ParliamentCacheManager(prefix);
 
     while (attempt < maxRetries) {
       try {
-        developer.log('Pobieram zunifikowany stan dla: $prefix...', name: 'InteractionProvider');
+        developer.log('Fetching unified state for: $prefix...', name: 'InteractionProvider');
         final response = await _apiService.callFunction('getUserInteractions', params: {
           'prefix': prefix,
         });
 
+        // GUARD: user or prefix changed during request — discard stale data
+        if (_lastUserId != operationUserId || _lastPrefix != prefix) {
+          developer.log('Interactions: user/prefix changed during fetch, discarding.', name: 'InteractionProvider');
+          return;
+        }
+
         final billsList = (response['trackedBills'] as List?)?.map((e) => e.toString()).toList() ?? [];
         final civicList = (response['trackedCivic'] as List?)?.map((e) => e.toString()).toList() ?? [];
-        
+
         _trackedBills = Set.from(billsList);
         _trackedCivic = Set.from(civicList);
         _votes = Map<String, dynamic>.from(response['votes'] ?? {});
@@ -132,15 +140,22 @@ class InteractionProvider with ChangeNotifier, WidgetsBindingObserver {
           'votes': _votes
         }, 'all');
 
-        developer.log('Załadowano do RAM z Firebase: ${_trackedBills.length} śledzonych, ${_votes.length} głosów.', name: 'InteractionProvider');
+        developer.log('Loaded: ${_trackedBills.length} tracked, ${_votes.length} votes.', name: 'InteractionProvider');
         break;
       } catch (e) {
         attempt++;
-        developer.log('Błąd pobierania interakcji (próba $attempt/$maxRetries): $e', name: 'InteractionProvider');
-        
+        developer.log('Fetch error (attempt $attempt/$maxRetries): $e', name: 'InteractionProvider');
+
         if (attempt >= maxRetries) {
-          developer.log('Próba odzyskania interakcji z lokalnego cache...', name: 'InteractionProvider');
+          // GUARD after delay
+          if (_lastUserId != operationUserId || _lastPrefix != prefix) return;
+
+          developer.log('Recovering interactions from cache...', name: 'InteractionProvider');
           final cachedData = await cacheManager.getTrackedItems('all');
+
+          // GUARD after cache read
+          if (_lastUserId != operationUserId || _lastPrefix != prefix) return;
+
           if (cachedData != null) {
             _trackedBills = Set.from((cachedData['trackedBills'] as List?)?.map((e) => e.toString()) ?? []);
             _trackedCivic = Set.from((cachedData['trackedCivic'] as List?)?.map((e) => e.toString()) ?? []);
@@ -151,9 +166,12 @@ class InteractionProvider with ChangeNotifier, WidgetsBindingObserver {
         }
       }
     }
-    
-    _isLoading = false;
-    notifyListeners();
+
+    // Final guard — update state only if still current user/prefix
+    if (_lastUserId == operationUserId && _lastPrefix == prefix) {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   void toggleTrackingLocally(String billId, bool isNowTracked, {String docType = 'bill'}) {

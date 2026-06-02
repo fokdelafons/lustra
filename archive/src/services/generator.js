@@ -5,6 +5,7 @@ const config = require('../config');
 const { format } = require('date-fns');
 const translations = require('../utils/translations');
 const { buildBillUrl, buildHubUrl, buildTopicUrl, buildMainTopicsUrl } = require('../utils/url-builder');
+const { formatLegislativeId } = require('../utils/id-helper');
 
 // --- ZMIENNE POMOCNICZE (CACHE) ---
 let billTemplate = null;
@@ -50,7 +51,7 @@ function getOgImage(docId, categories) {
     }
     const imageIndex = (hash % 5) + 1; // Wynik: 1, 2, 3, 4 lub 5
 
-    return `${baseUrl}/${folder}/preview${imageIndex}.jpg`;
+    return `${baseUrl}/${folder}/preview${imageIndex}.webp`;
 }
 
 async function loadTemplate() {
@@ -99,6 +100,7 @@ async function generateBills(docs) {
         const aiModel = doc.summaryGeneratedBy || null;
         const judgeModel = (doc.judgeMetadata && doc.judgeMetadata.model) || 'Lustra AI';
         const processUrl = doc.fullContent || null;
+        const formattedId = formatLegislativeId(doc);
 
         // 3. Typ Legislacji (Precyzyjne Mapowanie)
         let legType = 'Bill'; // Ostateczny fallback
@@ -157,6 +159,8 @@ async function generateBills(docs) {
                 summary: doc[`${lang}_summary`] || doc['eng_summary'] || 'Summary not available.',
                 key_points: doc[`${lang}_key_points`] || doc['eng_key_points'] || [],
             };
+
+            const billName = content.ai_title;
             
             // Nazwa Instytucji w danym języku
             const institutionName = config.LABELS.INSTITUTION[currentSlug][lang];
@@ -166,6 +170,8 @@ async function generateBills(docs) {
                 doc: doc,
                 term: term,
                 content: content,
+                billName: billName,
+                formattedId: formattedId,
                 meta: meta,
                 lang: lang,
                 hreflangs: hreflangs,

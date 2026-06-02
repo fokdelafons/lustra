@@ -6,7 +6,6 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
-import 'dart:developer' as developer;
 import 'package:lustra/services/api_service.dart';
 
 class AuthService {
@@ -48,15 +47,10 @@ class AuthService {
 
   Future<void> completeOnboarding({ required bool marketingConsent, required String parliamentId, }) async {
     if (_firebaseAuth.currentUser == null) {
-      developer.log('[CRITICAL] Próba onboardingu bez zalogowanego użytkownika!', name: 'AuthService');
       throw FirebaseAuthException(code: 'no-user', message: 'Session lost. Please log in again.');
     }
-    try {
-      await _firebaseAuth.currentUser!.reload();
-      await _firebaseAuth.currentUser!.getIdToken(true);
-    } catch (e) {
-      developer.log('[WARNING] Nie udało się odświeżyć sesji przed onboardingiem: $e', name: 'AuthService');
-    }
+        await _firebaseAuth.currentUser!.reload();
+    await _firebaseAuth.currentUser!.getIdToken(true);
     await _apiService.callFunction('userOnboarding', params: {
       'marketingConsent': marketingConsent, 
       'parliamentId': parliamentId,
@@ -74,14 +68,9 @@ class AuthService {
   }
 
   Future<UserCredential> signInWithFacebook() async {
-    developer.log("Starting Facebook login...", name: 'AuthService');
-    
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
-      developer.log("Running on iOS, using Limited Login with Nonce.", name: 'AuthService');
       final rawNonce = _generateNonce();
       final nonce = _sha256ofString(rawNonce);
-      developer.log("Generated rawNonce for FB: $rawNonce", name: 'AuthService');
-      developer.log("Generated hashed nonce for FB: $nonce", name: 'AuthService');
 
       final result = await FacebookAuth.instance.login(
           loginTracking: LoginTracking.limited,
@@ -89,43 +78,33 @@ class AuthService {
       );
 
       if (result.status == LoginStatus.success) {
-        developer.log("iOS Facebook Native Login Success. AccessToken received.", name: 'AuthService');
-        developer.log("Token: ${result.accessToken?.tokenString}", name: 'AuthService');
         try {
           final oAuthCredential = OAuthProvider('facebook.com').credential(
               idToken: result.accessToken!.tokenString,
               rawNonce: rawNonce,
           );
-          developer.log("OIDC credential for Firebase created. Signing in...", name: 'AuthService');
           return await _firebaseAuth.signInWithCredential(oAuthCredential);
-        } catch (e, s) {
-          developer.log("Firebase sign-in with Facebook FAILED on iOS", name: 'AuthService', error: e, stackTrace: s);
+        } catch (e) {
           rethrow;
         }
       } else {
-         developer.log("iOS Facebook Native login failed", name: 'AuthService', error: "Status: ${result.status}, Message: ${result.message}");
          throw FirebaseAuthException(code: 'facebook-sign-in-failed', message: result.message);
       }
     } 
 
     else {
-      developer.log("Running on Android, using standard login.", name: 'AuthService');
       final result = await FacebookAuth.instance.login(
         loginTracking: LoginTracking.enabled,
       );
 
       if (result.status == LoginStatus.success) {
-         developer.log("Android Facebook Login Success. Creating standard credential.", name: 'AuthService');
         try {
           final credential = FacebookAuthProvider.credential(result.accessToken!.tokenString);
-          developer.log("Credential created, signing in to Firebase...", name: 'AuthService');
           return await _firebaseAuth.signInWithCredential(credential);
-        } catch (e, s) {
-          developer.log("Firebase sign-in FAILED on Android", name: 'AuthService', error: e, stackTrace: s);
+        } catch (e) {
           rethrow;
         }
       } else {
-        developer.log("Android Facebook login failed", name: 'AuthService', error: "Status: ${result.status}, Message: ${result.message}");
         throw FirebaseAuthException(code: 'facebook-sign-in-failed', message: result.message);
       }
     }
@@ -135,14 +114,11 @@ Future<UserCredential> signInWithApple() async {
     if (kIsWeb) {
     throw FirebaseAuthException(code: 'operation-not-allowed', message: 'Not supported on Web');
   }
-	developer.log("Starting Apple login...", name: 'AuthService');
-	developer.log("Bundle ID from GoogleService: ${_firebaseAuth.app.options.iosBundleId}", name: 'AuthService');
 	
 	final rawNonce = _generateNonce();
 	final nonce = _sha256ofString(rawNonce);
 	
 	try {
-		developer.log("Calling SignInWithApple.getAppleIDCredential...", name: 'AuthService');
 		final appleCredential = await SignInWithApple.getAppleIDCredential(
 			scopes: [
 				AppleIDAuthorizationScopes.email,
@@ -157,13 +133,10 @@ Future<UserCredential> signInWithApple() async {
       accessToken: appleCredential.authorizationCode,
     );
 		
-		developer.log("OAuthCredential created, calling Firebase signIn...", name: 'AuthService');
 		final result = await _firebaseAuth.signInWithCredential(oauthCredential);
-		developer.log("Firebase signIn SUCCESS!", name: 'AuthService');
 		return result;
 		
-	} catch (e, s) {
-		developer.log("Apple sign-in failed at step: ${e.runtimeType}", name: 'AuthService', error: e, stackTrace: s);
+	} catch (e) {
 		if (e is SignInWithAppleAuthorizationException && e.code == AuthorizationErrorCode.canceled) {
 			throw FirebaseAuthException(code: 'sign-in-cancelled');
 		}
@@ -172,42 +145,55 @@ Future<UserCredential> signInWithApple() async {
 }
 
   Future<bool> hasCompletedProfile() async {
-    if (_firebaseAuth.currentUser == null) return false;
-    try {
-      final result = await _apiService.callFunction('checkUserProfile');
-      return result['exists'] as bool;
-    } catch (e) {
-      developer.log("Błąd podczas sprawdzania profilu przez funkcję: $e", name: 'AuthService');
-      return true;
+      if (_firebaseAuth.currentUser == null) return false;
+      try {
+        final result = await _apiService.callFunction('checkUserProfile');
+        return result['exists'] as bool;
+      } catch (e) {
+        // FAIL-CLOSED: on error, require onboarding rather than letting user through
+        return false;
+      }
     }
-  }
 
   Future<void> createUserDocumentFromSocialLogin({ required bool marketingConsent, required String parliamentId, }) async {
       await _apiService.callFunction('userOnboarding', params: {'marketingConsent': marketingConsent, 'parliamentId': parliamentId,},);
     }
 
-  Future<void> signOut() async {
+    Future<void> signOut() async {
     if (await _googleSignIn.isSignedIn()) {
       await _googleSignIn.signOut();
+    }
+    // Facebook session cleanup
+    try {
+      await FacebookAuth.instance.logOut();
+    } catch (_) {
+      // Facebook SDK may not be initialized — ignore
     }
     await _firebaseAuth.signOut();
   }
 
-  Future<void> deleteAccount() async {
+    Future<void> deleteAccount() async {
+    final user = _firebaseAuth.currentUser;
+    if (user == null) return;
+
+    // Force token refresh — confirms session is still valid before destructive op
+    try {
+      await user.getIdToken(true);
+    } catch (e) {
+      throw FirebaseAuthException(
+        code: 'reauthentication-required',
+        message: 'Session expired. Please log in again before deleting your account.',
+      );
+    }
+
     await _apiService.callFunction('deleteAccount');
   }
 
   Future<void> updateUserNotificationPrefs(Map<String, dynamic> prefs) async {
     if (currentUser == null) {
-      developer.log("Próba aktualizacji preferencji powiadomień dla niezalogowanego użytkownika.", name: 'AuthService');
       return;
     }
-    try {
-      await _apiService.callFunction('updateUserProfile', params: prefs);
-      developer.log("Pomyślnie zaktualizowano preferencje powiadomień: $prefs", name: 'AuthService');
-    } catch (e) {
-      developer.log("Błąd podczas aktualizacji preferencji powiadomień: $e", name: 'AuthService');
-    }
+    await _apiService.callFunction('updateUserProfile', params: prefs);
   }
   
   Future<bool> reauthenticateUser(String password) async {
@@ -218,7 +204,6 @@ Future<UserCredential> signInWithApple() async {
       await user.reauthenticateWithCredential(credential);
       return true;
     } catch (e) {
-      developer.log("Błąd reautentykacji: $e", name: "AuthService");
       return false;
     }
   }
@@ -232,7 +217,6 @@ Future<UserCredential> signInWithApple() async {
       }
       return null;
     } catch (e) {
-      developer.log("Błąd pobierania detali profilu: $e", name: 'AuthService');
       return null;
     }
   }

@@ -218,7 +218,7 @@ import '../../widgets/web_smooth_scroll.dart';
 
         final bool isNotificationLoad = _isFromNotification && _filterFromTimestamp != null;
 
-        final String sortByValue = isNotificationLoad ? 'processStartDate' : _sortBy;
+        final String sortByValue = isNotificationLoad ? 'firstSeenAt' : _sortBy;
         final String? categoryValue = isNotificationLoad ? null : (_selectedCategory == l10n.categoryAll ? null : categoryLabelToApiKey(context, _selectedCategory));
         final List<String> docTypeValue = isNotificationLoad ? [] : (_selectedDocumentTypeKey == 'all' ? activeService.defaultDocumentTypeIds : [_selectedDocumentTypeKey]);
         
@@ -268,7 +268,7 @@ Future<void> _loadMoreBills() async {
         
         final bool isNotificationLoad = _isFromNotification && _filterFromTimestamp != null;
 
-        final String sortByValue = isNotificationLoad ? 'processStartDate' : _sortBy;
+        final String sortByValue = isNotificationLoad ? 'firstSeenAt' : _sortBy;
         final String? categoryValue = isNotificationLoad ? null : (_selectedCategory == l10n.categoryAll ? null : categoryLabelToApiKey(context, _selectedCategory));
         final List<String> docTypeValue = isNotificationLoad ? [] : (_selectedDocumentTypeKey == 'all' ? activeService.defaultDocumentTypeIds : [_selectedDocumentTypeKey]);
         

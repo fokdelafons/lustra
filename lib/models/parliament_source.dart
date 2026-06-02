@@ -21,7 +21,7 @@ class ParliamentSource {
   static const ParliamentSource pl = ParliamentSource(
     id: 'pl',
     slug: 'sejm',
-    name: 'Poland',
+    name: 'Poland (BETA)',
     flagIconAsset: 'assets/flags/pl.svg',
     type: ParliamentType.national,
   );
@@ -29,7 +29,7 @@ class ParliamentSource {
   static const ParliamentSource eu = ParliamentSource(
     id: 'eu',
     slug: 'european-parliament',
-    name: 'European Union (15%)',
+    name: 'European Union (33%)',
     flagIconAsset: 'assets/flags/eu.svg',
     type: ParliamentType.european,
   );
@@ -45,7 +45,7 @@ class ParliamentSource {
   static const ParliamentSource uk = ParliamentSource(
     id: 'uk',
     slug: 'uk-parliament',
-    name: 'United Kingdom (70%)',
+    name: 'United Kingdom (BETA)',
     flagIconAsset: 'assets/flags/gb.svg',
     type: ParliamentType.national,
   );
@@ -53,7 +53,7 @@ class ParliamentSource {
   static const ParliamentSource de = ParliamentSource(
     id: 'de',
     slug: 'bundestag',
-    name: 'Germany (59%)',
+    name: 'Germany (80%)',
     flagIconAsset: 'assets/flags/de.svg',
     type: ParliamentType.national,
   );
@@ -61,7 +61,7 @@ class ParliamentSource {
   static const ParliamentSource fr = ParliamentSource(
     id: 'fr',
     slug: 'assemblee-nationale',
-    name: 'France (40%)',
+    name: 'France (70%)',
     flagIconAsset: 'assets/flags/fr.svg',
     type: ParliamentType.national,
   );

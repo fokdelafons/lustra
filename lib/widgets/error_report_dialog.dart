@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:lustra/l10n/app_localizations.dart';
 import '../services/api_service.dart';
 import '../../widgets/osint_loader.dart';
@@ -174,7 +173,7 @@ void showErrorReportDialog({
                       messenger.showSnackBar(
                         SnackBar(content: Text(l10n.reportErrorSuccess), backgroundColor: Colors.green),
                       );
-                    } on FirebaseFunctionsException catch (e) {
+                    } on ApiException catch (e) {
                       if (!mainContext.mounted) return;
                       navigator.pop();
                       
@@ -182,7 +181,7 @@ void showErrorReportDialog({
                       if (e.code == 'resource-exhausted') {
                         errorMessage = l10n.reportErrorRateLimitExceeded;
                       } else {
-                        errorMessage = e.message ?? l10n.errorFailedToLoadData;
+                        errorMessage = l10n.errorFailedToLoadData;
                       }
                       messenger.showSnackBar(
                         SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),

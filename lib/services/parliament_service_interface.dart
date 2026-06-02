@@ -103,7 +103,7 @@ abstract class ParliamentServiceInterface with ChangeNotifier {
   List<String> get defaultDocumentTypeIds;
   String get processStatusId;
   String? getOfficialUrl(Legislation legislation);
-  VoidCallback? getInterpellationTapAction(BuildContext context, InterpellationPreview interp);
+  VoidCallback? getSponsoredTapAction(BuildContext context, InterpellationPreview interp);
   String? getProcessUrl(Legislation legislation);
   String? getVotingPdfUrl(Legislation legislation);
   int calculateTotalTenureInYears(MP mp);

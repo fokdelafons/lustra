@@ -25,11 +25,27 @@ class NotificationService {
       developer.log('Zapisano powiadomienie z Zimnego Startu: ${initialMessage.data}', name: 'NotificationService');
       _pendingNotificationData = initialMessage.data;
     }
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+        FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       developer.log('Otwarto powiadomienie z tła: ${message.data}', name: 'NotificationService');
       final context = router.routerDelegate.navigatorKey.currentContext;
       if (context != null && context.mounted) {
         _handleNavigation(context, message.data);
+      }
+    });
+
+    // FCM token rotation — keep backend in sync
+    FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {
+      developer.log('FCM token refreshed', name: 'NotificationService');
+      final context = router.routerDelegate.navigatorKey.currentContext;
+      if (context != null && context.mounted) {
+        try {
+          final userProvider = context.read<UserProvider>();
+          if (userProvider.isInitialized) {
+            await userProvider.updatePreferences(fcmToken: newToken);
+          }
+        } catch (e) {
+          developer.log('Failed to update FCM token on refresh: $e', name: 'NotificationService');
+        }
       }
     });
   }

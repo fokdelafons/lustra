@@ -78,23 +78,32 @@ class CacheService {
     developer.log('Wyczyszczono cache dla prefixu: $prefix', name: 'CacheService');
   }
 
-  Future<void> clearUserData() async {
-    await init();
-    final keys = _prefs?.getKeys();
-    if (keys == null) return;
-    
-    final userKeys = [
-      '_cached_tracked_items', 
-      '_curated_list', 
-      '_my_curated_lists'
-    ];
-    
-    final toRemove = keys.where((k) => userKeys.any((uk) => k.contains(uk))).toList();
-    for (var key in toRemove) {
-      await _prefs?.remove(key);
+  Future<void> clearUserData({String? uid}) async {
+      await init();
+      final keys = _prefs?.getKeys();
+      if (keys == null) return;
+
+      final legacyKeys = [
+        '_cached_tracked_items',
+        '_curated_list',
+        '_my_curated_lists',
+        '_cached_user_profile',
+      ];
+
+      final toRemove = keys.where((k) {
+        if (uid != null && k.contains('_uid_$uid')) return true;
+        if (legacyKeys.any((lk) => k.contains(lk))) return true;
+        return false;
+      }).toList();
+
+      for (var key in toRemove) {
+        await _prefs?.remove(key);
+      }
+      developer.log(
+        'CacheService: wyczyszczono ${toRemove.length} kluczy dla uid=${uid ?? "null"}',
+        name: 'CacheService',
+      );
     }
-    developer.log('Garbage Collector: Wyczyszczono wrażliwy cache użytkownika z dysku.', name: 'CacheService');
-  }
 
   DateTime? _parseDate(String? dateString) {
     if (dateString == null) return null;

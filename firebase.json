@@ -1,7 +1,7 @@
 {"flutter":{"platforms":{"android":{"default":{"projectId":"lustra-d8fdf","appId":"1:626018819854:android:805fd2e92e382cb36bc15f","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"lustra-d8fdf","configurations":{"android":"1:626018819854:android:805fd2e92e382cb36bc15f","ios":"1:626018819854:ios:1204841b3ff5531c6bc15f","web":"1:626018819854:web:5804fa302ca220b96bc15f"}}}}},"hosting":[{
   "target": "lustra",
   "public": "public",
-  "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+  "ignore": ["firebase.json", "**/.*", "**/node_modules/**", "**/package.json", "**/package-lock.json", "**/optimize.js"],
   "headers": [
     {
       "source": "**/*.wasm",

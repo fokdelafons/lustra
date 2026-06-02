@@ -11,8 +11,24 @@
     <meta name="data-origin" content="public-domain">
     <meta name="ai-summary" content="true">
 
-    <title><%= content.ai_title %> (<%= doc.id %>)</title>
-    <meta name="description" content="<%= content.summary %>">
+    <% 
+        const seoSummaryStatusLabel = labels.seo_summary_status || "Summary & Status";
+        const seoTitle = `${formattedId}: ${seoSummaryStatusLabel} | ${billName}`;
+    %>
+    <title><%= seoTitle %></title>
+    <%
+        const seoDescriptionTemplate = labels.seo_description_template || "{{id}} summary and current status. Track updates, votes, key provisions and potential impact of {{title}} on Lustra.";
+        const seoDescription = seoDescriptionTemplate
+            .replaceAll("{{id}}", formattedId)
+            .replaceAll("{{title}}", billName);
+
+        const renderSeoLabel = (template, fallback) => {
+            return String(template || fallback || "")
+                .replaceAll("{{id}}", formattedId)
+                .replaceAll("{{title}}", billName);
+        };
+    %>
+    <meta name="description" content="<%= seoDescription %>">
     <meta name="author" content="Lustra News">
     <meta property="article:published_time" content="<%= meta.processStartDate %>">
     <meta property="article:modified_time" content="<%= meta.lastUpdated %>">
@@ -28,8 +44,8 @@
    <!-- OPEN GRAPH -->
     <meta property="og:type" content="article" />
     <meta property="og:site_name" content="Lustra.news" />
-    <meta property="og:title" content="<%= content.ai_title %> (<%= doc.id %>)" />
-    <meta property="og:description" content="<%= content.summary %>" />
+    <meta property="og:title" content="<%= seoTitle %>" />
+    <meta property="og:description" content="<%= seoDescription %>" />
     <meta property="og:image" content="<%= ogImageUrl %>" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -37,8 +53,8 @@
     
     <!-- TWITTER CARD -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="<%= content.ai_title %> (<%= doc.id %>)">
-    <meta name="twitter:description" content="<%= content.summary %>">
+    <meta name="twitter:title" content="<%= seoTitle %>">
+    <meta name="twitter:description" content="<%= seoDescription %>">
     <meta name="twitter:image" content="<%= ogImageUrl %>">
 
     <!-- FONTS (Icons Only + Swap Policy) -->
@@ -59,7 +75,7 @@
             faqItems.push({
                 "@type": "Question",
                 "name": labels.faq_id,
-                "acceptedAnswer": { "@type": "Answer", "text": labels.ans_id + " " + doc.id + "." }
+                "acceptedAnswer": { "@type": "Answer", "text": labels.ans_id + " " + formattedId + "." }
             });
         }
 
@@ -144,7 +160,7 @@
 
         faqItems.push({
             "@type": "Question",
-            "name": labels.faq_impact,
+            "name": renderSeoLabel(labels.faq_impact_heading_template, "Analysis and Potential Impact of {{id}}"),
             "acceptedAnswer": { "@type": "Answer", "text": labels.ans_impact }
         });
 
@@ -173,14 +189,14 @@
                     { "@type": "ListItem", "position": 1, "name": "Lustra", "item": "https://lustra.news/" + lang + "/" },
                     { "@type": "ListItem", "position": 2, "name": institutionName, "item": "https://lustra.news/" + lang + "/" + institutionSlug + "/" },
                     { "@type": "ListItem", "position": 3, "name": term + " Term", "item": "https://lustra.news/" + lang + "/" + institutionSlug + "/" + term + "/" },
-                    { "@type": "ListItem", "position": 4, "name": doc.id, "item": "https://lustra.news/" + lang + "/" + institutionSlug + "/" + term + "/" + typeSlug + "/" + doc.id + "/" }
+                    { "@type": "ListItem", "position": 4, "name": formattedId, "item": "https://lustra.news/" + lang + "/" + institutionSlug + "/" + term + "/" + typeSlug + "/" + doc.id + "/" }
                 ]
             },
             {
                 "@type": "Legislation",
                 "name": content.ai_title,
                 "alternateName": doc.titleOfficial,
-                "legislationIdentifier": doc.id,
+                "legislationIdentifier": formattedId,
                 "datePublished": meta.processStartDate,
                 "dateModified": meta.lastUpdated,
                 "description": content.summary,
@@ -535,31 +551,200 @@
 
         .legal-context {
             margin-bottom: 24px;
-            padding: 20px;
-            background-color: #FAFAFA;
-            border-radius: 8px;
-            border: 1px solid #EEEEEE;
-        }
-        .context-item { margin-bottom: 16px; }
-        .context-item:last-child { margin-bottom: 0; }
-        
-        .context-item h2 {
-            font-size: 12px; text-transform: uppercase;
-            color: var(--text-low); margin: 0 0 8px 0;
-            font-weight: 500; letter-spacing: 0.5px;
-        }
-        .context-item p {
-            font-size: 14px; line-height: 1.5;
-            color: var(--text-med); margin: 0;
-            font-family: 'Georgia', serif;
-            font-style: italic;
+            padding: 0;
+            background: transparent;
+            border-radius: 0;
+            border: 0;
         }
 
-        .tag-cloud { display: flex; flex-wrap: wrap; gap: 8px; }
+        .context-card {
+            margin-bottom: 16px;
+            padding: 20px;
+            background: #FFFFFF;
+            border: 1px solid #E8E8E8;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.035);
+        }
+
+        .context-card h2,
+        .faq-eyebrow {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--text-low);
+            margin: 0 0 10px 0;
+            font-weight: 700;
+            letter-spacing: 0.9px;
+        }
+
+        .official-title-text {
+            font-size: 15px;
+            line-height: 1.45;
+            color: var(--text-high);
+            margin: 0;
+            font-weight: 600;
+            font-family: inherit;
+            font-style: normal;
+        }
+
+        .faq-context {
+            margin-bottom: 16px;
+        }
+
+        .faq-header-card {
+            margin-bottom: 12px;
+            padding: 18px 20px;
+            border-radius: 12px;
+            background: linear-gradient(90deg, rgba(21, 101, 192, 0.08), rgba(21, 101, 192, 0.015));
+            border: 1px solid rgba(21, 101, 192, 0.12);
+        }
+
+        .faq-title-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+
+        .faq-title-row .material-icons-outlined {
+            color: var(--primary);
+            font-size: 22px;
+        }
+
+        .faq-title {
+            margin: 0;
+            font-size: 18px;
+            color: var(--text-high);
+            font-weight: 700;
+            line-height: 1.25;
+            text-transform: none;
+            letter-spacing: normal;
+        }
+
+        .faq-subtitle {
+            margin: 0;
+            font-size: 13px;
+            line-height: 1.45;
+            color: var(--text-med);
+        }
+
+        .faq-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            counter-reset: faq;
+        }
+
+        .faq-item {
+            position: relative;
+            counter-increment: faq;
+            padding: 16px 18px 16px 54px;
+            background: #FFFFFF;
+            border: 1px solid #E8E8E8;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        }
+
+        .faq-item::before {
+            content: counter(faq);
+            position: absolute;
+            left: 18px;
+            top: 17px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(21, 101, 192, 0.08);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .faq-question {
+            margin: 0 0 8px 0;
+            font-size: 15px;
+            line-height: 1.35;
+            color: var(--text-high);
+            font-weight: 700;
+        }
+
+        .faq-answer {
+            font-size: 14px;
+            line-height: 1.55;
+            color: var(--text-med);
+        }
+
+        .faq-answer p {
+            margin: 0;
+            font-size: inherit;
+            line-height: inherit;
+            color: inherit;
+            font-family: inherit;
+            font-style: normal;
+        }
+
+        .faq-answer ul {
+            margin: 8px 0 0 0;
+            padding-left: 18px;
+        }
+
+        .faq-answer li {
+            margin-bottom: 6px;
+        }
+
+        .faq-answer a {
+            color: var(--primary);
+            text-decoration: underline;
+            text-decoration-thickness: 1px;
+            text-underline-offset: 2px;
+        }
+
+        .faq-impact {
+            border-color: rgba(21, 101, 192, 0.2);
+            background: linear-gradient(180deg, #FFFFFF 0%, rgba(21, 101, 192, 0.035) 100%);
+        }
+
+        .tag-cloud {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
         .seo-tag {
-            font-size: 12px; background: white;
-            border: 1px solid #E0E0E0; color: var(--text-med);
-            padding: 4px 8px; border-radius: 4px;
+            font-size: 12px;
+            background: #FFFFFF;
+            border: 1px solid #E0E0E0;
+            color: var(--text-med);
+            padding: 6px 10px;
+            border-radius: 999px;
+            transition: background 0.15s, border-color 0.15s, color 0.15s;
+        }
+
+        .seo-tag:hover {
+            background: rgba(21, 101, 192, 0.05);
+            border-color: rgba(21, 101, 192, 0.25);
+            color: var(--primary);
+        }
+
+        @media (max-width: 600px) {
+            .context-card,
+            .faq-header-card,
+            .faq-item {
+                border-radius: 10px;
+            }
+
+            .faq-item {
+                padding: 15px 15px 15px 48px;
+            }
+
+            .faq-item::before {
+                left: 15px;
+            }
+
+            .faq-title {
+                font-size: 16px;
+            }
         }
 
         .authority-links {
@@ -809,9 +994,13 @@
         </div>
 
         <div class="meta-title"><%= labels.additional_info %></div>
+
+        <% if (doc.titleOfficial) { %>
+        <div class="meta-item"><%= doc.titleOfficial %></div>
+        <% } %>
         
-        <% if (doc.id) { %>
-        <div class="meta-item"><%= labels.print_number %> <%= doc.id %></div>
+        <% if (formattedId) { %>
+        <div class="meta-item"><%= labels.print_number %> <%= formattedId %></div>
         <% } %>
 
         <% if (doc.sponsor && doc.sponsor.name) { %>
@@ -851,73 +1040,78 @@
     </main>
 
 <!-- === SEO LAYER: CONTEXT & NAVIGATION (BELOW THE FOLD) === -->
-    <section class="seo-container">
-        <div class="seo-divider"></div>
+<section class="seo-container">
+    <div class="seo-divider"></div>
 
-        <!-- 2. SEMANTIC CONTEXT (Machine Logic) -->
-        <div class="legal-context">
-            
-            <!-- 1. OFFICIAL TITLE -->
-            <div class="context-item">
-                <h2><%= labels.official_legal_title %></h2>
-                <p style="font-weight: 500; color: #000; margin-bottom: 0;"><%= doc.titleOfficial %></p>
+    <div class="legal-context">
+
+        <!-- EXPANDED FAQ -->
+        <div class="context-item faq-context">
+            <div class="faq-header-card">
+                <div class="faq-eyebrow"><%= seoSummaryStatusLabel %></div>
+
+                <div class="faq-title-row">
+                    <h2 class="faq-title">
+                        <%= renderSeoLabel(labels.faq_title_template, "Key Questions about {{title}}") %>
+                    </h2>
+                </div>
+
+                <p class="faq-subtitle">
+                    <%= labels.faq_intro || "A structured overview of the legislative process, official sources, status and civic context." %>
+                </p>
             </div>
 
-            <div class="seo-divider" style="margin: 20px 0; opacity: 0.3;"></div>
+            <div class="faq-list">
 
-            <!-- 2. EXPANDED FAQ (Snippet Food) -->
-            <div class="context-item">
-                <h2><%= labels.faq_title %></h2>
-                
                 <!-- Q: ID -->
                 <% if (doc.id) { %>
-                <details style="margin-bottom: 12px; cursor: pointer;">
-                    <summary style="font-size: 14px; color: var(--primary); font-weight: 500;"><%= labels.faq_id %></summary>
-                    <p style="margin-top: 6px; font-size: 14px; color: var(--text-med);">
-                        <%= labels.ans_id %> <%= doc.id %>.
-                    </p>
-                </details>
+                <article class="faq-item">
+                    <h3 class="faq-question"><%= labels.faq_id %></h3>
+                    <div class="faq-answer">
+                        <p><%= labels.ans_id %> <%= formattedId %>.</p>
+                    </div>
+                </article>
                 <% } %>
 
                 <!-- Q: ORIGIN -->
                 <% 
-                   let visualOrigin = null;
-                   if (doc.id && doc.id.includes("_H")) visualOrigin = labels.unit_house;
-                   else if (doc.id && doc.id.includes("_S")) visualOrigin = labels.unit_senate;
+                    let visualOrigin = null;
+                    if (doc.id && doc.id.includes("_H")) visualOrigin = labels.unit_house;
+                    else if (doc.id && doc.id.includes("_S")) visualOrigin = labels.unit_senate;
                 %>
-                
+
                 <% if (visualOrigin) { %>
-                <details style="margin-bottom: 12px; cursor: pointer;">
-                    <summary style="font-size: 14px; color: var(--primary); font-weight: 500;"><%= labels.faq_origin %></summary>
-                    <p style="margin-top: 6px; font-size: 14px; color: var(--text-med);">
-                        <%= labels.ans_origin %> <strong><%= visualOrigin %></strong>.
-                    </p>
-                </details>
+                <article class="faq-item">
+                    <h3 class="faq-question"><%= labels.faq_origin %></h3>
+                    <div class="faq-answer">
+                        <p><%= labels.ans_origin %> <%= visualOrigin %>.</p>
+                    </div>
+                </article>
                 <% } %>
 
                 <!-- Q: START DATE -->
                 <% if (meta.processStartDate) { %>
-                <details style="margin-bottom: 12px; cursor: pointer;">
-                    <summary style="font-size: 14px; color: var(--primary); font-weight: 500;"><%= labels.faq_start %></summary>
-                    <p style="margin-top: 6px; font-size: 14px; color: var(--text-med);">
-                        <%= labels.ans_start %> <strong><%= meta.processStartDate %></strong>.
-                    </p>
-                </details>
+                <article class="faq-item">
+                    <h3 class="faq-question"><%= labels.faq_start %></h3>
+                    <div class="faq-answer">
+                        <p><%= labels.ans_start %> <%= meta.processStartDate %>.</p>
+                    </div>
+                </article>
                 <% } %>
 
                 <!-- Q: KEY PROVISIONS -->
                 <% if (content.key_points && content.key_points.length > 0) { %>
-                <details style="margin-bottom: 12px; cursor: pointer;">
-                    <summary style="font-size: 14px; color: var(--primary); font-weight: 500;"><%= labels.faq_provisions %></summary>
-                    <div style="margin-top: 6px; font-size: 14px; color: var(--text-med);">
-                        <p style="margin-bottom: 6px;"><%= labels.ans_provisions %></p>
-                        <ul style="padding-left: 20px; margin: 0;">
+                <article class="faq-item">
+                    <h3 class="faq-question"><%= labels.faq_provisions %></h3>
+                    <div class="faq-answer">
+                        <p><%= labels.ans_provisions %></p>
+                        <ul>
                             <% content.key_points.forEach(function(point) { %>
-                                <li style="margin-bottom: 4px;"><%= point %></li>
+                            <li><%= point %></li>
                             <% }); %>
                         </ul>
                     </div>
-                </details>
+                </article>
                 <% } %>
 
                 <!-- Q: STATUS DETAIL -->
@@ -925,95 +1119,105 @@
                     const sKey = doc.status.trim();
                     const sTrans = (labels.status && labels.status[sKey]) ? labels.status[sKey] : doc.status;
                 %>
-                <details style="margin-bottom: 12px; cursor: pointer;">
-                    <summary style="font-size: 14px; color: var(--primary); font-weight: 500;"><%= labels.faq_status %></summary>
-                    <p style="margin-top: 6px; font-size: 14px; color: var(--text-med);">
-                        <%= labels.ans_status %> <strong><%= sTrans %></strong>.
-                    </p>
-                </details>
+                <article class="faq-item">
+                    <h3 class="faq-question"><%= labels.faq_status %></h3>
+                    <div class="faq-answer">
+                        <p><%= labels.ans_status %> <%= sTrans %>.</p>
+                    </div>
+                </article>
                 <% } %>
 
                 <!-- Q: FULL TEXT SOURCE -->
                 <% if (doc.attachmentUrls && doc.attachmentUrls[0]) { %>
-                <details style="margin-bottom: 12px; cursor: pointer;">
-                    <summary style="font-size: 14px; color: var(--primary); font-weight: 500;"><%= labels.faq_text %></summary>
-                    <p style="margin-top: 6px; font-size: 14px; color: var(--text-med);">
-                        <%= labels.ans_text %>
-                        <a href="<%= doc.attachmentUrls[0] %>" target="_blank" rel="nofollow" style="color: var(--primary); text-decoration: underline;">
-                            <%= labels.ans_view_full_text %>
-                        </a>
-                    </p>
-                </details>
+                <article class="faq-item">
+                    <h3 class="faq-question"><%= labels.faq_text %></h3>
+                    <div class="faq-answer">
+                        <p>
+                            <%= labels.ans_text %>
+                            <a href="<%= doc.attachmentUrls[0] %>" target="_blank" rel="nofollow">
+                                <%= labels.ans_view_full_text %>
+                            </a>
+                        </p>
+                    </div>
+                </article>
                 <% } %>
 
                 <!-- Q: OFFICIAL VOTING RECORD -->
                 <% if (doc.votingUrl) { %>
-                <details style="margin-bottom: 12px; cursor: pointer;">
-                    <summary style="font-size: 14px; color: var(--primary); font-weight: 500;"><%= labels.faq_votes %></summary>
-                    <p style="margin-top: 6px; font-size: 14px; color: var(--text-med);">
-                        <%= labels.ans_votes %>
-                        <a href="<%= doc.votingUrl %>" target="_blank" rel="nofollow" style="color: var(--primary); text-decoration: underline;">
-                            <%= labels.ans_view_voting_record %>
-                        </a>
-                    </p>
-                </details>
+                <article class="faq-item">
+                    <h3 class="faq-question"><%= labels.faq_votes %></h3>
+                    <div class="faq-answer">
+                        <p>
+                            <%= labels.ans_votes %>
+                            <a href="<%= doc.votingUrl %>" target="_blank" rel="nofollow">
+                                <%= labels.ans_view_voting_record %>
+                            </a>
+                        </p>
+                    </div>
+                </article>
                 <% } %>
 
                 <!-- Q: SPONSOR -->
                 <% if (doc.sponsor && doc.sponsor.name) { %>
-                <details style="margin-bottom: 12px; cursor: pointer;">
-                    <summary style="font-size: 14px; color: var(--primary); font-weight: 500;"><%= labels.faq_sponsor %></summary>
-                    <p style="margin-top: 6px; font-size: 14px; color: var(--text-med);">
-                        <%= labels.ans_sponsor %> <strong><%= doc.sponsor.name %></strong>.
-                    </p>
-                </details>
+                <article class="faq-item">
+                    <h3 class="faq-question"><%= labels.faq_sponsor %></h3>
+                    <div class="faq-answer">
+                        <p><%= labels.ans_sponsor %> <%= doc.sponsor.name %>.</p>
+                    </div>
+                </article>
                 <% } %>
-                
-                <!-- Q: LATEST ACTION (statusText) -->
+
+                <!-- Q: LATEST ACTION -->
                 <% if (doc.statusText) { %>
-                <details style="margin-bottom: 12px; cursor: pointer;">
-                    <summary style="font-size: 14px; color: var(--primary); font-weight: 500;"><%= labels.faq_latest_action %></summary>
-                    <p style="margin-top: 6px; font-size: 14px; color: var(--text-med);">
-                        <%= labels.ans_latest_action %> <%= doc.statusText %>
-                    </p>
-                </details>
+                <article class="faq-item">
+                    <h3 class="faq-question"><%= labels.faq_latest_action %></h3>
+                    <div class="faq-answer">
+                        <p><%= labels.ans_latest_action %> <%= doc.statusText %></p>
+                    </div>
+                </article>
                 <% } %>
 
                 <!-- Q: TRUST / JUDGE -->
                 <% if (meta.judgeDate) { %>
-                <details style="margin-bottom: 12px; cursor: pointer;">
-                    <summary style="font-size: 14px; color: var(--primary); font-weight: 500;"><%= labels.faq_verified %></summary>
-                    <p style="margin-top: 6px; font-size: 14px; color: var(--text-med);">
-                        <%= labels.faq_verified_answer %> <%= meta.judgeDate %>.
-                    </p>
-                </details>
+                <article class="faq-item">
+                    <h3 class="faq-question"><%= labels.faq_verified %></h3>
+                    <div class="faq-answer">
+                        <p><%= labels.faq_verified_answer %> <%= meta.judgeDate %>.</p>
+                    </div>
+                </article>
                 <% } %>
 
                 <!-- Q: IMPACT -->
-                <details style="margin-bottom: 0; cursor: pointer;">
-                    <summary style="font-size: 14px; color: var(--primary); font-weight: 500;"><%= labels.faq_impact %></summary>
-                    <p style="margin-top: 6px; font-size: 14px; color: var(--text-med);">
-                        <%= labels.ans_impact %>
-                    </p>
-                </details>
+                <article class="faq-item faq-impact">
+                    <h3 class="faq-question">
+                        <%= renderSeoLabel(labels.faq_impact_heading_template, "Analysis and Potential Impact of {{id}}") %>
+                    </h3>
+                    <div class="faq-answer">
+                        <p><%= labels.ans_impact %></p>
+                    </div>
+                </article>
 
-            </div>
-
-            <div class="seo-divider" style="margin: 20px 0; opacity: 0.3;"></div>
-
-            <div class="context-item">
-                <h2><%= labels.categories_title || "CATEGORIES" %></h2>
-                <div class="tag-cloud">
-                    <% (doc.category || []).forEach(function(tag) { 
-                        const translatedTag = (labels.categories && labels.categories[tag]) ? labels.categories[tag] : tag;
-                    %>
-                    <a href="/<%= lang %>/<%= institutionSlug %>/topics/<%= slugify(tag) %>/" class="seo-tag" style="text-decoration: none; color: inherit;">
-                        <%= translatedTag %>
-                    </a>
-                    <% }); %>
-                </div>
             </div>
         </div>
+
+        <!-- CATEGORIES -->
+        <% if (doc.category && doc.category.length > 0) { %>
+        <div class="context-item context-card">
+            <h2><%= labels.categories_title || "CATEGORIES" %></h2>
+
+            <div class="tag-cloud">
+                <% (doc.category || []).forEach(function(tag) { 
+                    const translatedTag = (labels.categories && labels.categories[tag]) ? labels.categories[tag] : tag;
+                %>
+                <a href="/<%= lang %>/<%= institutionSlug %>/topics/<%= slugify(tag) %>/" class="seo-tag" style="text-decoration: none;">
+                    <%= translatedTag %>
+                </a>
+                <% }); %>
+            </div>
+        </div>
+        <% } %>
+    </div>
+
 
         <footer class="seo-footer" style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #E0E0E0; display: flex; flex-direction: column; align-items: center; text-align: center;">    
             <a href="/<%= lang %>/<%= institutionSlug %>/<%= term %>/" style="display: inline-flex; align-items: center; text-decoration: none; color: var(--text-med); font-size: 13px; font-weight: 500; margin-bottom: 16px;">

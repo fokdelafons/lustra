@@ -712,7 +712,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'Die Anzahl der Jahre ist ein ungefährer Wert, der auf der Grundlage der nachstehenden Daten berechnet wird, ohne das vorzeitige Erlöschen des parlamentarischen Mandats zu berücksichtigen.';
 
   @override
-  String tenureTermItem(String romanNumeral, String duration) {
+  String tenureTermItemPL(Object duration, Object romanNumeral) {
     return '$romanNumeral. Amtszeit des Sejm der Republik Polen $duration';
   }
 
@@ -1730,7 +1730,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get webBannerDownloadButton => 'Herunterladen';
 
   @override
-  String get supportStripeButton => 'Unterstützen (Stripe)';
+  String get supportStripeButton => 'Unterstützen (KoFi)';
 
   @override
   String get supportFounderMessage =>

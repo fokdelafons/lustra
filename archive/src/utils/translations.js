@@ -1,7 +1,7 @@
 module.exports = {
     en: {
         // --- NAVIGATION & UI ---
-        back_to_app: "Civic Audit",
+        back_to_app: "Trending Legislation",
         nav_prev: "Previous Bill",
         nav_next: "Next Bill",
         nav_index: "Congress Index",
@@ -30,7 +30,13 @@ module.exports = {
         civic_will_record: "CIVIC WILL RECORD",
         total_votes_recorded: "VOTES RECORDED",
         record_your_position_for_audit: "Record your position for audit.",
-        
+        seo_summary_status: "Summary & Status",
+        seo_description_template: "{{id}} summary and current status. Track updates, votes, key provisions and potential impact of {{title}} on Lustra.",
+        official_legal_title_template: "Official Title of {{id}}",
+        faq_title_template: "Key Questions about {{title}}",
+        faq_impact_heading_template: "Analysis and Potential Impact of {{id}}",
+        faq_intro: "A structured overview of the legislative process, official sources, status and civic context.",
+
         // --- HUB & BREADCRUMBS ---
         term_label: "Term",
         topic_label: "Topic",
@@ -179,7 +185,7 @@ module.exports = {
 
     pl: {
         // --- NAVIGATION & UI ---
-        back_to_app: "Audyt obywatelski",
+        back_to_app: "Popularne projekty",
         nav_prev: "Poprzednia Ustawa",
         nav_next: "Następna Ustawa",
         nav_index: "Indeks Kongresu",
@@ -215,6 +221,11 @@ module.exports = {
         nav_prev_page: "Poprzednia",
         nav_next_page: "Następna",
         hub_desc_suffix: "Przeglądaj podsumowania legislacyjne, głosowania i teksty prawne.",
+        seo_summary_status: "Podsumowanie i status",
+        seo_description_template: "{{id}}: podsumowanie i aktualny status. Śledź zmiany, głosowania, kluczowe zapisy i potencjalny wpływ projektu {{title}} w Lustra.",
+        official_legal_title_template: "Oficjalny tytuł {{id}}",
+        faq_title_template: "Kluczowe pytania o {{title}}",
+        faq_impact_heading_template: "Analiza i potencjalny wpływ {{id}}",
         
         // --- VOTING ---
         voting_results: "WYNIKI GŁOSOWANIA",
@@ -247,6 +258,7 @@ module.exports = {
         // --- SEO CONTEXT / FAQ ---
         official_legal_title: "OFICJALNY TYTUŁ PRAWNY",
         categories_title: "KATEGORIE", // Zmieniona nazwa klucza dla nagłówka
+
         
         faq_title: "CZĘSTO ZADAWANE PYTANIA",
         faq_id: "Jaki jest oficjalny numer tej ustawy?",
@@ -257,6 +269,8 @@ module.exports = {
         faq_text: "Gdzie mogę przeczytać pełny tekst ustawy?",
         faq_votes: "Gdzie znajduje się oficjalny zapis głosowania?",
         faq_verified: "Czy to podsumowanie jest zweryfikowane?",
+        faq_intro: "Uporządkowany przegląd procesu legislacyjnego, źródeł oficjalnych, statusu i kontekstu obywatelskiego.",
+
         
         ans_id: "Oficjalny numer druku dla tej legislacji to",
         ans_start: "Proces oficjalnie rozpoczął się",
@@ -351,7 +365,7 @@ module.exports = {
         }
     },
     de: {
-        back_to_app: "Bürgeraudit",
+        back_to_app: "Trendthemen der Gesetzgebung",
         nav_prev: "Vorheriges Gesetz",
         nav_next: "Nächstes Gesetz",
         nav_index: "Kongress-Index",
@@ -435,6 +449,13 @@ module.exports = {
         civic_will_record: "BÜRGERWILLE REGISTRIERT",
         total_votes_recorded: "ERFASSTE STIMMEN",
         record_your_position_for_audit: "Erfassen Sie Ihre Position für das Audit.",
+        seo_summary_status: "Zusammenfassung und Status",
+        seo_description_template: "{{id}} Zusammenfassung und aktueller Status. Verfolge Aktualisierungen, Abstimmungen, zentrale Bestimmungen und mögliche Auswirkungen von {{title}} auf Lustra.",
+        official_legal_title_template: "Offizieller Titel von {{id}}",
+        faq_title_template: "Wichtige Fragen zu {{title}}",
+        faq_impact_heading_template: "Analyse und mögliche Auswirkungen von {{id}}",
+        faq_intro: "Ein strukturierter Überblick über den Gesetzgebungsprozess, offizielle Quellen, Status und zivilgesellschaftlichen Kontext.",
+
 
         categories: {
             "Health": "Gesundheit",
@@ -502,7 +523,7 @@ module.exports = {
         }
     },
     fr: {
-        back_to_app: "Audit citoyen",
+        back_to_app: "Législation tendance",
         nav_prev: "Loi précédente",
         nav_next: "Loi suivante",
         nav_index: "Index du Congrès",
@@ -586,6 +607,15 @@ module.exports = {
         civic_will_record: "REGISTRE DE LA VOLONTÉ CITOYENNE",
         total_votes_recorded: "VOTES ENREGISTRÉS",
         record_your_position_for_audit: "Enregistrez votre position pour l'audit.",
+        seo_summary_status: "Résumé et statut",
+        seo_description_template: "Résumé et statut actuel de {{id}}. Suivez les mises à jour, les votes, les dispositions clés et l’impact potentiel de {{title}} sur Lustra.",
+        official_legal_title_template: "Titre officiel de {{id}}",
+        faq_title_template: "Questions clés sur {{title}}",
+        faq_impact_heading_template: "Analyse et impact potentiel de {{id}}",
+        faq_intro: "Un aperçu structuré du processus législatif, des sources officielles, du statut et du contexte civique.",
+
+
+
         categories: {
             "Health": "Santé",
             "Family": "Famille",
@@ -652,7 +682,7 @@ module.exports = {
         }
     },
     es: {
-        back_to_app: "Auditoría cívica",
+        back_to_app: "Legislación en tendencia",
         nav_prev: "Ley anterior",
         nav_next: "Ley siguiente",
         nav_index: "Índice del Congreso",
@@ -736,6 +766,13 @@ module.exports = {
         civic_will_record: "REGISTRO DE VOLUNTAD CÍVICA",
         total_votes_recorded: "VOTOS REGISTRADOS",
         record_your_position_for_audit: "Registre su posición para la auditoría.",
+        seo_summary_status: "Resumen y estado",
+        seo_description_template: "Resumen y estado actual de {{id}}. Sigue actualizaciones, votaciones, disposiciones clave e impacto potencial de {{title}} en Lustra.",
+        official_legal_title_template: "Título oficial de {{id}}",
+        faq_title_template: "Preguntas clave sobre {{title}}",
+        faq_impact_heading_template: "Análisis e impacto potencial de {{id}}",
+        faq_intro: "Una visión estructurada del proceso legislativo, las fuentes oficiales, el estado y el contexto cívico.",
+
 
         categories: {
             "Health": "Salud",
@@ -803,7 +840,7 @@ module.exports = {
         }
     },
     pt: {
-        back_to_app: "Auditoria cívica",
+        back_to_app: "Legislação em destaque",
         nav_prev: "Lei Anterior",
         nav_next: "Próxima Lei",
         nav_index: "Índice do Congresso",
@@ -887,6 +924,12 @@ module.exports = {
         civic_will_record: "REGISTO DA VONTADE CÍVICA",
         total_votes_recorded: "VOTOS REGISTADOS",
         record_your_position_for_audit: "Registe a sua posição para a auditoria.",
+        seo_summary_status: "Resumo e status",
+        seo_description_template: "Resumo e status atual de {{id}}. Acompanhe atualizações, votações, disposições principais e o impacto potencial de {{title}} na Lustra.",
+        official_legal_title_template: "Título oficial de {{id}}",
+        faq_title_template: "Perguntas-chave sobre {{title}}",
+        faq_impact_heading_template: "Análise e impacto potencial de {{id}}",
+        faq_intro: "Uma visão estruturada do processo legislativo, das fontes oficiais, do status e do contexto cívico.",
 
         categories: {
             "Health": "Saúde",
@@ -954,7 +997,7 @@ module.exports = {
         }
     },
     nl: {
-        back_to_app: "Burgeraudit",
+        back_to_app: "Trending wetgeving",
         nav_prev: "Vorig wetsvoorstel",
         nav_next: "Volgend wetsvoorstel",
         nav_index: "Congres Index",
@@ -1038,6 +1081,14 @@ module.exports = {
         civic_will_record: "BURGERWIL GEREGISTREERD",
         total_votes_recorded: "GEREGISTREERDE STEMMEN",
         record_your_position_for_audit: "Registreer uw standpunt voor de audit.",
+        seo_summary_status: "Samenvatting en status",
+        seo_description_template: "{{id}} samenvatting en actuele status. Volg updates, stemmingen, kernbepalingen en de mogelijke impact van {{title}} op Lustra.",
+        official_legal_title_template: "Officiële titel van {{id}}",
+        faq_title_template: "Belangrijke vragen over {{title}}",
+        faq_impact_heading_template: "Analyse en mogelijke impact van {{id}}",
+        faq_intro: "Een gestructureerd overzicht van het wetgevingsproces, officiële bronnen, status en maatschappelijke context.",
+
+
 
         categories: {
             "Health": "Gezondheid",
@@ -1105,7 +1156,7 @@ module.exports = {
         }
     },
     it: {
-        back_to_app: "Audit civico",
+        back_to_app: "Legislazione di tendenza",
         nav_prev: "Legge precedente",
         nav_next: "Legge successiva",
         nav_index: "Indice del Congresso",
@@ -1189,6 +1240,13 @@ module.exports = {
         civic_will_record: "REGISTRO DELLA VOLONTÀ CIVICA",
         total_votes_recorded: "VOTI REGISTRATI",
         record_your_position_for_audit: "Registra la tua posizione per l'audit.",
+        seo_summary_status: "Sintesi e stato",
+        seo_description_template: "Sintesi e stato attuale di {{id}}. Segui aggiornamenti, votazioni, disposizioni chiave e potenziale impatto di {{title}} su Lustra.",
+        official_legal_title_template: "Titolo ufficiale di {{id}}",
+        faq_title_template: "Domande chiave su {{title}}",
+        faq_impact_heading_template: "Analisi e potenziale impatto di {{id}}",
+        faq_intro: "Una panoramica strutturata del processo legislativo, delle fonti ufficiali, dello stato e del contesto civico.",
+
 
         categories: {
             "Health": "Salute",
