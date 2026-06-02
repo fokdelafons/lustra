@@ -2186,6 +2186,72 @@ abstract class AppLocalizations {
   /// **'Ways and Means resolution'**
   String get statusUkWaysAndMeansResolution;
 
+  /// No description provided for @statusUkCommitteeWholeHouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Committee of the whole House'**
+  String get statusUkCommitteeWholeHouse;
+
+  /// No description provided for @statusUkConsiderationCommonsAmendments.
+  ///
+  /// In en, this message translates to:
+  /// **'Consideration of Commons amendments and / or reasons'**
+  String get statusUkConsiderationCommonsAmendments;
+
+  /// No description provided for @statusUkEnactedApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Enacted (Approved)'**
+  String get statusUkEnactedApproved;
+
+  /// No description provided for @statusUkEnactedNegativeProcedure.
+  ///
+  /// In en, this message translates to:
+  /// **'Enacted (Negative Procedure)'**
+  String get statusUkEnactedNegativeProcedure;
+
+  /// No description provided for @statusUkLordsExaminers.
+  ///
+  /// In en, this message translates to:
+  /// **'Lords Examiners'**
+  String get statusUkLordsExaminers;
+
+  /// No description provided for @statusUkProposedDraftAffirmative.
+  ///
+  /// In en, this message translates to:
+  /// **'Proposed (Draft Affirmative)'**
+  String get statusUkProposedDraftAffirmative;
+
+  /// No description provided for @statusUkProposedDraftNegative.
+  ///
+  /// In en, this message translates to:
+  /// **'Proposed (Draft Negative)'**
+  String get statusUkProposedDraftNegative;
+
+  /// No description provided for @statusUkProposedEnhancedScrutiny.
+  ///
+  /// In en, this message translates to:
+  /// **'Proposed (Enhanced Scrutiny)'**
+  String get statusUkProposedEnhancedScrutiny;
+
+  /// No description provided for @statusUkProposedLegislativeReform.
+  ///
+  /// In en, this message translates to:
+  /// **'Proposed (Legislative Reform)'**
+  String get statusUkProposedLegislativeReform;
+
+  /// No description provided for @statusUkProposedNegativeSI.
+  ///
+  /// In en, this message translates to:
+  /// **'Proposed (Negative SI)'**
+  String get statusUkProposedNegativeSI;
+
+  /// No description provided for @statusUkProposedRemedialOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Proposed (Remedial Order)'**
+  String get statusUkProposedRemedialOrder;
+
   /// No description provided for @errorCheckConnection.
   ///
   /// In en, this message translates to:

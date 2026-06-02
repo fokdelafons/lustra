@@ -1169,6 +1169,46 @@ class AppLocalizationsDe extends AppLocalizations {
   String get statusUkWaysAndMeansResolution => 'Haushaltsresolution';
 
   @override
+  String get statusUkCommitteeWholeHouse => 'Ausschuss des gesamten Hauses';
+
+  @override
+  String get statusUkConsiderationCommonsAmendments =>
+      'Prüfung der Änderungsanträge des Unterhauses';
+
+  @override
+  String get statusUkEnactedApproved => 'Verabschiedet (genehmigt)';
+
+  @override
+  String get statusUkEnactedNegativeProcedure =>
+      'Verabschiedet (Negativverfahren)';
+
+  @override
+  String get statusUkLordsExaminers => 'Prüfer des Oberhauses';
+
+  @override
+  String get statusUkProposedDraftAffirmative =>
+      'Vorgeschlagen (Entwurf – affirmatives Verfahren)';
+
+  @override
+  String get statusUkProposedDraftNegative =>
+      'Vorgeschlagen (Entwurf – Negativverfahren)';
+
+  @override
+  String get statusUkProposedEnhancedScrutiny =>
+      'Vorgeschlagen (verstärkte Prüfung)';
+
+  @override
+  String get statusUkProposedLegislativeReform =>
+      'Vorgeschlagen (Gesetzesreform)';
+
+  @override
+  String get statusUkProposedNegativeSI => 'Vorgeschlagen (Negative SI)';
+
+  @override
+  String get statusUkProposedRemedialOrder =>
+      'Vorgeschlagen (Abhilfeverordnung)';
+
+  @override
   String get errorCheckConnection =>
       'Bitte überprüfen Sie Ihre Internetverbindung.';
 

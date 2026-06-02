@@ -1166,6 +1166,46 @@ class AppLocalizationsNl extends AppLocalizations {
   String get statusUkWaysAndMeansResolution => 'Ways and Means-resolutie';
 
   @override
+  String get statusUkCommitteeWholeHouse => 'Comité van het hele Huis';
+
+  @override
+  String get statusUkConsiderationCommonsAmendments =>
+      'Behandeling van amendementen van het Lagerhuis';
+
+  @override
+  String get statusUkEnactedApproved => 'Aangenomen (goedgekeurd)';
+
+  @override
+  String get statusUkEnactedNegativeProcedure =>
+      'Aangenomen (negatieve procedure)';
+
+  @override
+  String get statusUkLordsExaminers => 'Examinatoren van het Hogerhuis';
+
+  @override
+  String get statusUkProposedDraftAffirmative =>
+      'Voorgesteld (ontwerp – affirmatieve procedure)';
+
+  @override
+  String get statusUkProposedDraftNegative =>
+      'Voorgesteld (ontwerp – negatieve procedure)';
+
+  @override
+  String get statusUkProposedEnhancedScrutiny =>
+      'Voorgesteld (verscherpt toezicht)';
+
+  @override
+  String get statusUkProposedLegislativeReform =>
+      'Voorgesteld (wetgevingshervorming)';
+
+  @override
+  String get statusUkProposedNegativeSI => 'Voorgesteld (negatieve SI)';
+
+  @override
+  String get statusUkProposedRemedialOrder =>
+      'Voorgesteld (corrigerende maatregel)';
+
+  @override
   String get errorCheckConnection => 'Controleer uw internetverbinding.';
 
   @override

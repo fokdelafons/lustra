@@ -1154,6 +1154,45 @@ class AppLocalizationsPl extends AppLocalizations {
   String get statusUkWaysAndMeansResolution => 'Rezolucja budżetowa';
 
   @override
+  String get statusUkCommitteeWholeHouse => 'Komisja całej Izby';
+
+  @override
+  String get statusUkConsiderationCommonsAmendments =>
+      'Rozpatrzenie poprawek Izby Gmin';
+
+  @override
+  String get statusUkEnactedApproved => 'Uchwalono (zatwierdzono)';
+
+  @override
+  String get statusUkEnactedNegativeProcedure =>
+      'Uchwalono (procedura negatywna)';
+
+  @override
+  String get statusUkLordsExaminers => 'Egzaminatorzy Izby Lordów';
+
+  @override
+  String get statusUkProposedDraftAffirmative =>
+      'Zaproponowano (projekt – procedura afirmatywna)';
+
+  @override
+  String get statusUkProposedDraftNegative =>
+      'Zaproponowano (projekt – procedura negatywna)';
+
+  @override
+  String get statusUkProposedEnhancedScrutiny =>
+      'Zaproponowano (wzmocniona kontrola)';
+
+  @override
+  String get statusUkProposedLegislativeReform =>
+      'Zaproponowano (reforma legislacyjna)';
+
+  @override
+  String get statusUkProposedNegativeSI => 'Zaproponowano (negatywne SI)';
+
+  @override
+  String get statusUkProposedRemedialOrder => 'Zaproponowano (nakaz naprawczy)';
+
+  @override
   String get errorCheckConnection => 'Sprawdź swoje połączenie z internetem.';
 
   @override

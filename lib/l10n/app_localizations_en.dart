@@ -1148,6 +1148,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statusUkWaysAndMeansResolution => 'Ways and Means resolution';
 
   @override
+  String get statusUkCommitteeWholeHouse => 'Committee of the whole House';
+
+  @override
+  String get statusUkConsiderationCommonsAmendments =>
+      'Consideration of Commons amendments and / or reasons';
+
+  @override
+  String get statusUkEnactedApproved => 'Enacted (Approved)';
+
+  @override
+  String get statusUkEnactedNegativeProcedure => 'Enacted (Negative Procedure)';
+
+  @override
+  String get statusUkLordsExaminers => 'Lords Examiners';
+
+  @override
+  String get statusUkProposedDraftAffirmative => 'Proposed (Draft Affirmative)';
+
+  @override
+  String get statusUkProposedDraftNegative => 'Proposed (Draft Negative)';
+
+  @override
+  String get statusUkProposedEnhancedScrutiny => 'Proposed (Enhanced Scrutiny)';
+
+  @override
+  String get statusUkProposedLegislativeReform =>
+      'Proposed (Legislative Reform)';
+
+  @override
+  String get statusUkProposedNegativeSI => 'Proposed (Negative SI)';
+
+  @override
+  String get statusUkProposedRemedialOrder => 'Proposed (Remedial Order)';
+
+  @override
   String get errorCheckConnection => 'Please check your internet connection.';
 
   @override

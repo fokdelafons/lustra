@@ -71,3 +71,5 @@ android/.gradle
 #strony www
 /public
 /real-public
+/web/assets/og/
+/web/en/

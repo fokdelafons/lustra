@@ -1164,6 +1164,45 @@ class AppLocalizationsEs extends AppLocalizations {
       'Resolución de Medios y Arbitrios';
 
   @override
+  String get statusUkCommitteeWholeHouse => 'Comité de toda la Cámara';
+
+  @override
+  String get statusUkConsiderationCommonsAmendments =>
+      'Examen de las enmiendas de la Cámara de los Comunes';
+
+  @override
+  String get statusUkEnactedApproved => 'Promulgado (aprobado)';
+
+  @override
+  String get statusUkEnactedNegativeProcedure =>
+      'Promulgado (procedimiento negativo)';
+
+  @override
+  String get statusUkLordsExaminers => 'Examinadores de la Cámara de los Lores';
+
+  @override
+  String get statusUkProposedDraftAffirmative =>
+      'Propuesto (borrador – procedimiento afirmativo)';
+
+  @override
+  String get statusUkProposedDraftNegative =>
+      'Propuesto (borrador – procedimiento negativo)';
+
+  @override
+  String get statusUkProposedEnhancedScrutiny =>
+      'Propuesto (escrutinio reforzado)';
+
+  @override
+  String get statusUkProposedLegislativeReform =>
+      'Propuesto (reforma legislativa)';
+
+  @override
+  String get statusUkProposedNegativeSI => 'Propuesto (SI negativo)';
+
+  @override
+  String get statusUkProposedRemedialOrder => 'Propuesto (orden correctiva)';
+
+  @override
   String get errorCheckConnection =>
       'Por favor, compruebe su conexión a internet.';
 

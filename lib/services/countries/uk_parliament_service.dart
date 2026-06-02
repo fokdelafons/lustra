@@ -81,31 +81,46 @@ class UKParliamentService extends BaseParliamentApi implements ParliamentService
     return null;
   }
 
-  @override
-  Future<Map<String, String>> getLegislationFilterStatuses(BuildContext context) async {
-    final l10n = AppLocalizations.of(context)!;
-    return {
-      'all': l10n.filterStatusAll,
-      'Accepted': l10n.filterStatusPassed,
-      'Rejected': l10n.filterStatusRejected,
-    };
-  }
+@override
+Future<Map<String, String>> getLegislationFilterStatuses(BuildContext context) async {
+  final l10n = AppLocalizations.of(context)!;
+  return {
+    'all': l10n.filterStatusAll,
+    '1st reading': l10n.statusUk1stReading,
+    '2nd reading': l10n.statusUk2ndReading,
+    '3rd reading': l10n.statusUk3rdReading,
+    'Committee of the whole House': l10n.statusUkCommitteeWholeHouse,
+    'Committee stage': l10n.statusUkCommitteeStage,
+    'Consideration of Commons amendments and / or reasons': l10n.statusUkConsiderationCommonsAmendments,
+    'Enacted (Approved)': l10n.statusUkEnactedApproved,
+    'Enacted (Negative Procedure)': l10n.statusUkEnactedNegativeProcedure,
+    'Lords Examiners': l10n.statusUkLordsExaminers,
+    'Programme motion': l10n.statusUkProgrammeMotion,
+    'Proposed (Draft Affirmative)': l10n.statusUkProposedDraftAffirmative,
+    'Proposed (Draft Negative)': l10n.statusUkProposedDraftNegative,
+    'Proposed (Enhanced Scrutiny)': l10n.statusUkProposedEnhancedScrutiny,
+    'Proposed (Legislative Reform)': l10n.statusUkProposedLegislativeReform,
+    'Proposed (Negative SI)': l10n.statusUkProposedNegativeSI,
+    'Proposed (Remedial Order)': l10n.statusUkProposedRemedialOrder,
+    'Report stage': l10n.statusUkReportStage,
+    'Royal Assent': l10n.statusUkRoyalAssent,
+  };
+}
 
   @override
-  String get futureStatusId => 'planned';
+  String get futureStatusId => 'upcoming_session';
 
   @override
   String get processStatusId => 'process';
 
   @override
   Future<Map<String, String>> getLegislationFilterDocumentTypes(BuildContext context) async {
-    final l10n = AppLocalizations.of(context)!;
-    return {
-      'all': l10n.filterStatusAll,
-      // 'bill': l10n.docTypeBill,
-      // 'resolution': l10n.docTypeResolution,
-    };
-  }
+  final l10n = AppLocalizations.of(context)!;
+  return {
+    'bill': l10n.docTypeBill,
+    'resolution': l10n.docTypeResolution,
+  };
+}
 
   @override
   List<String> get defaultDocumentTypeIds => [];
@@ -115,8 +130,10 @@ class UKParliamentService extends BaseParliamentApi implements ParliamentService
     final String translatedLabel = translateUKStatus(context, status);
     final String lowerStatus = status?.toLowerCase() ?? '';
     const List<String> acceptedDisplayVariants = [
-      'act of parliament',
-      'royal assent'
+      "act of parliament",
+      "royal assent",
+      "enacted (approved)",
+      "enacted (negative procedure)",
     ];
     const List<String> rejectedDisplayVariants = [
       "withdrawn",
@@ -137,6 +154,12 @@ class UKParliamentService extends BaseParliamentApi implements ParliamentService
       "report stage",
       "second reading committee",
       "ways and means resolution"
+      "proposed (draft affirmative)",
+      "proposed (draft negative)",
+      "proposed (enhanced scrutiny)",
+      "proposed (legislative reform)",
+      "proposed (negative si)",
+      "proposed (remedial order)",
     ];
     if (acceptedDisplayVariants.contains(lowerStatus)) {
       return DisplayableStatus(
@@ -156,7 +179,7 @@ class UKParliamentService extends BaseParliamentApi implements ParliamentService
         backgroundColor: Colors.orange.withAlpha(20),
         textColor: Colors.orange[800]!,
       );
-    } else if (lowerStatus == 'zaplanowane' || lowerStatus == 'nadchodzące głosowanie') {
+    } else if (lowerStatus == 'Placed on Calendar') {
       return DisplayableStatus(
         label: translatedLabel,
         backgroundColor: Colors.blue.withAlpha(20),
@@ -199,13 +222,13 @@ class UKParliamentService extends BaseParliamentApi implements ParliamentService
   String translateVote(BuildContext context, String vote) {
     final l10n = AppLocalizations.of(context)!;
     switch (vote.toLowerCase()) {
-      case 'YES':
+      case 'yes':
         return l10n.voteTypeFor;
-      case 'NO':
+      case 'no':
         return l10n.voteTypeAgainst;
-      case 'Abstained':
+      case 'abstained':
         return l10n.voteTypeAbstain;
-      case 'Absent':
+      case 'absent':
         return l10n.voteTypeAbsent;
       default:
         return vote;

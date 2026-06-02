@@ -72,21 +72,21 @@ class PLParliamentService extends BaseParliamentApi implements ParliamentService
     final l10n = AppLocalizations.of(context)!;
     return {
       'all': l10n.filterStatusAll,
-      "W procesie": l10n.statusInProgress,
-      "Uchwalono i przekazano do Senatu": l10n.statusPassedSejmToSenat,
-      "Odrzucono": l10n.statusRejectedSejm,
-      "Odrzucono przez Senat": l10n.statusRejectedBySenate,
-      "Przekazano Prezydentowi": l10n.statusToPresident,
-      "VETO Prezydenta": l10n.statusVetoPresident,
-      "Skierowano do TK": l10n.statusToConstitutionalTribunal,
-      "Podpisano przez Prezydenta": l10n.statusSignedByPresident,
-      "W mocy": l10n.statusEnacted,
-      "Uchwalono": l10n.statusAdoptedResolution,
-      "Natychmiastowe odrzucenie": l10n.statusImmediateRejection,
-      "Wycofano": l10n.statusWithdrawn,
-      "Nadchodzące głosowanie": l10n.statusUpcoming,
+      'Introduced': l10n.statusInProgress,
+      'Passed House': l10n.statusPassedSejmToSenat,
+      'Rejected': l10n.statusRejectedSejm,
+      'Passed Senate': l10n.statusPassedSenate,
+      'To President': l10n.statusToPresident,
+      'Vetoed': l10n.statusVetoPresident,
+      'Sent to Constitutional Tribunal': l10n.statusToConstitutionalTribunal,
+      'Became Law': l10n.statusSignedByPresident,
+      'Adopted': l10n.statusEnacted,
+      'Withdrawn': l10n.statusWithdrawn,
+      'Placed on Calendar': l10n.statusUpcoming,
+      'Failed': l10n.statusImmediateRejection,
     };
   }
+
 
   @override
   String get futureStatusId => 'upcoming_session';
@@ -96,15 +96,15 @@ class PLParliamentService extends BaseParliamentApi implements ParliamentService
 
   @override
   Future<Map<String, String>> getLegislationFilterDocumentTypes(BuildContext context) async {
-    final l10n = AppLocalizations.of(context)!;
-    return {
-      'projekt ustawy': l10n.docTypeBill,
-      'projekt uchwały': l10n.docTypeResolution,
-    };
-  }
+  final l10n = AppLocalizations.of(context)!;
+  return {
+    'bill': l10n.docTypeBill,
+    'resolution': l10n.docTypeResolution,
+  };
+}
 
   @override
-  List<String> get defaultDocumentTypeIds => ['projekt ustawy', 'projekt uchwały'];
+  List<String> get defaultDocumentTypeIds => [];
   
   @override
   DisplayableStatus getDisplayableStatusInfo(BuildContext context, String? status) {
@@ -120,9 +120,11 @@ class PLParliamentService extends BaseParliamentApi implements ParliamentService
     const List<String> rejectedDisplayVariants = [
       "vetoed",
       "failed",
+      "rejected",
     ];
     const List<String> processDisplayVariants = [
       "introduced",
+      "sent to constitutional tribunal",
     ];
     if (acceptedDisplayVariants.contains(lowerStatus)) {
       return DisplayableStatus(

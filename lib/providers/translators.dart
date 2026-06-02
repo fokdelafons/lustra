@@ -8,20 +8,18 @@ String translatePLStatus(BuildContext context, String? backendStatus) {
   }
   
   final Map<String, String> statusMap = {
-    "W procesie": l10n.statusInProgress,
-    "Uchwalono i przekazano do Senatu": l10n.statusPassedSejmToSenat,
-    "Odrzucono": l10n.statusRejectedSejm,
-    "Odrzucono przez Senat": l10n.statusRejectedBySenate,
-    "Przekazano Prezydentowi": l10n.statusToPresident,
-    "VETO Prezydenta": l10n.statusVetoPresident,
-    "Skierowano do TK": l10n.statusToConstitutionalTribunal,
-    "Podpisano przez Prezydenta": l10n.statusSignedByPresident,
-    "W mocy": l10n.statusEnacted,
-    "Przedawniono": l10n.statusExpired,
-    "Uchwalono": l10n.statusAdoptedResolution,
-    "Natychmiastowe odrzucenie": l10n.statusImmediateRejection,
-    "Wycofano": l10n.statusWithdrawn,
-    "Nadchodzące głosowanie": l10n.statusUpcoming,
+    "Introduced": l10n.statusInProgress,
+    "Passed House": l10n.statusPassedSejmToSenat,
+    "Rejected": l10n.statusRejectedSejm,
+    "Passed Senate": l10n.statusRejectedBySenate,
+    "To President": l10n.statusToPresident,
+    "Vetoed": l10n.statusVetoPresident,
+    "Sent to Constitutional Tribunal": l10n.statusToConstitutionalTribunal,
+    "Became Law": l10n.statusSignedByPresident,
+    "Adopted": l10n.statusEnacted,
+    "Withdrawn": l10n.statusWithdrawn,
+    "Placed on Calendar": l10n.statusUpcoming,
+    "Failed": l10n.statusImmediateRejection,
   };
   return statusMap[backendStatus] ?? backendStatus;
 }
@@ -194,6 +192,7 @@ String translateUKStatus(BuildContext context, String? backendStatus) {
   if (backendStatus == null || backendStatus.isEmpty) {
     return l10n.noStatusInfo;
   }
+  final String lowerStatus = backendStatus.toLowerCase();
   final Map<String, String> statusMap = {
     "act of parliament": l10n.statusUkActOfParliament,
     "royal assent": l10n.statusUkRoyalAssent,
@@ -203,16 +202,27 @@ String translateUKStatus(BuildContext context, String? backendStatus) {
     "2nd reading": l10n.statusUk2ndReading,
     "3rd reading": l10n.statusUk3rdReading,
     "committee stage": l10n.statusUkCommitteeStage,
+    "committee of the whole house": l10n.statusUkCommitteeWholeHouse,
     "commons examiners": l10n.statusUkCommonsExaminers,
+    "lords examiners": l10n.statusUkLordsExaminers,
     "lords special public bill committee": l10n.statusUkLordsSpecialCommittee,
     "money resolution": l10n.statusUkMoneyResolution,
     "consideration of lords amendments": l10n.statusUkConsiderationLordsAmendments,
+    "consideration of commons amendments and / or reasons": l10n.statusUkConsiderationCommonsAmendments,
     "consideration of lords message": l10n.statusUkConsiderationLordsMessage,
     "order of commitment discharged": l10n.statusUkOrderOfCommitmentDischarged,
     "programme motion": l10n.statusUkProgrammeMotion,
     "report stage": l10n.statusUkReportStage,
     "second reading committee": l10n.statusUkSecondReadingCommittee,
     "ways and means resolution": l10n.statusUkWaysAndMeansResolution,
+    "enacted (approved)": l10n.statusUkEnactedApproved,
+    "enacted (negative procedure)": l10n.statusUkEnactedNegativeProcedure,
+    "proposed (draft affirmative)": l10n.statusUkProposedDraftAffirmative,
+    "proposed (draft negative)": l10n.statusUkProposedDraftNegative,
+    "proposed (enhanced scrutiny)": l10n.statusUkProposedEnhancedScrutiny,
+    "proposed (legislative reform)": l10n.statusUkProposedLegislativeReform,
+    "proposed (negative si)": l10n.statusUkProposedNegativeSI,
+    "proposed (remedial order)": l10n.statusUkProposedRemedialOrder,
   };
-  return statusMap[backendStatus.toLowerCase()] ?? backendStatus;
+  return statusMap[lowerStatus] ?? backendStatus;
 }
