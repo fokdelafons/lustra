@@ -3,7 +3,7 @@
 <plist version="1.0">
 	<dict>
 		<key>NSPhotoLibraryAddUsageDescription</key>
-		<string>NSPhotoLibraryAddUsageDescription</string>
+		<string>Lustra requires access to your photo library to save generated legislative cards as images, allowing you to easily share them on social media.</string>
 		<key>CFBundleURLTypes</key>
 		<array>
 			<dict>
